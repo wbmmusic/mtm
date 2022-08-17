@@ -97,9 +97,9 @@ app.on('ready', () => {
             }
         })
 
-        ipcMain.handle('openPort', async(e, prt) => {
-            console.log('open', prt)
-            port = new SerialPort({ baudRate: 9600, path: prt })
+        ipcMain.handle('openPort', async(e, path) => {
+            console.log('open', path)
+            port = new SerialPort({ path, baudRate: 115200 })
             port.on('open', () => {
                 console.log('PORT OPENED')
                 return { data: true }

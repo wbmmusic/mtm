@@ -11,11 +11,10 @@ import { TwoServos } from "./TwoServos";
 export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
+  const [selectedPort, setSelectedPort] = useState(null);
 
   useEffect(() => {
-    window.electron.receive("ports", thePorts => {
-      setPorts(thePorts);
-    });
+    window.electron.receive("ports", thePorts => setPorts(thePorts));
 
     return () => {
       window.electron.removeListener("ports");
@@ -31,11 +30,14 @@ export default function Top() {
   };
 
   const makeBody = () => {
-    if (page === "manual") {
-      return <TwoServos />;
-    } else if (page === "sequence") {
-      return <Sequence />;
-    }
+    if (page === "manual") return <TwoServos />;
+    else if (page === "sequence") return <Sequence />;
+  };
+
+  const handleSelectPort = idx => {
+    let targetPort = ports[idx];
+    openPrt(targetPort.path);
+    setSelectedPort(idx);
   };
 
   return (
@@ -44,10 +46,10 @@ export default function Top() {
         <FormControl fullWidth size={"small"}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
           <Select
-            onChange={e => openPrt(ports[e.target.value].path)}
+            onChange={e => handleSelectPort(e.target.value)}
             width={200}
             label={"COM Port"}
-            value={"COM Port"}
+            value={selectedPort}
           >
             {ports.map((prt, idx) => (
               <MenuItem key={"portItem" + idx} value={idx}>
