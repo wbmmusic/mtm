@@ -15,7 +15,8 @@ let ports = []
 let port = null
 
 const makePorts = async() => {
-    ports = await SerialPort.list()
+    let tempPorts = await SerialPort.list()
+    ports = tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth'))
     console.log("----- PORTS -----")
     ports.forEach(prt => {
         console.log(prt.path)
