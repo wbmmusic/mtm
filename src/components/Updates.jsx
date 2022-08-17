@@ -68,6 +68,11 @@ export default function Updates() {
       else console.log(a, b);
     });
 
+    window.electron.receive("app_version", version => {
+      window.electron.removeListener("app_version");
+      document.title = "MTM --- v" + version;
+    });
+
     return () => window.electron.removeListener("updater");
   }, []);
 

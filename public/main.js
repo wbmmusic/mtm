@@ -74,7 +74,7 @@ app.on('ready', () => {
         makePorts()
 
         ipcMain.on('reactIsReady', () => {
-
+            win.webContents.send('app_version', app.getVersion());
             if (firstReactInit === true) {
                 firstReactInit = false
                 win.webContents.send('ports', ports)
