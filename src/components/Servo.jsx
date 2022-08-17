@@ -1,14 +1,18 @@
 import { Box, Paper, Typography } from "@mui/material";
 import Slider from "@mui/material/Slider";
-import React from "react";
+import React, { useState } from "react";
 
 export const Servo = ({ idx, onChange }) => {
+  const [lastSent, setLastSent] = useState(null);
   const handleChange = val => {
-    console.log(val);
-    window.electron.ipcRenderer
-      .invoke("sendValue", idx, val)
-      .then(res => console.log(res))
-      .catch(err => console.log(err));
+    if (val !== lastSent) {
+      setLastSent(val);
+      console.log(val);
+      window.electron.ipcRenderer
+        .invoke("sendValue", idx, val)
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+    }
   };
   return (
     <Box component={Paper} maxWidth={400} m={1} p={2} elevation={6}>
