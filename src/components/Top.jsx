@@ -40,6 +40,16 @@ export default function Top() {
     setSelectedPort(idx);
   };
 
+  const makeNone = () => {
+    if (ports.length === 0) {
+      return (
+        <MenuItem key={"portItemNone"} value={0} disabled>
+          No Device Found
+        </MenuItem>
+      );
+    }
+  };
+
   return (
     <Box height={"100%"}>
       <Stack p={1} direction={"row"} spacing={1}>
@@ -51,6 +61,7 @@ export default function Top() {
             label={"COM Port"}
             value={selectedPort}
           >
+            {makeNone()}
             {ports.map((prt, idx) => (
               <MenuItem key={"portItem" + idx} value={idx}>
                 {prt.path}
