@@ -53,7 +53,7 @@ export default function Top() {
   return (
     <Box height={"100%"}>
       <Stack p={1} direction={"row"} spacing={1}>
-        <FormControl fullWidth size={"small"}>
+        <FormControl fullWidth size={"small"} disableAutoFocus={true}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
           <Select
             onChange={e => handleSelectPort(e.target.value)}
@@ -72,13 +72,13 @@ export default function Top() {
         <ButtonGroup variant="contained">
           <Button
             onClick={() => setPage("manual")}
-            color={page === "manual" ? "success" : "error"}
+            color={page === "manual" ? "success" : "primary"}
           >
             Manual
           </Button>
           <Button
             onClick={() => setPage("sequence")}
-            color={page === "sequence" ? "success" : "error"}
+            color={page === "sequence" ? "success" : "primary"}
           >
             sequence
           </Button>
