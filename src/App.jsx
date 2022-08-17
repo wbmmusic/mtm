@@ -1,5 +1,6 @@
 import { Box, CssBaseline } from "@mui/material";
 import Top from "./components/Top";
+import Updates from "./components/Updates";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
     >
       <CssBaseline />
       <Top />
+      <Updates />
     </Box>
   );
 }

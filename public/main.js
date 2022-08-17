@@ -2,12 +2,29 @@ const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron')
 const { join } = require('path')
 const { exec } = require('child_process');
 const url = require('url')
+const { SerialPort } = require('serialport')
 
 let firstReactInit = true
 
+
+
 ////////////////// App Startup ///////////////////////////////////////////////////////////////////
 let win
-    ////////  SINGLE INSTANCE //////////
+
+let ports = []
+let port = null
+
+const makePorts = async() => {
+    ports = await SerialPort.list()
+    console.log("----- PORTS -----")
+    ports.forEach(prt => {
+        console.log(prt.path)
+    })
+    console.log("--- END PORTS ---")
+}
+
+
+////////  SINGLE INSTANCE //////////
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) app.quit()
 
@@ -23,8 +40,8 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 900,
-        height: 700,
+        width: 500,
+        height: 400,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
@@ -53,10 +70,13 @@ function createWindow() {
 // Create myWindow, load the rest of the app, etc...
 app.on('ready', () => {
         //log("-APP IS READY");
+        makePorts()
+
         ipcMain.on('reactIsReady', () => {
 
             if (firstReactInit === true) {
                 firstReactInit = false
+                win.webContents.send('ports', ports)
                 console.log('React Is Ready')
                 if (app.isPackaged) {
                     win.webContents.send('message', 'App is packaged')
@@ -79,10 +99,13 @@ app.on('ready', () => {
             return true
         })
 
-        ipcMain.on('checkForUpdates', async(e, paths) => handleCheckForUpdates(paths))
-        ipcMain.on('openInCode', (e, fldrPath) => exec('code .', { cwd: fldrPath }))
-        ipcMain.on('openFolder', (e, fldrPath) => shell.openPath(fldrPath))
-
+        ipcMain.handle('openPort', async(prt) => {
+            port = new SerialPort({ baudRate: 9600, path: "COM3" })
+            port.on('open', () => {
+                console.log('PORT OPENED')
+                return "OPENED"
+            })
+        })
         createWindow()
     })
     ///////////////////////

@@ -14,10 +14,10 @@
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "^13.3.0",
         "@testing-library/user-event": "^13.5.0",
-        "foreman": "^3.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-scripts": "5.0.1",
+        "serialport": "^10.4.0",
         "web-vitals": "^2.1.4"
     },
     "scripts": {
@@ -34,6 +34,31 @@
         "refresh": "yarn upgrade --latest",
         "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
         "postinstall": "electron-builder install-app-deps"
+    },
+    "build": {
+        "productName": "MTM",
+        "appId": "com.wbm.mtm",
+        "copyright": "WBM Tek",
+        "extends": null,
+        "npmRebuild": false,
+        "afterSign": "./notarize.js",
+        "files": [
+            "build/**/*",
+            "electron/*"
+        ],
+        "mac": {
+            "icon": "public/icon.icns",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false,
+            "entitlements": "build/entitlements.mac.plist",
+            "entitlementsInherit": "build/entitlements.mac.plist"
+        },
+        "dmg": {
+            "sign": false
+        },
+        "win": {
+            "icon": "public/icon.ico"
+        }
     },
     "eslintConfig": {
         "extends": [
@@ -59,6 +84,8 @@
     },
     "devDependencies": {
         "electron": "^20.0.2",
-        "electron-builder": "^23.3.3"
+        "electron-builder": "^23.3.3",
+        "electron-notarize": "^1.2.1",
+        "foreman": "^3.0.1"
     }
 }
