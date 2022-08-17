@@ -60,8 +60,6 @@ export default function Top() {
             width={200}
             label={"COM Port"}
             value={selectedPort}
-            disableAutoFocus={true}
-            disableEnforceFocus={true}
           >
             {makeNone()}
             {ports.map((prt, idx) => (
