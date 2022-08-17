@@ -39,7 +39,9 @@ export default function Top() {
             value={"COM Port"}
           >
             {ports.map((prt, idx) => (
-              <MenuItem value={idx}>{prt.path}</MenuItem>
+              <MenuItem key={"portItem" + idx} value={idx}>
+                {prt.path}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
