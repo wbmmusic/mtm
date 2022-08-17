@@ -1,7 +1,7 @@
-const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const { join } = require('path')
-const { exec } = require('child_process');
 const url = require('url')
+const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport')
 
 let firstReactInit = true
@@ -40,8 +40,8 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 500,
-        height: 400,
+        width: 650,
+        height: 500,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
@@ -80,6 +80,18 @@ app.on('ready', () => {
                 console.log('React Is Ready')
                 if (app.isPackaged) {
                     win.webContents.send('message', 'App is packaged')
+
+                    autoUpdater.on('error', (err) => win.webContents.send('updater', err))
+                    autoUpdater.on('checking-for-update', () => win.webContents.send('updater', "checking-for-update"))
+                    autoUpdater.on('update-available', (info) => win.webContents.send('updater', 'update-available', info))
+                    autoUpdater.on('update-not-available', (info) => win.webContents.send('updater', 'update-not-available', info))
+                    autoUpdater.on('download-progress', (info) => win.webContents.send('updater', 'download-progress', info))
+                    autoUpdater.on('update-downloaded', (info) => win.webContents.send('updater', 'update-downloaded', info))
+
+                    ipcMain.on('installUpdate', () => autoUpdater.quitAndInstall())
+
+                    setTimeout(() => autoUpdater.checkForUpdates(), 3000);
+                    setInterval(() => autoUpdater.checkForUpdates(), 1000 * 60 * 60);
                 }
             }
         })

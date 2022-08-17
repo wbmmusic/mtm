@@ -12,6 +12,6 @@ exports.default = async function notarizing(context) {
         appBundleId: 'com.wbm.arttimecodegen',
         appPath: `${appOutDir}/${appName}.app`,
         appleId: process.env.APPLEID,
-        appleIdPassword: process.env.artTCgenIDPASS,
+        appleIdPassword: process.env.mtmIDPASS,
     });
 };
