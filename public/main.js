@@ -99,12 +99,16 @@ app.on('ready', () => {
             return true
         })
 
-        ipcMain.handle('openPort', async(prt) => {
+        ipcMain.handle('openPort', async(e, prt) => {
             port = new SerialPort({ baudRate: 9600, path: "COM3" })
             port.on('open', () => {
                 console.log('PORT OPENED')
                 return "OPENED"
             })
+        })
+
+        ipcMain.handle('sendValue', async(e, ch, val) => {
+            console.log("Channel", ch, "Val", val)
         })
         createWindow()
     })
