@@ -53,18 +53,15 @@ export default function Top() {
   return (
     <Box height={"100%"}>
       <Stack p={1} direction={"row"} spacing={1}>
-        <FormControl
-          fullWidth
-          size={"small"}
-          disableAutoFocus={true}
-          disableEnforceFocus={true}
-        >
+        <FormControl fullWidth size={"small"}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
           <Select
             onChange={e => handleSelectPort(e.target.value)}
             width={200}
             label={"COM Port"}
             value={selectedPort}
+            disableAutoFocus={true}
+            disableEnforceFocus={true}
           >
             {makeNone()}
             {ports.map((prt, idx) => (
