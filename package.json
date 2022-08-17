@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "private": true,
     "author": "Marece Williams",
-    "description": "Enter a description",
+    "description": "MTM Copmoser",
     "homepage": "./",
     "main": "public/main.js",
     "dependencies": {

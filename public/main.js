@@ -84,21 +84,6 @@ app.on('ready', () => {
             }
         })
 
-        ipcMain.handle('scanFolder', () => {
-            const xyz = dialog.showOpenDialogSync(win, {
-                properties: ['openDirectory'],
-                title: "Choose folder to scan"
-            })
-
-            if (xyz !== undefined) return findNodeProjectFolders(xyz[0])
-            else return {}
-        })
-
-        ipcMain.handle("update", async(e, x) => {
-            await update(x);
-            return true
-        })
-
         ipcMain.handle('openPort', async(e, prt) => {
             console.log('open', prt)
             port = new SerialPort({ baudRate: 9600, path: prt })
@@ -110,6 +95,7 @@ app.on('ready', () => {
 
         ipcMain.handle('sendValue', async(e, ch, val) => {
             console.log("Channel", ch, "Val", val)
+            port.write(new Buffer.from([ch, val]))
         })
         createWindow()
     })
@@ -119,9 +105,7 @@ app.on('ready', () => {
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit() })
 
 app.on('activate', () => {
-    if (win === null) {
-        createWindow()
-    }
+    if (win === null) createWindow()
 })
 
 ////////////////// END App Startup ///////////////////////////////////////////////////////////////
