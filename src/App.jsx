@@ -6,14 +6,13 @@ function App() {
   return (
     <Box
       sx={{
-        borderTop: "1px solid lightgrey",
         height: "100vh",
         overflow: "hidden",
       }}
     >
       <CssBaseline />
-      <Top />
       <Updates />
+      <Top />
     </Box>
   );
 }
