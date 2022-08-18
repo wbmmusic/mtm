@@ -22,7 +22,7 @@ export default function Top() {
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
   const [audioFile, setAudioFile] = useState({ file: null });
-  const [sound, setSound] = useState(false);
+  const [sound, setSound] = useState(true);
   const playerRef = useRef(null);
 
   useEffect(() => {
