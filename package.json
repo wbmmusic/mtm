@@ -49,6 +49,9 @@
             "build/**/*",
             "electron/*"
         ],
+        "extraResources": [
+            "public/sounds/*"
+        ],
         "mac": {
             "icon": "public/icon.icns",
             "hardenedRuntime": true,

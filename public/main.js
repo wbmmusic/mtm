@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, protocol } = require('electron')
 const { join } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
@@ -16,16 +16,19 @@ const makePorts = async() => {
     let tempPorts = await SerialPort.list()
     ports = tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth'))
     console.log("----- PORTS -----")
-    ports.forEach(prt => {
-        console.log(prt.path)
-    })
+    ports.forEach((prt, idx) => console.log(idx, "->", prt.path))
     console.log("--- END PORTS ---")
 }
 
 const getPorts = async() => {
     return new Promise(async(resolve, reject) => {
-        let tempPorts = await SerialPort.list()
-        resolve(tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth')))
+        try {
+            let tempPorts = await SerialPort.list()
+            resolve(tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth')))
+        } catch (error) {
+            reject(error)
+        }
+
     })
 
 }
@@ -78,6 +81,12 @@ app.on('ready', () => {
         //log("-APP IS READY");
         makePorts()
 
+        protocol.registerFileProtocol('sound', (request, callback) => {
+            const url = request.url.substr(7)
+            console.log("SOUND URL ->", url)
+            callback({ path: join(__dirname, 'sounds', url) })
+        })
+
         ipcMain.on('reactIsReady', () => {
             win.webContents.send('app_version', app.getVersion());
             if (firstReactInit === true) {
@@ -108,6 +117,10 @@ app.on('ready', () => {
                 console.log('PORT OPENED')
                 return { data: true }
             })
+        })
+
+        ipcMain.on('play', (e, file) => {
+            win.webContents.send('play_file', file)
         })
 
         ipcMain.handle('getPorts', async() => await getPorts())

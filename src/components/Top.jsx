@@ -12,6 +12,15 @@ export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
+
+  useEffect(() => {
+    window.electron.send("play", "open.mp3");
+
+    window.electron.receive("play_file", file => {
+      setAudioFile(file);
+    });
+  }, []);
 
   const updatePorts = () => {
     window.electron.ipcRenderer
@@ -22,6 +31,7 @@ export default function Top() {
 
   const openPrt = prt => {
     console.log(prt);
+    window.electron.send("play", "select_com.mp3");
     window.electron.ipcRenderer
       .invoke("openPort", prt)
       .then(res => console.log(res))
@@ -88,6 +98,7 @@ export default function Top() {
       <Box height={"100%"} sx={{ overflow: "hidden" }}>
         {makeBody()}
       </Box>
+      <audio src={"sound://" + audioFile} autoPlay />
     </Stack>
   );
 }

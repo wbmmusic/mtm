@@ -4,7 +4,7 @@ import DragHandleIcon from "@mui/icons-material/DragHandle";
 import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -44,6 +44,10 @@ export const Sequence = () => {
     { id: 5, type: "delay", note: "Wait for next move", value: 520 },
     { id: 6, type: "move", note: "Move to position 3" },
   ]);
+
+  useEffect(() => {
+    window.electron.send("play", "sequence.mp3");
+  }, []);
 
   const handleDelayChange = (newValue, idx) => {
     let tempActions = JSON.parse(JSON.stringify(actions));
