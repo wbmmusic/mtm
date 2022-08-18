@@ -60,6 +60,7 @@ export const Sequence = () => {
     if (!result.destination) {
       return;
     }
+    window.electron.send("play", "drag_end.mp3");
     // 配列の順序を入れ替える
     let movedItems = reorder(
       actions, //　順序を入れ変えたい配列

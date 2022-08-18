@@ -8,7 +8,7 @@ export const Servo = ({ idx, label }) => {
   const handleChange = val => {
     if (val !== lastSent) {
       setLastSent(val);
-      console.log("Servo", idx, "->", val);
+      //console.log("Servo", idx, "->", val);
       window.electron.ipcRenderer
         .invoke("sendValue", idx, val)
         .then(res => console.log(res))

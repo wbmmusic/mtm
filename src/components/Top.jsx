@@ -4,7 +4,7 @@ import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Sequence } from "./Sequence";
 import { TwoServos } from "./TwoServos";
 
@@ -12,17 +12,24 @@ export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
-  const [audioFile, setAudioFile] = useState(null);
+  const [audioFile, setAudioFile] = useState({ file: null });
+  const playerRef = useRef(null);
 
   useEffect(() => {
     window.electron.send("play", "open.mp3");
 
     window.electron.receive("play_file", file => {
-      setAudioFile(file);
+      setAudioFile({ file });
     });
   }, []);
 
+  useEffect(() => {
+    playerRef.current.load();
+    playerRef.current.play();
+  }, [audioFile]);
+
   const updatePorts = () => {
+    window.electron.send("play", "open_com.mp3");
     window.electron.ipcRenderer
       .invoke("getPorts")
       .then(prts => setPorts(prts))
@@ -30,7 +37,7 @@ export default function Top() {
   };
 
   const openPrt = prt => {
-    console.log(prt);
+    //console.log(prt);
     window.electron.send("play", "select_com.mp3");
     window.electron.ipcRenderer
       .invoke("openPort", prt)
@@ -98,7 +105,7 @@ export default function Top() {
       <Box height={"100%"} sx={{ overflow: "hidden" }}>
         {makeBody()}
       </Box>
-      <audio src={"sound://" + audioFile} autoPlay />
+      <audio ref={playerRef} src={"sound://" + audioFile.file} />
     </Stack>
   );
 }
