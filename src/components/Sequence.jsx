@@ -33,7 +33,7 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 // const getListStyle = (isDraggingOver) => ({
 //   background: isDraggingOver ? "#1769aa" : "lightgrey",
 //   padding: "10px"
-// });
+//  });
 
 export const Sequence = () => {
   const [questions, setQuestions] = useState([
