@@ -2,7 +2,8 @@ const { app, BrowserWindow, ipcMain, protocol } = require('electron')
 const { join } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
-const { SerialPort } = require('serialport')
+const { SerialPort } = require('serialport');
+const { mkdirSync, existsSync, writeFileSync, readFileSync } = require('fs');
 
 let firstReactInit = true
 
@@ -11,6 +12,32 @@ let win
 
 let ports = []
 let port = null
+
+const pathToUserData = join(app.getPath('userData'), 'data')
+const pathToUserSettings = join(pathToUserData, 'settings.json')
+
+console.log(pathToUserData)
+
+const checkFolders = () => {
+    const defaultSettings = {
+        sound: true
+    }
+    if (!existsSync(pathToUserData)) mkdirSync(pathToUserData)
+    if (!existsSync(pathToUserSettings)) {
+        writeFileSync(pathToUserSettings, JSON.stringify(defaultSettings))
+    }
+
+}
+
+checkFolders();
+
+const settings = () => {
+    return JSON.parse(readFileSync(pathToUserSettings))
+}
+
+const saveSettings = (data) => {
+    writeFileSync(pathToUserSettings, JSON.stringify(data))
+}
 
 const makePorts = async() => {
     let tempPorts = await SerialPort.list()
@@ -121,6 +148,13 @@ app.on('ready', () => {
 
         ipcMain.on('play', (e, file) => {
             win.webContents.send('play_file', file)
+        })
+
+        ipcMain.handle('sound', (e, onOff) => {
+            let tempSettings = settings()
+            tempSettings.sound = onOff
+            saveSettings(tempSettings)
+            return settings().sound
         })
 
         ipcMain.handle('getPorts', async() => await getPorts())

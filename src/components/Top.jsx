@@ -1,4 +1,11 @@
-import { Box, Button, InputLabel, MenuItem } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Tooltip,
+} from "@mui/material";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
@@ -7,12 +14,15 @@ import Stack from "@mui/material/Stack";
 import React, { useEffect, useRef, useState } from "react";
 import { Sequence } from "./Sequence";
 import { TwoServos } from "./TwoServos";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 
 export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
   const [audioFile, setAudioFile] = useState({ file: null });
+  const [sound, setSound] = useState(false);
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -24,9 +34,45 @@ export default function Top() {
   }, []);
 
   useEffect(() => {
-    playerRef.current.load();
-    playerRef.current.play();
+    if (sound) {
+      playerRef.current.load();
+      playerRef.current.play();
+    }
   }, [audioFile]);
+
+  const soundOn = mute => {
+    window.electron.ipcRenderer
+      .invoke("sound", mute)
+      .then(res => setSound(res));
+  };
+
+  const makeMute = () => {
+    if (!sound) {
+      return (
+        <Tooltip title="Sound On">
+          <IconButton
+            color="inherit"
+            size={"small"}
+            onClick={() => soundOn(true)}
+          >
+            <VolumeOffIcon />
+          </IconButton>
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Tooltip title="Sound Off">
+          <IconButton
+            color="inherit"
+            size={"small"}
+            onClick={() => soundOn(false)}
+          >
+            <VolumeUpIcon />
+          </IconButton>
+        </Tooltip>
+      );
+    }
+  };
 
   const updatePorts = () => {
     window.electron.send("play", "open_com.mp3");
@@ -86,6 +132,7 @@ export default function Top() {
             ))}
           </Select>
         </FormControl>
+        {makeMute()}
         <ButtonGroup variant="contained">
           <Button
             onClick={() => setPage("manual")}
