@@ -82,7 +82,6 @@ app.on('ready', () => {
             win.webContents.send('app_version', app.getVersion());
             if (firstReactInit === true) {
                 firstReactInit = false
-                win.webContents.send('ports', ports)
                 console.log('React Is Ready')
                 if (app.isPackaged) {
                     win.webContents.send('message', 'App is packaged')
