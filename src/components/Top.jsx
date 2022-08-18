@@ -12,14 +12,13 @@ export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
-  //
-  useEffect(() => {
-    window.electron.receive("ports", thePorts => setPorts(thePorts));
 
-    return () => {
-      window.electron.removeListener("ports");
-    };
-  }, []);
+  const updatePorts = () => {
+    window.electron.ipcRenderer
+      .invoke("getPorts")
+      .then(prts => setPorts(prts))
+      .catch(err => console.log(err));
+  };
 
   const openPrt = prt => {
     console.log(prt);
@@ -56,6 +55,7 @@ export default function Top() {
         <FormControl fullWidth size={"small"}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
           <Select
+            onOpen={updatePorts}
             onChange={e => handleSelectPort(e.target.value)}
             width={200}
             label={"COM Port"}

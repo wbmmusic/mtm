@@ -18,14 +18,6 @@ export const Servo = ({ idx, label }) => {
 
   return (
     <Box component={Paper} m={1} p={2} elevation={6}>
-      <Slider
-        min={0}
-        max={255}
-        step={1}
-        defaultValue={127}
-        valueLabelDisplay="auto"
-        onChange={e => handleChange(e.target.value)}
-      />
       <Stack direction="row">
         <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
           {"Servo " + idx}
@@ -35,6 +27,14 @@ export const Servo = ({ idx, label }) => {
           {"Pin " + label}
         </Typography>
       </Stack>
+      <Slider
+        min={0}
+        max={255}
+        step={1}
+        defaultValue={127}
+        valueLabelDisplay="auto"
+        onChange={e => handleChange(e.target.value)}
+      />
     </Box>
   );
 };

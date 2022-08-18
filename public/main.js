@@ -6,8 +6,6 @@ const { SerialPort } = require('serialport')
 
 let firstReactInit = true
 
-
-
 ////////////////// App Startup ///////////////////////////////////////////////////////////////////
 let win
 
@@ -24,6 +22,13 @@ const makePorts = async() => {
     console.log("--- END PORTS ---")
 }
 
+const getPorts = async() => {
+    return new Promise(async(resolve, reject) => {
+        let tempPorts = await SerialPort.list()
+        resolve(tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth')))
+    })
+
+}
 
 ////////  SINGLE INSTANCE //////////
 const gotTheLock = app.requestSingleInstanceLock()
@@ -106,8 +111,10 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('getPorts', async() => await getPorts())
+
         ipcMain.handle('sendValue', async(e, ch, val) => {
-            console.log("Channel", ch, "Val", val)
+            //console.log("Channel", ch, "Val", val)
             port.write(new Buffer.from([ch, val]))
         })
         createWindow()

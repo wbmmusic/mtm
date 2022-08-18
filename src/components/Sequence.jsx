@@ -9,12 +9,12 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import { TextField, Typography } from "@mui/material";
+import { Stack, TableContainer, TextField, Typography } from "@mui/material";
+import { Transport } from "./Transport";
 
 // ドラッグ&ドロップした要素を入れ替える
 const reorder = (list, startIndex, endIndex) => {
@@ -36,7 +36,7 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 //  });
 
 export const Sequence = () => {
-  const [questions, setQuestions] = useState([
+  const [actions, actionssetActions] = useState([
     { id: 1, type: "delay", note: "Wait to start", value: 1000 },
     { id: 2, type: "move", note: "Move to position 1" },
     { id: 3, type: "delay", note: "Wait for next move", value: 3000 },
@@ -46,9 +46,9 @@ export const Sequence = () => {
   ]);
 
   const handleDelayChange = (newValue, idx) => {
-    let tempQuestions = JSON.parse(JSON.stringify(questions));
-    tempQuestions[idx].value = parseInt(newValue);
-    setQuestions(tempQuestions);
+    let tempActions = JSON.parse(JSON.stringify(actions));
+    tempActions[idx].value = parseInt(newValue);
+    actionssetActions(tempActions);
   };
 
   const onDragEnd = result => {
@@ -58,19 +58,19 @@ export const Sequence = () => {
     }
     // 配列の順序を入れ替える
     let movedItems = reorder(
-      questions, //　順序を入れ変えたい配列
+      actions, //　順序を入れ変えたい配列
       result.source.index, // 元の配列の位置
       result.destination.index // 移動先の配列の位置
     );
-    setQuestions(movedItems);
+    actionssetActions(movedItems);
   };
 
   const makeEventTime = idx => {
     let startTime = 0;
 
     for (let i = 0; i < idx; i++) {
-      if (questions[i].type === "delay") {
-        startTime = startTime + questions[i].value;
+      if (actions[i].type === "delay") {
+        startTime = startTime + actions[i].value;
       }
     }
 
@@ -117,7 +117,7 @@ export const Sequence = () => {
           <TableCell>
             <ThreeSixtyIcon />
           </TableCell>
-          <TableCell>Servo Move</TableCell>
+          <TableCell sx={{ whiteSpace: "nowrap" }}>Servo Move</TableCell>
           <TableCell>
             <Typography>{question.note}</Typography>
           </TableCell>
@@ -127,69 +127,74 @@ export const Sequence = () => {
   };
 
   return (
-    <Box m={1} height={"100%"}>
-      <TableContainer component={Paper} height={"100%"}>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell width={1}>
-                <ImportExportIcon />
-              </TableCell>
-              <TableCell width={1}>
-                <AccessTimeIcon />
-              </TableCell>
-              <TableCell width={1}>
-                <Typography>Type</Typography>
-              </TableCell>
-              <TableCell>
-                <Typography>Parameter</Typography>
-              </TableCell>
-              <TableCell>
-                <Typography>Note</Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          {/* <TableBody> */}
-          {/*ドラッグアンドドロップの有効範囲 */}
-          <DragDropContext onDragEnd={onDragEnd}>
-            {/* ドロップできる範囲 */}
-            <Droppable droppableId="droppable">
-              {(provided, snapshot) => (
-                <TableBody
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  // style={getListStyle(snapshot.isDraggingOver)}
-                >
-                  {/*　ドラッグできる要素　*/}
-                  {questions.map((question, index) => (
-                    <Draggable
-                      key={question.id}
-                      draggableId={"q-" + question.id}
-                      index={index}
+    <Box p={1} height={"100%"}>
+      <Stack height={"100%"} sx={{ overflow: "hidden" }}>
+        <Box height={"100%"} sx={{ overflow: "auto" }} p={1}>
+          <TableContainer component={Paper} sx={{ maxHeight: "100%" }}>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  <TableCell width={1}>
+                    <ImportExportIcon />
+                  </TableCell>
+                  <TableCell width={1}>
+                    <AccessTimeIcon />
+                  </TableCell>
+                  <TableCell width={1}>
+                    <Typography>Type</Typography>
+                  </TableCell>
+                  <TableCell width={1}>
+                    <Typography>Parameter</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>Note</Typography>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              {/* <TableBody> */}
+              {/*ドラッグアンドドロップの有効範囲 */}
+              <DragDropContext onDragEnd={onDragEnd}>
+                {/* ドロップできる範囲 */}
+                <Droppable droppableId="droppable">
+                  {(provided, snapshot) => (
+                    <TableBody
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      // style={getListStyle(snapshot.isDraggingOver)}
                     >
-                      {(provided, snapshot) => (
-                        <TableRow
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={getItemStyle(
-                            snapshot.isDragging,
-                            provided.draggableProps.style
-                          )}
+                      {/*　ドラッグできる要素　*/}
+                      {actions.map((question, index) => (
+                        <Draggable
+                          key={question.id}
+                          draggableId={"q-" + question.id}
+                          index={index}
                         >
-                          {makeRowContents(question, index)}
-                        </TableRow>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </TableBody>
-              )}
-            </Droppable>
-          </DragDropContext>
-          {/* </TableBody> */}
-        </Table>
-      </TableContainer>
+                          {(provided, snapshot) => (
+                            <TableRow
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={getItemStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                            >
+                              {makeRowContents(question, index)}
+                            </TableRow>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </TableBody>
+                  )}
+                </Droppable>
+              </DragDropContext>
+              {/* </TableBody> */}
+            </Table>
+          </TableContainer>
+        </Box>
+        <Transport />
+      </Stack>
     </Box>
   );
 };
