@@ -51,7 +51,7 @@ export default function Top() {
   };
 
   return (
-    <Box height={"100%"}>
+    <Stack height={"100%"}>
       <Stack p={1} direction={"row"} spacing={1}>
         <FormControl fullWidth size={"small"}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
@@ -85,9 +85,9 @@ export default function Top() {
         </ButtonGroup>
       </Stack>
       <Divider />
-      <Box height={"80%"} sx={{ overflow: "hidden", border: "5px solid" }}>
+      <Box height={"100%"} sx={{ overflow: "hidden" }}>
         {makeBody()}
       </Box>
-    </Box>
+    </Stack>
   );
 }

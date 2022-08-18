@@ -1,8 +1,8 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import React, { useState } from "react";
 
-export const Servo = ({ idx, onChange }) => {
+export const Servo = ({ idx, label }) => {
   const [lastSent, setLastSent] = useState(null);
 
   const handleChange = val => {
@@ -17,7 +17,7 @@ export const Servo = ({ idx, onChange }) => {
   };
 
   return (
-    <Box component={Paper} maxWidth={400} m={1} p={2} elevation={6}>
+    <Box component={Paper} m={1} p={2} elevation={6}>
       <Slider
         min={0}
         max={255}
@@ -26,7 +26,15 @@ export const Servo = ({ idx, onChange }) => {
         valueLabelDisplay="auto"
         onChange={e => handleChange(e.target.value)}
       />
-      <Typography>{"Servo " + idx}</Typography>
+      <Stack direction="row">
+        <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+          {"Servo " + idx}
+        </Typography>
+        <Box width={"100%"} />
+        <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+          {"Pin " + label}
+        </Typography>
+      </Stack>
     </Box>
   );
 };

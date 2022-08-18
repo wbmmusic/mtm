@@ -41,8 +41,8 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
-        width: 650,
-        height: 500,
+        width: 800,
+        height: 600,
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
