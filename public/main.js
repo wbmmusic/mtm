@@ -12,11 +12,19 @@ let win
 
 let ports = []
 let port = null
+let settings;
 
 const pathToUserData = join(app.getPath('userData'), 'data')
 const pathToUserSettings = join(pathToUserData, 'settings.json')
 
-console.log(pathToUserData)
+const readSettings = () => {
+    return JSON.parse(readFileSync(pathToUserSettings))
+}
+
+const saveSettings = () => {
+    writeFileSync(pathToUserSettings, JSON.stringify(settings, null, ' '))
+    settings = readSettings()
+}
 
 const checkFolders = () => {
     const defaultSettings = {
@@ -24,20 +32,14 @@ const checkFolders = () => {
     }
     if (!existsSync(pathToUserData)) mkdirSync(pathToUserData)
     if (!existsSync(pathToUserSettings)) {
-        writeFileSync(pathToUserSettings, JSON.stringify(defaultSettings))
+        settings = defaultSettings
+        saveSettings()
     }
-
 }
 
 checkFolders();
 
-const settings = () => {
-    return JSON.parse(readFileSync(pathToUserSettings))
-}
-
-const saveSettings = (data) => {
-    writeFileSync(pathToUserSettings, JSON.stringify(data, null, ' '))
-}
+settings = readSettings()
 
 const makePorts = async() => {
     let tempPorts = await SerialPort.list()
@@ -128,7 +130,6 @@ app.on('ready', () => {
                     autoUpdater.on('update-not-available', (info) => win.webContents.send('updater', 'update-not-available', info))
                     autoUpdater.on('download-progress', (info) => win.webContents.send('updater', 'download-progress', info))
                     autoUpdater.on('update-downloaded', (info) => win.webContents.send('updater', 'update-downloaded', info))
-
                     ipcMain.on('installUpdate', () => autoUpdater.quitAndInstall())
 
                     setTimeout(() => autoUpdater.checkForUpdates(), 3000);
@@ -138,23 +139,25 @@ app.on('ready', () => {
         })
 
         ipcMain.handle('openPort', async(e, path) => {
-            console.log('open', path)
-            port = new SerialPort({ path, baudRate: 115200 })
-            port.on('open', () => {
-                console.log('PORT OPENED')
-                return { data: true }
+            return new Promise((resolve, reject) => {
+                console.log('open', path)
+                port = new SerialPort({ path, baudRate: 115200 })
+                port.on('open', () => {
+                    console.log('PORT OPENED')
+                    resolve(true)
+                })
             })
+
         })
 
         ipcMain.on('play', (e, file) => {
-            win.webContents.send('play_file', file)
+            if (settings.sound) win.webContents.send('play_file', file)
         })
 
         ipcMain.handle('sound', (e, onOff) => {
-            let tempSettings = settings()
-            tempSettings.sound = onOff
-            saveSettings(tempSettings)
-            return settings().sound
+            settings.sound = onOff
+            saveSettings()
+            return settings.sound
         })
 
         ipcMain.handle('getPorts', async() => await getPorts())

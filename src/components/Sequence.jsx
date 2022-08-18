@@ -16,7 +16,6 @@ import Box from "@mui/material/Box";
 import { Stack, TableContainer, TextField, Typography } from "@mui/material";
 import { Transport } from "./Transport";
 
-// ドラッグ&ドロップした要素を入れ替える
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -24,12 +23,10 @@ const reorder = (list, startIndex, endIndex) => {
   return result;
 };
 
-// ドラッグ&ドロップの質問のスタイル
 const getItemStyle = (isDragging, draggableStyle) => ({
   background: isDragging ? "#757ce8" : "white",
   ...draggableStyle,
 });
-// ドラッグ&ドロップのリストのスタイル
 // const getListStyle = (isDraggingOver) => ({
 //   background: isDraggingOver ? "#1769aa" : "lightgrey",
 //   padding: "10px"
@@ -37,17 +34,18 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 
 export const Sequence = () => {
   const [actions, actionssetActions] = useState([
-    { id: 1, type: "delay", note: "Wait to start", value: 1000 },
-    { id: 2, type: "move", note: "Move to position 1" },
-    { id: 3, type: "delay", note: "Wait for next move", value: 3000 },
-    { id: 4, type: "move", note: "Move to position 2" },
-    { id: 5, type: "delay", note: "Wait for next move", value: 520 },
-    { id: 6, type: "move", note: "Move to position 3" },
+    { id: 1, type: "delay", note: "Wait to start", value: 10 },
+    { id: 2, type: "move", note: "Pos 1" },
+    { id: 3, type: "delay", note: "Wait for next move", value: 30 },
+    { id: 4, type: "move", note: "Pos 2" },
+    { id: 5, type: "delay", note: "Wait for next move", value: 52 },
+    { id: 6, type: "move", note: "Pos 3" },
+    { id: 7, type: "delay", note: "Wait for next move", value: 10 },
+    { id: 8, type: "move", note: "Pos 4" },
+    { id: 9, type: "delay", note: "Wait for next move", value: 10 },
   ]);
 
-  useEffect(() => {
-    window.electron.send("play", "sequence.mp3");
-  }, []);
+  useEffect(() => window.electron.send("play", "sequence.mp3"), []);
 
   const handleDelayChange = (newValue, idx) => {
     let tempActions = JSON.parse(JSON.stringify(actions));
@@ -72,18 +70,14 @@ export const Sequence = () => {
 
   const makeEventTime = idx => {
     let startTime = 0;
-
     for (let i = 0; i < idx; i++) {
-      if (actions[i].type === "delay") {
-        startTime = startTime + actions[i].value;
-      }
+      if (actions[i].type === "delay") startTime = startTime + actions[i].value;
     }
-
-    return <Typography>{startTime / 1000}</Typography>;
+    return <Typography>{startTime / 10}</Typography>;
   };
 
-  const makeRowContents = (question, idx) => {
-    if (question.type === "delay") {
+  const makeRowContents = (action, idx) => {
+    if (action.type === "delay") {
       return (
         <>
           <TableCell>
@@ -97,20 +91,24 @@ export const Sequence = () => {
           </TableCell>
           <TableCell>
             <TextField
-              label="delay ms"
+              label="delay sec"
               variant="standard"
               size="small"
-              value={question.value}
+              value={action.value / 10}
               type="number"
-              onChange={e => handleDelayChange(e.target.value, idx)}
+              inputProps={{
+                maxLength: 6,
+                step: "0.1",
+              }}
+              onChange={e => handleDelayChange(e.target.value * 10, idx)}
             />
           </TableCell>
           <TableCell>
-            <Typography>{question.note}</Typography>
+            <Typography>{action.note}</Typography>
           </TableCell>
         </>
       );
-    } else if (question.type === "move") {
+    } else if (action.type === "move") {
       return (
         <>
           <TableCell>
@@ -124,7 +122,7 @@ export const Sequence = () => {
           </TableCell>
           <TableCell sx={{ whiteSpace: "nowrap" }}>Servo Move</TableCell>
           <TableCell>
-            <Typography>{question.note}</Typography>
+            <Typography>{action.note}</Typography>
           </TableCell>
         </>
       );
@@ -157,9 +155,7 @@ export const Sequence = () => {
                 </TableRow>
               </TableHead>
               {/* <TableBody> */}
-              {/*ドラッグアンドドロップの有効範囲 */}
               <DragDropContext onDragEnd={onDragEnd}>
-                {/* ドロップできる範囲 */}
                 <Droppable droppableId="droppable">
                   {(provided, snapshot) => (
                     <TableBody
@@ -167,7 +163,6 @@ export const Sequence = () => {
                       ref={provided.innerRef}
                       // style={getListStyle(snapshot.isDraggingOver)}
                     >
-                      {/*　ドラッグできる要素　*/}
                       {actions.map((question, index) => (
                         <Draggable
                           key={question.id}
@@ -198,7 +193,7 @@ export const Sequence = () => {
             </Table>
           </TableContainer>
         </Box>
-        <Transport />
+        <Transport actions={actions} />
       </Stack>
     </Box>
   );
