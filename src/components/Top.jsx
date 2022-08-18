@@ -11,7 +11,7 @@ import { TwoServos } from "./TwoServos";
 export default function Top() {
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
-  const [selectedPort, setSelectedPort] = useState(null);
+  const [selectedPort, setSelectedPort] = useState("");
   //
   useEffect(() => {
     window.electron.receive("ports", thePorts => setPorts(thePorts));
