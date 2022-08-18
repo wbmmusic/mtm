@@ -36,7 +36,7 @@ const settings = () => {
 }
 
 const saveSettings = (data) => {
-    writeFileSync(pathToUserSettings, JSON.stringify(data))
+    writeFileSync(pathToUserSettings, JSON.stringify(data, null, ' '))
 }
 
 const makePorts = async() => {
