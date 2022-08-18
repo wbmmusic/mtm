@@ -41,9 +41,15 @@ export const Sequence = () => {
     { id: 2, type: "move", note: "Move to position 1" },
     { id: 3, type: "delay", note: "Wait for next move", value: 3000 },
     { id: 4, type: "move", note: "Move to position 2" },
-    { id: 5, type: "delay", note: "Wait for next move", value: 500 },
+    { id: 5, type: "delay", note: "Wait for next move", value: 520 },
     { id: 6, type: "move", note: "Move to position 3" },
   ]);
+
+  const handleDelayChange = (newValue, idx) => {
+    let tempQuestions = JSON.parse(JSON.stringify(questions));
+    tempQuestions[idx].value = parseInt(newValue);
+    setQuestions(tempQuestions);
+  };
 
   const onDragEnd = result => {
     // ドロップ先がない
@@ -59,6 +65,18 @@ export const Sequence = () => {
     setQuestions(movedItems);
   };
 
+  const makeEventTime = idx => {
+    let startTime = 0;
+
+    for (let i = 0; i < idx; i++) {
+      if (questions[i].type === "delay") {
+        startTime = startTime + questions[i].value;
+      }
+    }
+
+    return <Typography>{startTime / 1000}</Typography>;
+  };
+
   const makeRowContents = (question, idx) => {
     if (question.type === "delay") {
       return (
@@ -68,9 +86,7 @@ export const Sequence = () => {
               <DragHandleIcon />
             </Box>
           </TableCell>
-          <TableCell>
-            <Typography>00:000</Typography>
-          </TableCell>
+          <TableCell>{makeEventTime(idx)}</TableCell>
           <TableCell>
             <TimerIcon />
           </TableCell>
@@ -81,6 +97,7 @@ export const Sequence = () => {
               size="small"
               value={question.value}
               type="number"
+              onChange={e => handleDelayChange(e.target.value, idx)}
             />
           </TableCell>
           <TableCell>
@@ -96,9 +113,7 @@ export const Sequence = () => {
               <DragHandleIcon />
             </Box>
           </TableCell>
-          <TableCell>
-            <Typography>00:000</Typography>
-          </TableCell>
+          <TableCell>{makeEventTime(idx)}</TableCell>
           <TableCell>
             <ThreeSixtyIcon />
           </TableCell>
