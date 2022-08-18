@@ -1,6 +1,3 @@
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import StopIcon from "@mui/icons-material/Stop";
-import FirstPageIcon from "@mui/icons-material/FirstPage";
 import TimerIcon from "@mui/icons-material/Timer";
 import ThreeSixtyIcon from "@mui/icons-material/ThreeSixty";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
@@ -17,7 +14,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 
 // ドラッグ&ドロップした要素を入れ替える
 const reorder = (list, startIndex, endIndex) => {
@@ -40,10 +37,12 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 
 export const Sequence = () => {
   const [questions, setQuestions] = useState([
-    { id: 1, type: "delay", value: 1000 },
-    { id: 2, type: "move" },
-    { id: 3, type: "delay", value: 1000 },
-    { id: 4, type: "move" },
+    { id: 1, type: "delay", note: "Wait to start", value: 1000 },
+    { id: 2, type: "move", note: "Move to position 1" },
+    { id: 3, type: "delay", note: "Wait for next move", value: 3000 },
+    { id: 4, type: "move", note: "Move to position 2" },
+    { id: 5, type: "delay", note: "Wait for next move", value: 500 },
+    { id: 6, type: "move", note: "Move to position 3" },
   ]);
 
   const onDragEnd = result => {
@@ -70,12 +69,23 @@ export const Sequence = () => {
             </Box>
           </TableCell>
           <TableCell>
-            <Typography>00:00:00</Typography>
+            <Typography>00:000</Typography>
           </TableCell>
           <TableCell>
             <TimerIcon />
           </TableCell>
-          <TableCell>Delay X sec</TableCell>
+          <TableCell>
+            <TextField
+              label="delay ms"
+              variant="standard"
+              size="small"
+              value={question.value}
+              type="number"
+            />
+          </TableCell>
+          <TableCell>
+            <Typography>{question.note}</Typography>
+          </TableCell>
         </>
       );
     } else if (question.type === "move") {
@@ -87,20 +97,23 @@ export const Sequence = () => {
             </Box>
           </TableCell>
           <TableCell>
-            <Typography>00:00:00</Typography>
+            <Typography>00:000</Typography>
           </TableCell>
           <TableCell>
             <ThreeSixtyIcon />
           </TableCell>
           <TableCell>Servo Move</TableCell>
+          <TableCell>
+            <Typography>{question.note}</Typography>
+          </TableCell>
         </>
       );
     }
   };
 
   return (
-    <Box m={1}>
-      <TableContainer component={Paper}>
+    <Box m={1} height={"100%"}>
+      <TableContainer component={Paper} height={"100%"}>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -110,8 +123,15 @@ export const Sequence = () => {
               <TableCell width={1}>
                 <AccessTimeIcon />
               </TableCell>
-              <TableCell width={1}>Type</TableCell>
-              <TableCell>Parameter</TableCell>
+              <TableCell width={1}>
+                <Typography>Type</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>Parameter</Typography>
+              </TableCell>
+              <TableCell>
+                <Typography>Note</Typography>
+              </TableCell>
             </TableRow>
           </TableHead>
           {/* <TableBody> */}
