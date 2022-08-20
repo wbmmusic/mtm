@@ -116,6 +116,12 @@ app.on('ready', () => {
             callback({ path: join(__dirname, 'sounds', url) })
         })
 
+        protocol.registerFileProtocol('img', (request, callback) => {
+            const url = request.url.substr(5)
+            console.log("IMAGE URL ->", url)
+            callback({ path: join(__dirname, 'images', url) })
+        })
+
         ipcMain.on('reactIsReady', () => {
             win.webContents.send('app_version', app.getVersion());
             if (firstReactInit === true) {

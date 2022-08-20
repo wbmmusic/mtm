@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Tooltip,
-} from "@mui/material";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import { Box, IconButton, InputLabel, MenuItem, Tooltip } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
@@ -16,8 +8,15 @@ import { Sequence } from "./Sequence";
 import { TwoServos } from "./TwoServos";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import HomeIcon from "@mui/icons-material/Home";
+import { Routes, Route } from "react-router-dom";
+import { Home } from "./Home";
+import { useNavigate } from "react-router-dom";
+import { Robot } from "./Robot";
 
 export default function Top() {
+  const navigate = useNavigate();
+
   const [ports, setPorts] = useState([]);
   const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
@@ -116,6 +115,9 @@ export default function Top() {
   return (
     <Stack height={"100%"}>
       <Stack p={1} direction={"row"} spacing={1}>
+        <IconButton color="inherit" onClick={() => navigate("/")}>
+          <HomeIcon />
+        </IconButton>
         <FormControl fullWidth size={"small"}>
           <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
           <Select
@@ -134,24 +136,15 @@ export default function Top() {
           </Select>
         </FormControl>
         {makeMute()}
-        <ButtonGroup variant="contained">
-          <Button
-            onClick={() => setPage("manual")}
-            color={page === "manual" ? "success" : "primary"}
-          >
-            Manual
-          </Button>
-          <Button
-            onClick={() => setPage("sequence")}
-            color={page === "sequence" ? "success" : "primary"}
-          >
-            seq
-          </Button>
-        </ButtonGroup>
       </Stack>
       <Divider />
-      <Box height={"100%"} sx={{ overflow: "hidden" }}>
-        {makeBody()}
+      <Box height={"100%"} sx={{ overflow: "auto" }}>
+        <Routes>
+          <Route path="robot/*" element={<Robot />} />
+          <Route path="sequence" element={<Sequence />} />
+          <Route path="manual" element={<TwoServos />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
       </Box>
       <audio ref={playerRef} src={"sound://" + audioFile.file} />
     </Stack>
