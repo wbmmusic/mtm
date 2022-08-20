@@ -2,6 +2,7 @@ import {
   Box,
   Divider,
   IconButton,
+  Paper,
   Slider,
   Stack,
   Tooltip,
@@ -83,10 +84,11 @@ export const Transport = ({ actions }) => {
 
   useEffect(() => {
     setMarks(makeMarks());
+    console.log("Make Marks");
   }, [actions]);
 
   return (
-    <Box>
+    <Box component={Paper} elevation={4}>
       <Stack>
         <Box sx={{ padding: "0px 15px" }}>
           <Slider
@@ -142,8 +144,11 @@ export const Transport = ({ actions }) => {
           </Tooltip>
           <Box width={"100%"} />
           <Box sx={{ margin: "auto" }}>
-            <Typography sx={{ whiteSpace: "nowrap" }} variant="body2">
-              {current / 10 + " / " + duration() / 10}
+            <Typography
+              sx={{ whiteSpace: "nowrap", marginRight: "4px" }}
+              variant="body2"
+            >
+              {current / 10 + " / " + duration() / 10 + " sec"}
             </Typography>
           </Box>
         </Stack>
