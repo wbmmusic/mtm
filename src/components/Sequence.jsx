@@ -5,21 +5,10 @@ import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
 
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
-
 const getItemStyle = (isDragging, draggableStyle) => ({
   background: isDragging ? "#757ce8" : "salmon",
   ...draggableStyle,
 });
-// const getListStyle = (isDraggingOver) => ({
-//   background: isDraggingOver ? "#1769aa" : "lightgrey",
-//   padding: "10px"
-//  });
 
 const delays = [
   { id: uuid(), content: "1s", type: "delay", value: 10 },
@@ -45,6 +34,7 @@ export const Sequence = () => {
   const [trash, setTrash] = useState([]);
 
   useEffect(() => window.electron.send("play", "sequence.mp3"), []);
+  console.log("Render Sequence");
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -86,6 +76,7 @@ export const Sequence = () => {
       let actionsCpy = JSON.parse(JSON.stringify(actions));
       actionsCpy.splice(res.destination.index, 0, objCpy);
       setActions(actionsCpy);
+      window.electron.send("play", "timeline_add.mp3");
       console.log("Added Item To Timeline");
     } else if (
       res.source.droppableId === "timeline" &&
@@ -95,6 +86,7 @@ export const Sequence = () => {
       let cutAction = actionsCpy.splice(res.source.index, 1)[0];
       actionsCpy.splice(res.destination.index, 0, cutAction);
       setActions(actionsCpy);
+      window.electron.send("play", "timeline_move.mp3");
       console.log("Moved Item IN Timeline");
     } else if (
       res.source.droppableId === "timeline" &&
@@ -102,6 +94,7 @@ export const Sequence = () => {
     ) {
       console.log(res);
       setActions(old => old.filter((x, idx) => idx !== res.source.index));
+      window.electron.send("play", "trash.mp3");
       console.log("TRASHED");
     }
   };
