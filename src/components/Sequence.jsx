@@ -22,27 +22,31 @@ const getItemStyle = (isDragging, draggableStyle) => ({
 //  });
 
 const delays = [
-  { id: uuid(), content: "2 Sec", type: "delay", value: 20 },
-  { id: uuid(), content: "4 Sec", type: "delay", value: 40 },
-  { id: uuid(), content: "8 Sec", type: "delay", value: 80 },
-  { id: uuid(), content: "12 Sec", type: "delay", value: 120 },
+  { id: uuid(), content: "1s", type: "delay", value: 10 },
+  { id: uuid(), content: "3s", type: "delay", value: 30 },
+  { id: uuid(), content: "5s", type: "delay", value: 50 },
+  { id: uuid(), content: "10s", type: "delay", value: 100 },
 ];
 
-const TIMELINE_ITEMS = [
-  { id: uuid(), content: "One", type: "move" },
-  { id: uuid(), content: "Two", type: "move" },
-  { id: uuid(), content: "Three", type: "move" },
-  { id: uuid(), content: "Four", type: "move" },
-  { id: uuid(), content: "Five", type: "move" },
+const defaultPositions = [
+  { id: uuid(), content: "p1", type: "move", servos: [10, 10] },
+  { id: uuid(), content: "p2", type: "move", servos: [200, 200] },
+  { id: uuid(), content: "p3", type: "move", servos: [200, 10] },
+  { id: uuid(), content: "p4", type: "move", servos: [10, 200] },
 ];
+
+const TIMELINE_ITEMS = [];
 
 export const Sequence = () => {
+  const makeObjects = () => [...delays, ...defaultPositions];
+
   const [actions, setActions] = useState(TIMELINE_ITEMS);
+  const [timelineObjects, setTimelineObjects] = useState(makeObjects());
 
   useEffect(() => window.electron.send("play", "sequence.mp3"), []);
 
   const DelayItem = ({ itm }) => (
-    <Stack>
+    <Stack height={"50px"}>
       <Box>
         <Typography
           variant="body2"
@@ -51,15 +55,21 @@ export const Sequence = () => {
           {itm.content}
         </Typography>
       </Box>
-      <Box>
+      <Box height={"100%"}>
         <Box
           m={"auto"}
-          height={"30px"}
-          width={itm.value + "px"}
+          height={"100%"}
+          width={itm.value / 2 + "px"}
           sx={{ backgroundColor: "lightGrey" }}
         />
       </Box>
     </Stack>
+  );
+
+  const PositionItem = ({ itm }) => (
+    <Box height={"50px"}>
+      <Typography>{itm.content}</Typography>
+    </Box>
   );
 
   const onDragEnd = res => {
@@ -67,7 +77,9 @@ export const Sequence = () => {
       res.source.droppableId === "objects" &&
       res.destination.droppableId === "timeline"
     ) {
-      let objCpy = JSON.parse(JSON.stringify(delays[res.source.index]));
+      let objCpy = JSON.parse(
+        JSON.stringify(timelineObjects[res.source.index])
+      );
       objCpy.id = uuid();
       let actionsCpy = JSON.parse(JSON.stringify(actions));
       actionsCpy.splice(res.destination.index, 0, objCpy);
@@ -82,6 +94,14 @@ export const Sequence = () => {
       actionsCpy.splice(res.destination.index, 0, cutAction);
       setActions(actionsCpy);
       console.log("Moved Item IN Timeline");
+    }
+  };
+
+  const makeItem = itm => {
+    if (itm.type === "delay") {
+      return <DelayItem itm={itm} />;
+    } else if (itm.type === "move") {
+      return <PositionItem itm={itm} />;
     }
   };
 
@@ -104,7 +124,7 @@ export const Sequence = () => {
               spacing={1}
               sx={{ border: "1px solid" }}
             >
-              {delays.map((itm, idx) => (
+              {timelineObjects.map((itm, idx) => (
                 <Draggable
                   key={"timelineitm" + itm.id}
                   draggableId={itm.id}
@@ -120,7 +140,7 @@ export const Sequence = () => {
                         p={1}
                         sx={{ border: "1px solid" }}
                       >
-                        <DelayItem itm={itm} />
+                        {makeItem(itm)}
                       </Box>
                       {snapshot.isDragging && (
                         <Box
@@ -128,7 +148,7 @@ export const Sequence = () => {
                           p={1}
                           sx={{ border: "1px solid" }}
                         >
-                          <DelayItem itm={itm} />
+                          {makeItem(itm)}
                         </Box>
                       )}
                     </>
@@ -165,33 +185,18 @@ export const Sequence = () => {
                   index={idx}
                 >
                   {provided2 => {
-                    if (itm.type === "delay") {
-                      return (
-                        <Box
-                          component={Paper}
-                          ref={provided2.innerRef}
-                          {...provided2.draggableProps}
-                          {...provided2.dragHandleProps}
-                          p={1}
-                          sx={{ border: "1px solid" }}
-                        >
-                          <DelayItem itm={itm} />
-                        </Box>
-                      );
-                    } else {
-                      return (
-                        <Box
-                          component={Paper}
-                          ref={provided2.innerRef}
-                          {...provided2.draggableProps}
-                          {...provided2.dragHandleProps}
-                          p={1}
-                          sx={{ border: "1px solid" }}
-                        >
-                          <Typography>{itm.content}</Typography>
-                        </Box>
-                      );
-                    }
+                    return (
+                      <Box
+                        component={Paper}
+                        ref={provided2.innerRef}
+                        {...provided2.draggableProps}
+                        {...provided2.dragHandleProps}
+                        p={1}
+                        sx={{ border: "1px solid" }}
+                      >
+                        {makeItem(itm)}
+                      </Box>
+                    );
                   }}
                 </Draggable>
               ))}
@@ -205,7 +210,7 @@ export const Sequence = () => {
 
   return (
     <Box p={1} height={"100%"}>
-      <Stack height={"100%"} sx={{ overflow: "hidden" }} spacing={1}>
+      <Stack height={"100%"} sx={{ overflow: "hidden" }} spacing={6}>
         <DragDropContext onDragEnd={onDragEnd}>
           <TimelineObjects />
           {/* <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box> */}

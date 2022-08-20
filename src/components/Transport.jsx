@@ -14,12 +14,6 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import RepeatIcon from "@mui/icons-material/Repeat";
 
 export const Transport = ({ actions }) => {
-  const [current, setCurrent] = useState(0);
-  const [intervalId, setIntervalId] = useState(0);
-  const [repeat, setRepeat] = useState(false);
-
-  const returnToStart = () => setCurrent(0);
-
   const makeMarks = () => {
     let out = [];
     let curTime = 0;
@@ -28,11 +22,18 @@ export const Transport = ({ actions }) => {
         //out.push({ value: curTime, label: "" });
         curTime = curTime + act.value;
       } else if (act.type === "move") {
-        out.push({ value: curTime, label: act.content });
+        out.push({ value: curTime, label: act.content, servos: act.servos });
       }
     });
     return out;
   };
+
+  const [current, setCurrent] = useState(0);
+  const [intervalId, setIntervalId] = useState(0);
+  const [repeat, setRepeat] = useState(false);
+  const [marks, setMarks] = useState(makeMarks());
+
+  const returnToStart = () => setCurrent(0);
 
   const duration = () => {
     let dur = 0;
@@ -57,18 +58,39 @@ export const Transport = ({ actions }) => {
   };
 
   useEffect(() => {
+    marks.forEach(mark => {
+      if (mark.value === current) {
+        let packet = [];
+        mark.servos.forEach((servo, idx) => {
+          packet.push(idx + 1);
+          packet.push(servo);
+        });
+        if (packet.length > 0) {
+          console.log("Send", packet);
+          window.electron.ipcRenderer
+            .invoke("sendValue", packet)
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        }
+      }
+    });
+
     if (current > duration()) {
       if (repeat) returnToStart();
       else stop();
     }
   }, [current]);
 
+  useEffect(() => {
+    setMarks(makeMarks());
+  }, [actions]);
+
   return (
     <Box>
       <Stack>
         <Box sx={{ padding: "0px 15px" }}>
           <Slider
-            marks={makeMarks()}
+            marks={marks}
             value={current}
             min={0}
             step={1}

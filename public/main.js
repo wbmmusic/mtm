@@ -162,9 +162,9 @@ app.on('ready', () => {
 
         ipcMain.handle('getPorts', async() => await getPorts())
 
-        ipcMain.handle('sendValue', async(e, ch, val) => {
-            //console.log("Channel", ch, "Val", val)
-            port.write(new Buffer.from([ch, val]))
+        ipcMain.handle('sendValue', async(e, data) => {
+            console.log("Send Serial", data)
+            port.write(new Buffer.from(data))
         })
         createWindow()
     })

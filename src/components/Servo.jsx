@@ -10,7 +10,7 @@ export const Servo = ({ idx, label }) => {
       setLastSent(val);
       //console.log("Servo", idx, "->", val);
       window.electron.ipcRenderer
-        .invoke("sendValue", idx, val)
+        .invoke("sendValue", [idx, val])
         .then(res => console.log(res))
         .catch(err => console.log(err));
     }
