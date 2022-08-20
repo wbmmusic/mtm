@@ -44,7 +44,10 @@ export const Sequence = () => {
   const DelayItem = ({ itm }) => (
     <Stack>
       <Box>
-        <Typography sx={{ textAlign: "center", whiteSpace: "nowrap" }}>
+        <Typography
+          variant="body2"
+          sx={{ textAlign: "center", whiteSpace: "nowrap" }}
+        >
           {itm.content}
         </Typography>
       </Box>
