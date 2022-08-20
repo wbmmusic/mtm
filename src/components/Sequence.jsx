@@ -29,10 +29,10 @@ const delays = [
 ];
 
 const defaultPositions = [
-  { id: uuid(), content: "p1", type: "move", servos: [10, 10] },
-  { id: uuid(), content: "p2", type: "move", servos: [200, 200] },
-  { id: uuid(), content: "p3", type: "move", servos: [200, 10] },
-  { id: uuid(), content: "p4", type: "move", servos: [10, 200] },
+  { id: uuid(), content: "p1", type: "move", servos: [1, 1] },
+  { id: uuid(), content: "p2", type: "move", servos: [179, 179] },
+  { id: uuid(), content: "p3", type: "move", servos: [179, 1] },
+  { id: uuid(), content: "p4", type: "move", servos: [1, 179] },
 ];
 
 const TIMELINE_ITEMS = [];

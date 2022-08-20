@@ -29,9 +29,9 @@ export const Servo = ({ idx, label }) => {
       </Stack>
       <Slider
         min={0}
-        max={255}
+        max={180}
         step={1}
-        defaultValue={127}
+        defaultValue={90}
         valueLabelDisplay="auto"
         onChange={e => handleChange(e.target.value)}
       />
