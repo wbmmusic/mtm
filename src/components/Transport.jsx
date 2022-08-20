@@ -28,7 +28,7 @@ export const Transport = ({ actions }) => {
         //out.push({ value: curTime, label: "" });
         curTime = curTime + act.value;
       } else if (act.type === "move") {
-        out.push({ value: curTime, label: act.note });
+        out.push({ value: curTime, label: act.content });
       }
     });
     return out;
@@ -52,11 +52,7 @@ export const Transport = ({ actions }) => {
       stop();
       return;
     }
-
-    const newIntervalId = setInterval(() => {
-      setCurrent(prev => prev + 1);
-    }, 100);
-
+    const newIntervalId = setInterval(() => setCurrent(prev => prev + 1), 100);
     setIntervalId(newIntervalId);
   };
 
@@ -70,9 +66,8 @@ export const Transport = ({ actions }) => {
   return (
     <Box>
       <Stack>
-        <Box sx={{ padding: "0px 10px" }}>
+        <Box sx={{ padding: "0px 15px" }}>
           <Slider
-            //size="small"
             marks={makeMarks()}
             value={current}
             min={0}

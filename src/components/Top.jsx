@@ -16,7 +16,6 @@ import { Sequence } from "./Sequence";
 import { TwoServos } from "./TwoServos";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
-import { Sequence2 } from "./Sequence2";
 
 export default function Top() {
   const [ports, setPorts] = useState([]);
@@ -95,7 +94,6 @@ export default function Top() {
   const makeBody = () => {
     if (page === "manual") return <TwoServos />;
     else if (page === "sequence") return <Sequence />;
-    else if (page === "seq2") return <Sequence2 />;
     else return <Box>ERROR</Box>;
   };
 
@@ -148,12 +146,6 @@ export default function Top() {
             color={page === "sequence" ? "success" : "primary"}
           >
             seq
-          </Button>
-          <Button
-            onClick={() => setPage("seq2")}
-            color={page === "seq2" ? "success" : "primary"}
-          >
-            seq2
           </Button>
         </ButtonGroup>
       </Stack>
