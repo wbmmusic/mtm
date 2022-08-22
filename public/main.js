@@ -3,7 +3,7 @@ const { join } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
-const { mkdirSync, existsSync, writeFileSync, readFileSync } = require('fs');
+const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync } = require('fs');
 
 let firstReactInit = true
 
@@ -16,6 +16,7 @@ let settings;
 
 const pathToUserData = join(app.getPath('userData'), 'data')
 const pathToUserSettings = join(pathToUserData, 'settings.json')
+const pathToRobots = join(pathToUserData, 'robots')
 
 const readSettings = () => {
     return JSON.parse(readFileSync(pathToUserSettings))
@@ -31,6 +32,7 @@ const checkFolders = () => {
         sound: true
     }
     if (!existsSync(pathToUserData)) mkdirSync(pathToUserData)
+    if (!existsSync(pathToRobots)) mkdirSync(pathToRobots)
     if (!existsSync(pathToUserSettings)) {
         settings = defaultSettings
         saveSettings()
@@ -60,6 +62,17 @@ const getPorts = async() => {
 
     })
 
+}
+
+const getRobots = () => {
+    const folders = readdirSync(pathToRobots, { withFileTypes: true }).filter(dirent => dirent.isDirectory())
+    let robotFolders = []
+    folders.forEach(folder => {
+        if (existsSync(join(pathToRobots, folder.name, 'robot.json')) && existsSync(join(pathToRobots, folder.name, 'sequences'))) {
+            robotFolders.push(folder.name)
+        }
+    })
+    return robotFolders
 }
 
 ////////  SINGLE INSTANCE //////////
@@ -172,6 +185,36 @@ app.on('ready', () => {
             console.log("Send Serial", data)
             port.write(new Buffer.from(data))
         })
+
+        ipcMain.handle('getRobots', async() => {
+            return new Promise((resolve, reject) => {
+                let rbts = getRobots()
+                console.log(rbts)
+                resolve(rbts)
+            })
+        })
+
+        ipcMain.handle('saveRobot', async(e, robot) => {
+            return new Promise((resolve, reject) => {
+                const robotPath = join(pathToRobots, robot.path)
+                const robotFilePath = join(robotPath, 'robot.json')
+                const robotSequencesPath = join(robotPath, 'sequences')
+                console.log("Save Robot", robot)
+                if (existsSync(robotPath)) {
+                    reject(new Error("Robot folder path already exists"))
+                } else {
+                    try {
+                        mkdirSync(robotPath)
+                        mkdirSync(robotSequencesPath)
+                        writeFileSync(robotFilePath, JSON.stringify(robot, null, ' '))
+                        resolve()
+                    } catch (error) {
+                        reject(error)
+                    }
+                }
+            })
+        })
+
         createWindow()
     })
     ///////////////////////

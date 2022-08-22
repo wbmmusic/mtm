@@ -1,20 +1,21 @@
 import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../contexts/GlobalContext";
 import AddIcon from "@mui/icons-material/Add";
+import { EditRobotModal } from "./robot_modal/EditRobotModal";
 
-const robots = [
+const defaultRobots = [
   {
     name: "25 cent high five",
     path: "high25",
-    servos: 1,
+    servos: [{ name: "one" }],
     description: "Make a coin disappear when your robot gives it high five",
   },
   {
     name: "Rubik's Cube",
     path: "rubiks",
-    servos: 2,
+    servos: [{ name: "one" }, { name: "two" }],
     description: "Your robot will solve a rubik's cube in no time",
   },
 ];
@@ -23,17 +24,33 @@ export const RobotSelector = () => {
   const navigate = useNavigate();
   const { admin } = useContext(GlobalContext);
 
+  const [robotModal, setRobotModal] = useState(null);
+  const [robots, setRobots] = useState(defaultRobots);
+
+  useEffect(() => {
+    window.electron.ipcRenderer
+      .invoke("getRobots")
+      .then(bots => console.log(bots))
+      .catch(err => console.error(err));
+  }, []);
+
   const addRobotBlock = () => (
     <Box>
-      <Button
-        startIcon={<AddIcon />}
-        variant="contained"
-        onClick={() => console.log("Create New Robot")}
-      >
+      <Button startIcon={<AddIcon />} onClick={() => setRobotModal("new")}>
         Create New Robot
       </Button>
     </Box>
   );
+
+  const handleModelOut = data => {
+    if (data === "close") setRobotModal(null);
+  };
+
+  const makeModal = () => {
+    if (robotModal === "new" || robotModal === "edit") {
+      return <EditRobotModal newEdit={robotModal} out={handleModelOut} />;
+    }
+  };
 
   const RobotCard = ({ robot }) => (
     <Box
@@ -49,7 +66,7 @@ export const RobotSelector = () => {
         </Typography>
         <Box width={"100%"} />
         <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-          Servos: {robot.servos}
+          Servos: {robot.servos.length}
         </Typography>
       </Stack>
       <Divider />
@@ -76,6 +93,7 @@ export const RobotSelector = () => {
         {robots.map((robot, idx) => {
           return <RobotCard key={"robotCard" + idx} robot={robot} />;
         })}
+        {makeModal()}
       </Stack>
     </Box>
   );
