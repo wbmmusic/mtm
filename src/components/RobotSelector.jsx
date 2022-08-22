@@ -72,10 +72,10 @@ export const RobotSelector = () => {
         <Typography variant="h5">Robots</Typography>
       </Box>
       <Stack spacing={1}>
+        {admin ? addRobotBlock() : null}
         {robots.map((robot, idx) => {
           return <RobotCard key={"robotCard" + idx} robot={robot} />;
         })}
-        {admin ? addRobotBlock() : null}
       </Stack>
     </Box>
   );
