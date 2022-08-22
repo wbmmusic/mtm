@@ -1,6 +1,8 @@
-import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
-import React from "react";
+import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { GlobalContext } from "../contexts/GlobalContext";
+import AddIcon from "@mui/icons-material/Add";
 
 const robots = [
   {
@@ -15,12 +17,23 @@ const robots = [
     servos: 2,
     description: "Your robot will solve a rubik's cube in no time",
   },
-  { name: "Robot 3", servos: 2, description: "Test Description" },
-  { name: "Robot 4", servos: 1, description: "Test Description" },
 ];
 
 export const RobotSelector = () => {
   const navigate = useNavigate();
+  const { admin } = useContext(GlobalContext);
+
+  const addRobotBlock = () => (
+    <Box>
+      <Button
+        startIcon={<AddIcon />}
+        variant="contained"
+        onClick={() => console.log("Create New Robot")}
+      >
+        Create New Robot
+      </Button>
+    </Box>
+  );
 
   const RobotCard = ({ robot }) => (
     <Box
@@ -59,9 +72,10 @@ export const RobotSelector = () => {
         <Typography variant="h5">Robots</Typography>
       </Box>
       <Stack spacing={1}>
-        {robots.map(robot => {
-          return <RobotCard robot={robot} />;
+        {robots.map((robot, idx) => {
+          return <RobotCard key={"robotCard" + idx} robot={robot} />;
         })}
+        {admin ? addRobotBlock() : null}
       </Stack>
     </Box>
   );

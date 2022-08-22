@@ -1,4 +1,4 @@
-const { app, contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 const version = require('../package.json').version
 
 contextBridge.exposeInMainWorld('electron', {
@@ -6,6 +6,6 @@ contextBridge.exposeInMainWorld('electron', {
     send: (channel, args) => ipcRenderer.send(channel, args),
     receive: (channel, func) => ipcRenderer.on(channel, (event, ...args) => func(...args)),
     removeListener: (channel) => ipcRenderer.removeAllListeners(channel),
-    ipcRenderer: ipcRenderer,
-    ver: () => version
+    ver: () => version,
+
 })

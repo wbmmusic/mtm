@@ -3,22 +3,25 @@ import Divider from "@mui/material/Divider";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Sequence } from "./Sequence";
 import { TwoServos } from "./TwoServos";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import HomeIcon from "@mui/icons-material/Home";
+import AutoFixNormalIcon from "@mui/icons-material/AutoFixNormal";
+import AutoFixOffIcon from "@mui/icons-material/AutoFixOff";
 import { Routes, Route } from "react-router-dom";
 import { Home } from "./Home";
 import { useNavigate } from "react-router-dom";
 import { Robot } from "./Robot";
+import { GlobalContext } from "../contexts/GlobalContext";
 
 export default function Top() {
   const navigate = useNavigate();
+  const { admin, toggleAdmin } = useContext(GlobalContext);
 
   const [ports, setPorts] = useState([]);
-  const [page, setPage] = useState("manual");
   const [selectedPort, setSelectedPort] = useState("");
   const [audioFile, setAudioFile] = useState({ file: null });
   const [sound, setSound] = useState(true);
@@ -33,7 +36,7 @@ export default function Top() {
   }, []);
 
   useEffect(() => {
-    if (sound) {
+    if (sound && audioFile.file) {
       playerRef.current.load();
       playerRef.current.play();
     }
@@ -73,6 +76,26 @@ export default function Top() {
     }
   };
 
+  const makeAdminMode = () => {
+    if (admin) {
+      return (
+        <Tooltip title="Leave Admin Mode">
+          <IconButton color="inherit" size={"small"} onClick={toggleAdmin}>
+            <AutoFixOffIcon />
+          </IconButton>
+        </Tooltip>
+      );
+    } else {
+      return (
+        <Tooltip title="Enter Admin Mode">
+          <IconButton color="inherit" size={"small"} onClick={toggleAdmin}>
+            <AutoFixNormalIcon />
+          </IconButton>
+        </Tooltip>
+      );
+    }
+  };
+
   const updatePorts = () => {
     window.electron.send("play", "open_com.mp3");
     window.electron.ipcRenderer
@@ -88,12 +111,6 @@ export default function Top() {
       .invoke("openPort", prt)
       .then(res => console.log(res))
       .catch(err => console.log(err));
-  };
-
-  const makeBody = () => {
-    if (page === "manual") return <TwoServos />;
-    else if (page === "sequence") return <Sequence />;
-    else return <Box>ERROR</Box>;
   };
 
   const handleSelectPort = idx => {
@@ -114,7 +131,12 @@ export default function Top() {
 
   return (
     <Stack height={"100%"}>
-      <Stack p={1} direction={"row"} spacing={1}>
+      <Stack
+        p={1}
+        direction={"row"}
+        spacing={1}
+        sx={{ backgroundColor: admin ? "salmon" : "" }}
+      >
         <IconButton color="inherit" onClick={() => navigate("/")}>
           <HomeIcon />
         </IconButton>
@@ -136,6 +158,7 @@ export default function Top() {
           </Select>
         </FormControl>
         {makeMute()}
+        {makeAdminMode()}
       </Stack>
       <Divider />
       <Box height={"100%"} sx={{ overflow: "auto" }}>
@@ -146,7 +169,9 @@ export default function Top() {
           <Route path="*" element={<Home />} />
         </Routes>
       </Box>
-      <audio ref={playerRef} src={"sound://" + audioFile.file} />
+      {audioFile.file ? (
+        <audio ref={playerRef} src={"sound://" + audioFile.file} />
+      ) : null}
     </Stack>
   );
 }

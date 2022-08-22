@@ -126,7 +126,7 @@ export const Sequence = () => {
               <Stack
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                direction={"horizontal"}
+                direction={"row"}
                 p={1}
                 width={"100%"}
                 spacing={1}
@@ -187,7 +187,7 @@ export const Sequence = () => {
               <Stack
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                direction={"horizontal"}
+                direction={"row"}
                 p={1}
                 width={"100%"}
                 spacing={1}
@@ -239,7 +239,7 @@ export const Sequence = () => {
               <Stack
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                direction={"horizontal"}
+                direction={"row"}
                 p={1}
                 width={"100%"}
                 spacing={1}

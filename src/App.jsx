@@ -1,6 +1,7 @@
 import { Box, CssBaseline } from "@mui/material";
 import Top from "./components/Top";
 import Updates from "./components/Updates";
+import GlobalContextProvider from "./contexts/GlobalContext";
 
 function App() {
   return (
@@ -12,7 +13,9 @@ function App() {
     >
       <CssBaseline />
       <Updates />
-      <Top />
+      <GlobalContextProvider>
+        <Top />
+      </GlobalContextProvider>
     </Box>
   );
 }
