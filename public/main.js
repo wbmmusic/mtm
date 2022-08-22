@@ -66,13 +66,15 @@ const getPorts = async() => {
 
 const getRobots = () => {
     const folders = readdirSync(pathToRobots, { withFileTypes: true }).filter(dirent => dirent.isDirectory())
-    let robotFolders = []
+    let robots = []
     folders.forEach(folder => {
-        if (existsSync(join(pathToRobots, folder.name, 'robot.json')) && existsSync(join(pathToRobots, folder.name, 'sequences'))) {
-            robotFolders.push(folder.name)
+        const pathToRobot = join(pathToRobots, folder.name)
+        const pathToRobotFile = join(pathToRobot, 'robot.json')
+        if (existsSync(pathToRobot) && existsSync(pathToRobotFile)) {
+            robots.push(JSON.parse(readFileSync(pathToRobotFile)))
         }
     })
-    return robotFolders
+    return robots
 }
 
 ////////  SINGLE INSTANCE //////////
@@ -198,14 +200,12 @@ app.on('ready', () => {
             return new Promise((resolve, reject) => {
                 const robotPath = join(pathToRobots, robot.path)
                 const robotFilePath = join(robotPath, 'robot.json')
-                const robotSequencesPath = join(robotPath, 'sequences')
                 console.log("Save Robot", robot)
                 if (existsSync(robotPath)) {
                     reject(new Error("Robot folder path already exists"))
                 } else {
                     try {
                         mkdirSync(robotPath)
-                        mkdirSync(robotSequencesPath)
                         writeFileSync(robotFilePath, JSON.stringify(robot, null, ' '))
                         resolve()
                     } catch (error) {
