@@ -28,14 +28,27 @@ const defaultRobot = {
 
 const defaultServo = { name: "" };
 
-export const EditRobotModal = ({ newEdit, out }) => {
+export const EditRobotModal = ({ mode, data, out }) => {
+  const makeRobot = () => {
+    if (mode === "edit") return JSON.parse(JSON.stringify(data));
+    else return defaultRobot;
+  };
+
+  const makeOgRobot = () => {
+    if (mode === "edit") return JSON.parse(JSON.stringify(data));
+    else return null;
+  };
+
   const [open, setOpen] = useState(true);
   const handleClose = () => setOpen(false);
-  const [robot, setRobot] = useState(defaultRobot);
+  const [robot, setRobot] = useState(makeRobot());
+  const [ogRobot, setOgRobot] = useState(makeOgRobot());
+
+  console.log(robot, ogRobot);
 
   const makeTitle = () => {
-    if (newEdit === "new") return "New Robot";
-    else if (newEdit === "edit") return "Edit Robot";
+    if (mode === "new") return "New Robot";
+    else if (mode === "edit") return "Edit Robot";
   };
 
   const saveDisabled = () => {
@@ -43,22 +56,32 @@ export const EditRobotModal = ({ newEdit, out }) => {
     return false;
   };
 
+  const saveChangesDisabled = () => {
+    if (saveDisabled()) return true;
+    if (JSON.stringify(robot) === JSON.stringify(ogRobot)) return true;
+    return false;
+  };
+
   const saveRobot = () => {
     window.electron.ipcRenderer
       .invoke("saveRobot", robot)
-      .then(res => out("close"))
+      .then(res => out("refresh"))
       .catch(err => console.log(err));
   };
 
   const makeBtns = () => {
-    if (newEdit === "new") {
+    if (mode === "new") {
       return (
         <Button size="small" disabled={saveDisabled()} onClick={saveRobot}>
           Save New Robot
         </Button>
       );
-    } else if (newEdit === "edit") {
-      return <Button size="small">Save Changes</Button>;
+    } else if (mode === "edit") {
+      return (
+        <Button size="small" disabled={saveChangesDisabled()}>
+          Save Changes
+        </Button>
+      );
     }
   };
 
@@ -100,7 +123,7 @@ export const EditRobotModal = ({ newEdit, out }) => {
               setRobot(old => ({
                 ...old,
                 name: e.target.value,
-                path: e.target.value.replaceAll(" ", "").toLowerCase(),
+                path: e.target.value.replaceAll(" ", "_").toLowerCase(),
               }))
             }
           />

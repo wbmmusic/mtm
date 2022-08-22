@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Divider,
+  Modal,
   Paper,
   Rating,
   Stack,
@@ -15,46 +16,71 @@ import { EditRobotModal } from "./robot_modal/EditRobotModal";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 
+const defaultDeleteModal = { show: false, robot: null };
+
 export const RobotSelector = () => {
   const navigate = useNavigate();
   const { admin } = useContext(GlobalContext);
 
-  const [robotModal, setRobotModal] = useState(null);
+  const [robotModal, setRobotModal] = useState({ mode: null });
   const [robots, setRobots] = useState([]);
+  const [deleteModal, setDeleteModal] = useState(defaultDeleteModal);
 
-  useEffect(() => {
+  const getRobots = () => {
     window.electron.ipcRenderer
       .invoke("getRobots")
       .then(bots => setRobots(bots))
       .catch(err => console.error(err));
+  };
+
+  useEffect(() => {
+    getRobots();
   }, []);
 
   const deleteBot = path => {
     console.log("delete", path);
+    window.electron.ipcRenderer
+      .invoke("deleteRobot", path)
+      .then(bots => {
+        setRobots(bots);
+        closeDeleteModal();
+      })
+      .catch(err => console.error(err));
   };
 
   const AddRobotBlock = () => (
     <Box>
-      <Button startIcon={<AddIcon />} onClick={() => setRobotModal("new")}>
+      <Button
+        startIcon={<AddIcon />}
+        onClick={() => setRobotModal({ mode: "new" })}
+      >
         Create New Robot
       </Button>
     </Box>
   );
 
   const handleModelOut = data => {
-    if (data === "close") setRobotModal(null);
-  };
-
-  const makeModal = () => {
-    if (robotModal === "new" || robotModal === "edit") {
-      return <EditRobotModal newEdit={robotModal} out={handleModelOut} />;
+    if (data === "close") setRobotModal({ mode: null });
+    else if (data === "refresh") {
+      getRobots();
+      setRobotModal({ mode: null });
     }
   };
 
-  const DeleteBot = ({ path }) => (
+  const Buttons = ({ robot }) => (
     <Stack direction="row-reverse">
-      <Button color="error" size="small" onClick={() => deleteBot(path)}>
+      <Button
+        color="error"
+        size="small"
+        onClick={() => setDeleteModal({ show: true, robot })}
+      >
         Delete
+      </Button>
+      <Button
+        size="small"
+        onClick={() => setRobotModal({ mode: "edit", robot })}
+      >
+        Edit
       </Button>
     </Stack>
   );
@@ -93,9 +119,62 @@ export const RobotSelector = () => {
           </Box>
         </Stack>
       </Box>
-      {admin ? <DeleteBot path={robot.path} /> : null}
+      {admin ? <Buttons robot={robot} /> : null}
     </Box>
   );
+
+  const closeDeleteModal = () => setDeleteModal(defaultDeleteModal);
+
+  const DeleteModal = () => {
+    return (
+      <Modal
+        open={deleteModal.show}
+        onClose={closeDeleteModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Confirm Delete Robot
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Are you sure you want to delete robot named{" "}
+            <b>{deleteModal.robot.name}</b>
+          </Typography>
+          <Stack direction="row-reverse" spacing={1}>
+            <Button
+              size="small"
+              color="error"
+              onClick={() => deleteBot(deleteModal.robot.path)}
+            >
+              Delete
+            </Button>
+            <Button
+              size="small"
+              color="success"
+              onClick={() => setDeleteModal(defaultDeleteModal)}
+            >
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
+    );
+  };
+
+  const makeModal = () => {
+    if (robotModal.mode === "new" || robotModal.mode === "edit") {
+      return (
+        <EditRobotModal
+          mode={robotModal.mode}
+          data={robotModal.robot}
+          out={handleModelOut}
+        />
+      );
+    } else if (deleteModal.show) {
+      return <DeleteModal robot={deleteModal.robot} />;
+    }
+  };
 
   return (
     <Box m={1} p={1} component={Paper} elevation={4}>
@@ -111,4 +190,16 @@ export const RobotSelector = () => {
       </Stack>
     </Box>
   );
+};
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
 };

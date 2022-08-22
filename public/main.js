@@ -3,7 +3,7 @@ const { join } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
-const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync } = require('fs');
+const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync } = require('fs');
 
 let firstReactInit = true
 
@@ -193,6 +193,21 @@ app.on('ready', () => {
                 let rbts = getRobots()
                 console.log(rbts)
                 resolve(rbts)
+            })
+        })
+
+        ipcMain.handle('deleteRobot', async(e, path) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    const robotPath = join(pathToRobots, path)
+                    if (existsSync(robotPath)) rmdirSync(robotPath, { recursive: true })
+                    else throw new Error('Folder with path ' + path + " does not exist")
+                    let rbts = getRobots()
+                    resolve(rbts)
+                } catch (error) {
+                    reject(error)
+                }
+
             })
         })
 
