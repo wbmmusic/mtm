@@ -243,6 +243,39 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('updateRobot', async(e, robot, oldPath) => {
+            return new Promise((resolve, reject) => {
+                const robotPath = join(pathToRobots, robot.path)
+                const robotFilePath = join(robotPath, 'robot.json')
+                const oldRobotFolderPath = join(pathToRobots, oldPath)
+
+                if (oldPath) {
+                    if (existsSync(oldRobotFolderPath)) {
+                        try {
+                            rmdirSync(oldRobotFolderPath, { recursive: true })
+                            mkdirSync(robotPath)
+                            writeFileSync(robotFilePath, JSON.stringify(robot))
+                            const updatedRobot = readFileSync(robotFilePath)
+                            resolve(updatedRobot)
+                        } catch (error) {
+                            reject(error)
+                        }
+                    } else reject(new Error('Cant find oldPath ' + oldPath))
+
+                } else {
+                    if (existsSync(robotFilePath)) {
+                        try {
+                            writeFileSync(robotFilePath, JSON.stringify(robot, null, ' '))
+                            const updatedRobot = JSON.parse(readFileSync(robotFilePath))
+                            resolve(updatedRobot)
+                        } catch (error) {
+                            reject(error)
+                        }
+                    } else reject(new Error("Can't find robot at " + robot.path))
+                }
+            })
+        })
+
         createWindow()
     })
     ///////////////////////

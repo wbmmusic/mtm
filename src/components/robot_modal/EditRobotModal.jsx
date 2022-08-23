@@ -67,6 +67,20 @@ export const EditRobotModal = ({ mode, data, out }) => {
       .catch(err => console.log(err));
   };
 
+  const updateRobot = () => {
+    if (ogRobot.path !== robot.path) {
+      window.electron.ipcRenderer
+        .invoke("updateRobot", robot, ogRobot.path)
+        .then(res => out("refresh"))
+        .catch(err => console.log(err));
+    } else {
+      window.electron.ipcRenderer
+        .invoke("updateRobot", robot)
+        .then(res => out("refresh"))
+        .catch(err => console.log(err));
+    }
+  };
+
   const makeBtns = () => {
     if (mode === "new") {
       return (
@@ -76,7 +90,11 @@ export const EditRobotModal = ({ mode, data, out }) => {
       );
     } else if (mode === "edit") {
       return (
-        <Button size="small" disabled={saveChangesDisabled()}>
+        <Button
+          size="small"
+          disabled={saveChangesDisabled()}
+          onClick={updateRobot}
+        >
           Save Changes
         </Button>
       );
