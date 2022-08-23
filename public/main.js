@@ -279,6 +279,27 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('createPosition', async(e, path, position) => {
+            return new Promise(async(resolve, reject) => {
+                console.log("Create Position", position.name)
+                const robotPath = join(pathToRobots, path)
+                const robotFilePath = join(robotPath, 'robot.json')
+
+                if (existsSync(robotFilePath)) {
+                    try {
+                        let tempFile = JSON.parse(readFileSync(robotFilePath))
+                        tempFile.positions.push(position)
+                        writeFileSync(robotFilePath, JSON.stringify(tempFile, null, ' '))
+                        let positions = JSON.parse(readFileSync(robotFilePath)).positions
+                        resolve(positions)
+                    } catch (error) {
+                        reject(error)
+                    }
+                } else reject('Cand find robot file ' + path)
+
+            })
+        })
+
         createWindow()
     })
     ///////////////////////

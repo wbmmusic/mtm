@@ -16,18 +16,14 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
   const makePosition = () => {
     let out = { name: "", servos: [] };
 
-    robot.servos.forEach(servo =>
-      out.servos.push({ ...servo, ...defaultServo })
-    );
+    robot.servos.forEach(servo => out.servos.push({ ...defaultServo }));
 
     return out;
   };
   const [pos, setPos] = useState(makePosition());
   //const [ogPos, setOgPos] = useState(null);
 
-  const handleCreatePosition = () => {
-    out("createPosition", pos);
-  };
+  const handleCreatePosition = () => out("createPosition", pos);
 
   const makeTitle = () => {
     if (mode === "new") return "New";
@@ -86,7 +82,7 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
           {pos.servos.map((servo, idx) => (
             <Servo
               key={"servo" + idx}
-              label={servo.name}
+              label={robot.servos[idx].name}
               idx={idx + 1}
               servo={servo}
               onChange={(type, val) => {

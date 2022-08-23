@@ -43,3 +43,12 @@ export const getPositions = async robotPath => {
       .catch(err => reject(err));
   });
 };
+
+export const createPosition = async (path, position) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("createPosition", path, position)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};

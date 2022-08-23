@@ -15,7 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import AddIcon from "@mui/icons-material/Add";
 import { EditPositionModal } from "./EditPositionModal";
-import { getRobot } from "../../helpers";
+import { createPosition, getRobot } from "../../helpers";
 
 const delays = [
   { id: uuid(), content: "1s", type: "delay", value: 10 },
@@ -144,13 +144,14 @@ export const Sequence = () => {
     });
   };
 
-  const handlePositionModal = (type, data) => {
+  const handlePositionModal = async (type, data) => {
     console.log("Position Modal Out", type);
     if (type === "cancel") setPositionModal(defaultPositionModal);
     if (type === "createPosition") {
       // get positions
-      console.log(data);
       setPositionModal(defaultPositionModal);
+      let positions = await createPosition(robotPath, data);
+      console.log(positions);
     }
   };
 
