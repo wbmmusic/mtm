@@ -11,7 +11,7 @@ import {
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const delays = [
@@ -32,6 +32,8 @@ const TIMELINE_ITEMS = [];
 
 export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
+  const navigate = useNavigate();
+
   console.log(robotPath, sequencePath);
 
   const makeObjects = () => [...delays, ...defaultPositions];
@@ -119,9 +121,6 @@ export const Sequence = () => {
         <Box component={Paper} elevation={4}>
           <Box sx={{ paddingLeft: "4px" }}>
             <Typography variant="h6">OBJECTS</Typography>
-            <Typography variant="body2">
-              These items can be dragged to the timeline
-            </Typography>
           </Box>
           <Droppable
             droppableId="objects"
@@ -133,7 +132,7 @@ export const Sequence = () => {
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 direction={"row"}
-                p={1}
+                p={0.5}
                 width={"100%"}
                 spacing={1}
                 sx={{ border: "1px solid" }}
@@ -151,7 +150,7 @@ export const Sequence = () => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           component={Paper}
-                          p={1}
+                          p={0.5}
                           sx={{ border: "1px solid" }}
                         >
                           {makeItem(itm)}
@@ -159,7 +158,7 @@ export const Sequence = () => {
                         {snapshot.isDragging && (
                           <Box
                             component={Paper}
-                            p={1}
+                            p={0.5}
                             sx={{ border: "1px solid" }}
                           >
                             {makeItem(itm)}
@@ -184,9 +183,6 @@ export const Sequence = () => {
         <Box width={"100%"} component={Paper} elevation={4}>
           <Box sx={{ paddingLeft: "4px" }}>
             <Typography variant="h6">Timeline</Typography>
-            <Typography variant="body2">
-              These objects can be reordered or moved to the trash
-            </Typography>
           </Box>
           <Droppable droppableId="timeline" direction="horizontal">
             {provided => (
@@ -196,7 +192,7 @@ export const Sequence = () => {
                 direction={"row"}
                 p={1}
                 width={"100%"}
-                spacing={1}
+                spacing={0.5}
                 sx={{ border: "1px solid", overflowY: "auto" }}
               >
                 {actions.map((itm, idx) => (
@@ -212,7 +208,7 @@ export const Sequence = () => {
                           ref={provided2.innerRef}
                           {...provided2.draggableProps}
                           {...provided2.dragHandleProps}
-                          p={1}
+                          p={0.5}
                           sx={{ border: "1px solid" }}
                         >
                           {makeItem(itm)}
@@ -236,9 +232,6 @@ export const Sequence = () => {
         <Box component={Paper} elevation={4}>
           <Box sx={{ paddingLeft: "4px" }}>
             <Typography variant="h6">Trash</Typography>
-            <Typography variant="body2">
-              To remove objects from timeline drag them here
-            </Typography>
           </Box>
           <Droppable droppableId="trash" direction="horizontal">
             {provided => (
@@ -307,6 +300,7 @@ export const Sequence = () => {
             startIcon={<KeyboardReturnIcon />}
             sx={{ whiteSpace: "nowrap" }}
             size="small"
+            onClick={() => navigate("/robot/" + robotPath)}
           >
             Back to robot
           </Button>
