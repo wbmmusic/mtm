@@ -8,15 +8,19 @@ import {
   Button,
   Divider,
   LinearProgress,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
-import AddIcon from "@mui/icons-material/Add";
 import { EditPositionModal } from "./EditPositionModal";
 import { createPosition, getRobot } from "../../helpers";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { SelectPositionModal } from "./SelectPositionModal";
 
 const delays = [
   { id: uuid(), content: "1s", type: "delay", value: 10 },
@@ -35,6 +39,7 @@ const defaultPositions = [
 const TIMELINE_ITEMS = [];
 
 const defaultPositionModal = { show: false, mode: null, position: null };
+const defaultSelectPositionModal = { show: false };
 
 export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
@@ -44,6 +49,12 @@ export const Sequence = () => {
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
   const [robot, setRobot] = useState(null);
+
+  const [selectPositionModal, setSelectPositionModal] = useState(
+    defaultSelectPositionModal
+  );
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
   const [timelineObjects, setTimelineObjects] = useState([]);
 
@@ -75,10 +86,14 @@ export const Sequence = () => {
   }, []);
 
   useEffect(() => {
-    if (robot) {
-      makeObjects();
-    }
+    if (robot) makeObjects();
   }, [robot]);
+
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => setAnchorEl(null);
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -348,6 +363,19 @@ export const Sequence = () => {
     return true;
   };
 
+  const handleSelectPosition = (type, data) => {
+    if (type === "cancel") setSelectPositionModal(defaultSelectPositionModal);
+    if (type === "edit") {
+      console.log("Edit", data);
+      setSelectPositionModal(defaultSelectPositionModal);
+      setPositionModal({
+        show: true,
+        mode: "edit",
+        position: data,
+      });
+    }
+  };
+
   return (
     <Stack
       height={"100%"}
@@ -366,12 +394,45 @@ export const Sequence = () => {
         </Box>
         <Box>
           <Button
-            startIcon={<AddIcon />}
             size="small"
-            onClick={handleAddPosition}
+            startIcon={anchorEl ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={handleClick}
           >
             Position
           </Button>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+          >
+            <MenuItem
+              onClick={() => {
+                handleClose();
+                handleAddPosition();
+              }}
+            >
+              New Position
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleClose();
+                setSelectPositionModal({
+                  show: true,
+                  positions: robot.positions,
+                });
+              }}
+            >
+              Edit Position
+            </MenuItem>
+          </Menu>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
           <Button disbaled={!isSavable()} size="small">
@@ -404,6 +465,12 @@ export const Sequence = () => {
           position={positionModal.position}
           robot={robot}
           out={handlePositionModal}
+        />
+      ) : null}
+      {selectPositionModal.show ? (
+        <SelectPositionModal
+          positions={robot.positions}
+          out={handleSelectPosition}
         />
       ) : null}
     </Stack>

@@ -6,7 +6,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { modalStyle } from "../../styles";
 import { Servo } from "./Servo";
 
@@ -15,13 +15,19 @@ const defaultServo = { enabled: false, value: 90 };
 export const EditPositionModal = ({ mode, position, robot, out }) => {
   const makePosition = () => {
     let out = { name: "", servos: [] };
-
     robot.servos.forEach(servo => out.servos.push({ ...defaultServo }));
-
     return out;
   };
+
+  const [ogPos, setOgPos] = useState(null);
   const [pos, setPos] = useState(makePosition());
-  //const [ogPos, setOgPos] = useState(null);
+
+  useEffect(() => {
+    if (position) {
+      setOgPos(JSON.parse(JSON.stringify(position)));
+      setPos(JSON.parse(JSON.stringify(position)));
+    }
+  }, []);
 
   const handleCreatePosition = () => out("createPosition", pos);
 
@@ -38,6 +44,7 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
 
   const isSavable = () => {
     if (!isCreatable()) return false;
+    if (JSON.stringify(ogPos) === JSON.stringify(pos)) return false;
     return true;
   };
 
