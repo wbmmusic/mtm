@@ -7,6 +7,7 @@ import {
   TextField,
   Button,
   Divider,
+  LinearProgress,
 } from "@mui/material";
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
@@ -39,13 +40,25 @@ export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
   const navigate = useNavigate();
 
-  const makeObjects = () => [...delays, ...defaultPositions];
-
   const [actions, setActions] = useState(TIMELINE_ITEMS);
-  const [timelineObjects, setTimelineObjects] = useState(makeObjects());
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
   const [robot, setRobot] = useState(null);
+
+  const [timelineObjects, setTimelineObjects] = useState([]);
+
+  const makeObjects = () => {
+    let out = [...delays];
+    robot.positions.forEach(position => {
+      out.push({
+        id: uuid(),
+        content: position.name,
+        type: "move",
+        servos: position.servos,
+      });
+    });
+    setTimelineObjects(out);
+  };
 
   const setTheRobot = async () => {
     try {
@@ -60,6 +73,12 @@ export const Sequence = () => {
     window.electron.send("play", "sequence.mp3");
     setTheRobot();
   }, []);
+
+  useEffect(() => {
+    if (robot) {
+      makeObjects();
+    }
+  }, [robot]);
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -85,7 +104,16 @@ export const Sequence = () => {
   const PositionItem = ({ itm }) => (
     <Box height={"100%"}>
       <Typography variant="body2">{itm.content}</Typography>
-      <Typography variant="body2">{JSON.stringify(itm.servos)}</Typography>
+      <Stack spacing={0.5}>
+        {itm.servos.map(servo => (
+          <LinearProgress
+            color={servo.enabled ? "primary" : "inherit"}
+            variant="determinate"
+            max={180}
+            value={(servo.value * 100) / 180}
+          />
+        ))}
+      </Stack>
     </Box>
   );
 
@@ -174,7 +202,7 @@ export const Sequence = () => {
                 direction={"row"}
                 p={0.5}
                 width={"100%"}
-                spacing={1}
+                spacing={0.5}
                 sx={{ border: "1px solid" }}
               >
                 {timelineObjects.map((itm, idx) => (
@@ -316,6 +344,10 @@ export const Sequence = () => {
     );
   };
 
+  const isSavable = () => {
+    return true;
+  };
+
   return (
     <Stack
       height={"100%"}
@@ -342,7 +374,9 @@ export const Sequence = () => {
           </Button>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Button size="small">Save</Button>
+          <Button disbaled={!isSavable()} size="small">
+            Save
+          </Button>
         </Box>
         <Box>
           <Button
