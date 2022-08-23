@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import { Stack, Paper, Typography } from "@mui/material";
+import {
+  Stack,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Divider,
+} from "@mui/material";
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
-
-const getItemStyle = (isDragging, draggableStyle) => ({
-  background: isDragging ? "#757ce8" : "salmon",
-  ...draggableStyle,
-});
+import { useParams } from "react-router-dom";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const delays = [
   { id: uuid(), content: "1s", type: "delay", value: 10 },
@@ -27,6 +31,9 @@ const defaultPositions = [
 const TIMELINE_ITEMS = [];
 
 export const Sequence = () => {
+  const { robotPath, sequencePath } = useParams();
+  console.log(robotPath, sequencePath);
+
   const makeObjects = () => [...delays, ...defaultPositions];
 
   const [actions, setActions] = useState(TIMELINE_ITEMS);
@@ -34,7 +41,6 @@ export const Sequence = () => {
   const [trash, setTrash] = useState([]);
 
   useEffect(() => window.electron.send("play", "sequence.mp3"), []);
-  console.log("Render Sequence");
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -278,17 +284,43 @@ export const Sequence = () => {
   };
 
   return (
-    <Box height={"100%"}>
-      <Stack height={"100%"} sx={{ overflow: "hidden" }}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <TimelineObjects />
-          {/* <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box> */}
-          <Timeline />
-          <Trash />
-        </DragDropContext>
-        <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box>
-        <Transport actions={actions} />
+    <Stack
+      height={"100%"}
+      width={"100%"}
+      maxWidth={"100vw"}
+      sx={{ overflow: "hidden" }}
+    >
+      <Stack direction="row" width={"100vw"} spacing={1} p={1}>
+        <Box width={"100%"}>
+          <TextField
+            sx={{ width: "100%" }}
+            label="Sequence Name"
+            size="small"
+            variant="standard"
+          />
+        </Box>
+        <Box sx={{ justifyContent: "center" }}>
+          <Button size="small">Save</Button>
+        </Box>
+        <Box>
+          <Button
+            startIcon={<KeyboardReturnIcon />}
+            sx={{ whiteSpace: "nowrap" }}
+            size="small"
+          >
+            Back to robot
+          </Button>
+        </Box>
       </Stack>
-    </Box>
+      <Divider />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <TimelineObjects />
+        {/* <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box> */}
+        <Timeline />
+        <Trash />
+      </DragDropContext>
+      <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box>
+      <Transport actions={actions} />
+    </Stack>
   );
 };

@@ -163,8 +163,11 @@ export default function Top() {
       <Divider />
       <Box height={"100%"} sx={{ overflow: "auto" }}>
         <Routes>
-          <Route path="robot/*" element={<Robot />} />
-          <Route path="sequence" element={<Sequence />} />
+          <Route path="robot/:robotPath" element={<Robot />} />
+          <Route
+            path="sequence/:robotPath/:sequencePath"
+            element={<Sequence />}
+          />
           <Route path="manual" element={<TwoServos />} />
           <Route path="*" element={<Home />} />
         </Routes>

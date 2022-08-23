@@ -19,7 +19,7 @@ const defaultRobot = {
   path: "",
   readOnly: false,
   description: "",
-  linkToVideo: "",
+  youtubeId: "",
   servos: [],
   sequences: [],
   difficulty: 0,
@@ -43,8 +43,6 @@ export const EditRobotModal = ({ mode, data, out }) => {
   const handleClose = () => setOpen(false);
   const [robot, setRobot] = useState(makeRobot());
   const [ogRobot, setOgRobot] = useState(makeOgRobot());
-
-  console.log(robot, ogRobot);
 
   const makeTitle = () => {
     if (mode === "new") return "New Robot";
@@ -141,9 +139,9 @@ export const EditRobotModal = ({ mode, data, out }) => {
             label="Link To Video"
             size="small"
             variant="standard"
-            value={robot.linkToVideo}
+            value={robot.youtubeId}
             onChange={e =>
-              setRobot(old => ({ ...old, linkToVideo: e.target.value }))
+              setRobot(old => ({ ...old, youtubeId: e.target.value }))
             }
           />
           <Stack direction="row" spacing={1}>

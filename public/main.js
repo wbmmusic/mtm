@@ -191,8 +191,21 @@ app.on('ready', () => {
         ipcMain.handle('getRobots', async() => {
             return new Promise((resolve, reject) => {
                 let rbts = getRobots()
-                console.log(rbts)
                 resolve(rbts)
+            })
+        })
+
+        ipcMain.handle('getRobot', async(e, path) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    const pathToRobot = join(pathToRobots, path, 'robot.json')
+                    if (!existsSync(pathToRobot)) throw new Error('Path to robot' + path + " does not exist")
+                    let bot = JSON.parse(readFileSync(pathToRobot))
+                    resolve(bot)
+                } catch (error) {
+                    console.log(error.message)
+                    reject(error)
+                }
             })
         })
 
