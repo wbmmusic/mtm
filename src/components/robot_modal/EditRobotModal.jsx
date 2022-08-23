@@ -13,6 +13,7 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import { ServoInput } from "./ServoInput";
+import { saveRobot } from "../../helpers";
 
 const defaultRobot = {
   name: "",
@@ -22,6 +23,7 @@ const defaultRobot = {
   youtubeId: "",
   servos: [],
   sequences: [],
+  positions: [],
   difficulty: 0,
   boardRequirements: {},
 };
@@ -60,15 +62,9 @@ export const EditRobotModal = ({ mode, data, out }) => {
     return false;
   };
 
-  const saveRobot = () => {
-    window.electron.ipcRenderer
-      .invoke("saveRobot", robot)
-      .then(res => out("refresh"))
-      .catch(err => console.log(err));
-  };
-
   const updateRobot = () => {
     if (ogRobot.path !== robot.path) {
+      console.log("Paths not equal");
       window.electron.ipcRenderer
         .invoke("updateRobot", robot, ogRobot.path)
         .then(res => out("refresh"))
@@ -84,7 +80,18 @@ export const EditRobotModal = ({ mode, data, out }) => {
   const makeBtns = () => {
     if (mode === "new") {
       return (
-        <Button size="small" disabled={saveDisabled()} onClick={saveRobot}>
+        <Button
+          size="small"
+          disabled={saveDisabled()}
+          onClick={async () => {
+            try {
+              await saveRobot(robot);
+              out("refresh");
+            } catch (error) {
+              console.error(error);
+            }
+          }}
+        >
           Save New Robot
         </Button>
       );
@@ -154,7 +161,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
             }
           />
           <TextField
-            label="Link To Video"
+            label="Assembly video YouTube ID"
             size="small"
             variant="standard"
             value={robot.youtubeId}

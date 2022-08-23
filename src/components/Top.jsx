@@ -4,7 +4,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Sequence } from "./Sequence";
+import { Sequence } from "./sequence/Sequence";
 import { TwoServos } from "./TwoServos";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";

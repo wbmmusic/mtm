@@ -212,6 +212,7 @@ app.on('ready', () => {
         ipcMain.handle('deleteRobot', async(e, path) => {
             return new Promise((resolve, reject) => {
                 try {
+                    console.log("Delete Robot", path)
                     const robotPath = join(pathToRobots, path)
                     if (existsSync(robotPath)) rmdirSync(robotPath, { recursive: true })
                     else throw new Error('Folder with path ' + path + " does not exist")
@@ -226,9 +227,10 @@ app.on('ready', () => {
 
         ipcMain.handle('saveRobot', async(e, robot) => {
             return new Promise((resolve, reject) => {
+                console.log("Save Robot", robot.name)
                 const robotPath = join(pathToRobots, robot.path)
                 const robotFilePath = join(robotPath, 'robot.json')
-                console.log("Save Robot", robot)
+
                 if (existsSync(robotPath)) {
                     reject(new Error("Robot folder path already exists"))
                 } else {
@@ -247,9 +249,9 @@ app.on('ready', () => {
             return new Promise((resolve, reject) => {
                 const robotPath = join(pathToRobots, robot.path)
                 const robotFilePath = join(robotPath, 'robot.json')
-                const oldRobotFolderPath = join(pathToRobots, oldPath)
 
                 if (oldPath) {
+                    const oldRobotFolderPath = join(pathToRobots, oldPath)
                     if (existsSync(oldRobotFolderPath)) {
                         try {
                             rmdirSync(oldRobotFolderPath, { recursive: true })

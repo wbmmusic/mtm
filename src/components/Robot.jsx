@@ -4,20 +4,23 @@ import { SequencePicker } from "./SequencePicker";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { useParams } from "react-router-dom";
+import { getRobot } from "../helpers";
 
 export const Robot = () => {
   const [robot, setRobot] = useState(null);
   const path = useParams().robotPath;
 
-  const getRobot = () => {
-    window.electron.ipcRenderer
-      .invoke("getRobot", path)
-      .then(res => setRobot(res))
-      .catch(err => console.error(err));
+  const setTheRobot = async () => {
+    try {
+      const theRobot = await getRobot(path);
+      setRobot(theRobot);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    getRobot();
+    setTheRobot();
   }, []);
 
   if (robot === null)

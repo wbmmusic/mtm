@@ -8,11 +8,14 @@ import {
   Button,
   Divider,
 } from "@mui/material";
-import { Transport } from "./Transport";
+import { Transport } from "../Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import AddIcon from "@mui/icons-material/Add";
+import { EditPositionModal } from "./EditPositionModal";
+import { getRobot } from "../../helpers";
 
 const delays = [
   { id: uuid(), content: "1s", type: "delay", value: 10 },
@@ -30,6 +33,8 @@ const defaultPositions = [
 
 const TIMELINE_ITEMS = [];
 
+const defaultPositionModal = { show: false, mode: null, position: null };
+
 export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
   const navigate = useNavigate();
@@ -41,8 +46,24 @@ export const Sequence = () => {
   const [actions, setActions] = useState(TIMELINE_ITEMS);
   const [timelineObjects, setTimelineObjects] = useState(makeObjects());
   const [trash, setTrash] = useState([]);
+  const [positionModal, setPositionModal] = useState(defaultPositionModal);
+  const [robot, setRobot] = useState(null);
 
-  useEffect(() => window.electron.send("play", "sequence.mp3"), []);
+  const setTheRobot = async () => {
+    try {
+      const theRobot = await getRobot(robotPath);
+      setRobot(theRobot);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    window.electron.send("play", "sequence.mp3");
+    setTheRobot();
+  }, []);
+
+  console.log(robot);
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -113,6 +134,23 @@ export const Sequence = () => {
     } else if (itm.type === "move") {
       return <PositionItem itm={itm} />;
     }
+  };
+
+  const makeDefaultPosition = () => {
+    return null;
+  };
+
+  const handleAddPosition = () => {
+    setPositionModal({
+      show: true,
+      mode: "new",
+      position: makeDefaultPosition(),
+    });
+  };
+
+  const handlePositionModal = data => {
+    console.log("Position Modal Out", data);
+    if (data === "cancel") setPositionModal(defaultPositionModal);
   };
 
   const TimelineObjects = () => {
@@ -292,6 +330,15 @@ export const Sequence = () => {
             variant="standard"
           />
         </Box>
+        <Box>
+          <Button
+            startIcon={<AddIcon />}
+            size="small"
+            onClick={handleAddPosition}
+          >
+            Position
+          </Button>
+        </Box>
         <Box sx={{ justifyContent: "center" }}>
           <Button size="small">Save</Button>
         </Box>
@@ -315,6 +362,14 @@ export const Sequence = () => {
       </DragDropContext>
       <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box>
       <Transport actions={actions} />
+      {positionModal.mode !== null ? (
+        <EditPositionModal
+          mode={positionModal.mode}
+          position={positionModal.position}
+          robot={robot}
+          out={handlePositionModal}
+        />
+      ) : null}
     </Stack>
   );
 };

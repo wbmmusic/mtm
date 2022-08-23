@@ -15,6 +15,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { EditRobotModal } from "./robot_modal/EditRobotModal";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
+import { deleteRobot, getRobots } from "../helpers";
 
 const defaultDeleteModal = { show: false, robot: null };
 
@@ -26,26 +27,27 @@ export const RobotSelector = () => {
   const [robots, setRobots] = useState([]);
   const [deleteModal, setDeleteModal] = useState(defaultDeleteModal);
 
-  const getRobots = () => {
-    window.electron.ipcRenderer
-      .invoke("getRobots")
-      .then(bots => setRobots(bots))
-      .catch(err => console.error(err));
+  const setTheRobots = async () => {
+    try {
+      const robots = await getRobots();
+      setRobots(robots);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
-    getRobots();
+    setTheRobots();
   }, []);
 
-  const deleteBot = path => {
-    console.log("delete", path);
-    window.electron.ipcRenderer
-      .invoke("deleteRobot", path)
-      .then(bots => {
-        setRobots(bots);
-        closeDeleteModal();
-      })
-      .catch(err => console.error(err));
+  const deleteBot = async path => {
+    try {
+      const robots = await deleteRobot(path);
+      setRobots(robots);
+      closeDeleteModal();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const AddRobotBlock = () => (
@@ -62,7 +64,7 @@ export const RobotSelector = () => {
   const handleModelOut = data => {
     if (data === "close") setRobotModal({ mode: null });
     else if (data === "refresh") {
-      getRobots();
+      setTheRobots();
       setRobotModal({ mode: null });
     }
   };
