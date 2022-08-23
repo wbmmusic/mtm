@@ -8,7 +8,7 @@ import {
   Button,
   Divider,
 } from "@mui/material";
-import { Transport } from "../Transport";
+import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { v4 as uuid } from "uuid";
 import { useNavigate, useParams } from "react-router-dom";

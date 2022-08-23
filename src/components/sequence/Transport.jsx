@@ -92,6 +92,7 @@ export const Transport = ({ actions }) => {
       <Stack>
         <Box sx={{ padding: "0px 15px" }}>
           <Slider
+            size="small"
             marks={marks}
             value={current}
             min={0}
