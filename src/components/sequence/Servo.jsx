@@ -1,9 +1,17 @@
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Typography,
+} from "@mui/material";
 import Slider from "@mui/material/Slider";
 import React, { useState } from "react";
 
 export const Servo = ({ idx, label }) => {
   const [lastSent, setLastSent] = useState(null);
+  const [enabled, setEnabled] = useState(false);
 
   const handleChange = val => {
     if (val !== lastSent) {
@@ -17,17 +25,25 @@ export const Servo = ({ idx, label }) => {
   };
 
   return (
-    <Box component={Paper} m={1} p={2} elevation={6}>
+    <Box component={Paper} p={2} elevation={4}>
       <Stack direction="row">
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={enabled}
+              onChange={e => setEnabled(e.target.checked)}
+              size="small"
+            />
+          }
+          label={label}
+        />
+        <Box width={"100%"} />
         <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
           {"Servo " + idx}
         </Typography>
-        <Box width={"100%"} />
-        <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-          {"Pin " + label}
-        </Typography>
       </Stack>
       <Slider
+        disabled={!enabled}
         min={0}
         max={180}
         step={1}

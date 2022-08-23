@@ -5,7 +5,6 @@ import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Sequence } from "./sequence/Sequence";
-import { TwoServos } from "./TwoServos";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import HomeIcon from "@mui/icons-material/Home";
@@ -168,7 +167,6 @@ export default function Top() {
             path="sequence/:robotPath/:sequencePath"
             element={<Sequence />}
           />
-          <Route path="manual" element={<TwoServos />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Box>

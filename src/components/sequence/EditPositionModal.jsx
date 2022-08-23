@@ -1,5 +1,13 @@
-import { Box, Modal, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Modal,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useState } from "react";
+import { Servo } from "./Servo";
 
 export const EditPositionModal = ({ mode, position, robot, out }) => {
   const [pos, setPos] = useState(null);
@@ -8,6 +16,22 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
   const makeTitle = () => {
     if (mode === "new") return "New";
     if (mode === "edit") return "Edit";
+  };
+
+  const isCreatable = () => {
+    return false;
+  };
+
+  const makeBtn = () => {
+    if (mode === "new") {
+      return (
+        <Button size="small" disabled={isCreatable()}>
+          Create
+        </Button>
+      );
+    } else if (mode === "edit") {
+      return <Button size="small">Save</Button>;
+    }
   };
 
   return (
@@ -21,15 +45,18 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {`${makeTitle()} Position`}
         </Typography>
-        <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-          Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-        </Typography>
-        <Stack>
+        <Stack spacing={1}>
+          <TextField variant="standard" label="Position Name" />
           {robot.servos.map((servo, idx) => (
-            <Box key={"servo" + idx}>
-              <Typography>{servo.name}</Typography>
-            </Box>
+            <Servo key={"servo" + idx} idx={idx + 1} label={servo.name} />
           ))}
+        </Stack>
+        <Box p={1} />
+        <Stack direction="row-reverse" spacing={1}>
+          <Button size="small" onClick={() => out("cancel")}>
+            Cancel
+          </Button>
+          {makeBtn()}
         </Stack>
       </Box>
     </Modal>
