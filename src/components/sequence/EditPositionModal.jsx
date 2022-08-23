@@ -10,15 +10,11 @@ import React, { useState } from "react";
 import { modalStyle } from "../../styles";
 import { Servo } from "./Servo";
 
-const defaultServo = { enabled: false, value: null };
-const defaultPosition = { name: "", servos: [] };
+const defaultServo = { enabled: false, value: 90 };
 
 export const EditPositionModal = ({ mode, position, robot, out }) => {
   const makePosition = () => {
-    let out = {
-      name: "",
-      servos: [],
-    };
+    let out = { name: "", servos: [] };
 
     robot.servos.forEach(servo =>
       out.servos.push({ ...servo, ...defaultServo })
@@ -27,26 +23,45 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
     return out;
   };
   const [pos, setPos] = useState(makePosition());
-  const [ogPos, setOgPos] = useState(null);
+  //const [ogPos, setOgPos] = useState(null);
+
+  const handleCreatePosition = () => {
+    out("createPosition", pos);
+  };
 
   const makeTitle = () => {
     if (mode === "new") return "New";
     if (mode === "edit") return "Edit";
+    return "ERROR";
   };
 
   const isCreatable = () => {
-    return false;
+    if (pos.name === "") return false;
+    return true;
+  };
+
+  const isSavable = () => {
+    if (!isCreatable()) return false;
+    return true;
   };
 
   const makeBtn = () => {
     if (mode === "new") {
       return (
-        <Button size="small" disabled={isCreatable()}>
+        <Button
+          size="small"
+          disabled={!isCreatable()}
+          onClick={handleCreatePosition}
+        >
           Create
         </Button>
       );
     } else if (mode === "edit") {
-      return <Button size="small">Save</Button>;
+      return (
+        <Button size="small" disabled={!isSavable()}>
+          Save
+        </Button>
+      );
     }
   };
 
@@ -62,7 +77,12 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
           {`${makeTitle()} Position`}
         </Typography>
         <Stack spacing={1}>
-          <TextField variant="standard" label="Position Name" />
+          <TextField
+            value={pos.name}
+            onChange={e => setPos(old => ({ ...old, name: e.target.value }))}
+            variant="standard"
+            label="Position Name"
+          />
           {pos.servos.map((servo, idx) => (
             <Servo
               key={"servo" + idx}

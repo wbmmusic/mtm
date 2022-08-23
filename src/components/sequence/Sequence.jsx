@@ -39,8 +39,6 @@ export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
   const navigate = useNavigate();
 
-  console.log(robotPath, sequencePath);
-
   const makeObjects = () => [...delays, ...defaultPositions];
 
   const [actions, setActions] = useState(TIMELINE_ITEMS);
@@ -146,9 +144,14 @@ export const Sequence = () => {
     });
   };
 
-  const handlePositionModal = data => {
-    console.log("Position Modal Out", data);
-    if (data === "cancel") setPositionModal(defaultPositionModal);
+  const handlePositionModal = (type, data) => {
+    console.log("Position Modal Out", type);
+    if (type === "cancel") setPositionModal(defaultPositionModal);
+    if (type === "createPosition") {
+      // get positions
+      console.log(data);
+      setPositionModal(defaultPositionModal);
+    }
   };
 
   const TimelineObjects = () => {

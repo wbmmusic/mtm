@@ -9,6 +9,7 @@ function App() {
       sx={{
         height: "100vh",
         overflow: "hidden",
+        userSelect: "none",
       }}
     >
       <CssBaseline />

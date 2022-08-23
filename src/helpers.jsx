@@ -34,3 +34,12 @@ export const saveRobot = async robot => {
       .catch(err => reject(err));
   });
 };
+
+export const getPositions = async robotPath => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("getPositions", robotPath)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};
