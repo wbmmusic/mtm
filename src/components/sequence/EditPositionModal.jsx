@@ -9,6 +9,8 @@ import {
 import React, { useState } from "react";
 import { Servo } from "./Servo";
 
+const defaultServo = { enabled: false, value: null };
+
 export const EditPositionModal = ({ mode, position, robot, out }) => {
   const [pos, setPos] = useState(null);
   const [ogPos, setOgPos] = useState(null);

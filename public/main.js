@@ -184,7 +184,7 @@ app.on('ready', () => {
         ipcMain.handle('getPorts', async() => await getPorts())
 
         ipcMain.handle('sendValue', async(e, data) => {
-            console.log("Send Serial", data)
+            //console.log("Send Serial", data)
             port.write(new Buffer.from(data))
         })
 
