@@ -7,13 +7,26 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
+import { modalStyle } from "../../styles";
 import { Servo } from "./Servo";
 
 const defaultServo = { enabled: false, value: null };
 const defaultPosition = { name: "", servos: [] };
 
 export const EditPositionModal = ({ mode, position, robot, out }) => {
-  const [pos, setPos] = useState(null);
+  const makePosition = () => {
+    let out = {
+      name: "",
+      servos: [],
+    };
+
+    robot.servos.forEach(servo =>
+      out.servos.push({ ...servo, ...defaultServo })
+    );
+
+    return out;
+  };
+  const [pos, setPos] = useState(makePosition());
   const [ogPos, setOgPos] = useState(null);
 
   const makeTitle = () => {
@@ -44,14 +57,28 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={style}>
+      <Box sx={modalStyle}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {`${makeTitle()} Position`}
         </Typography>
         <Stack spacing={1}>
           <TextField variant="standard" label="Position Name" />
-          {robot.servos.map((servo, idx) => (
-            <Servo key={"servo" + idx} idx={idx + 1} label={servo.name} />
+          {pos.servos.map((servo, idx) => (
+            <Servo
+              key={"servo" + idx}
+              label={servo.name}
+              idx={idx + 1}
+              servo={servo}
+              onChange={(type, val) => {
+                let tempPos = JSON.parse(JSON.stringify(pos));
+                if (type === "value") {
+                  tempPos.servos[idx].value = val;
+                } else if (type === "enabled") {
+                  tempPos.servos[idx].enabled = val;
+                }
+                setPos(tempPos);
+              }}
+            />
           ))}
         </Stack>
         <Box p={1} />
@@ -64,16 +91,4 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
       </Box>
     </Modal>
   );
-};
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
 };

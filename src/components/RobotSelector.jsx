@@ -16,6 +16,7 @@ import { EditRobotModal } from "./robot_modal/EditRobotModal";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import { deleteRobot, getRobots } from "../helpers";
+import { modalStyle } from "../styles";
 
 const defaultDeleteModal = { show: false, robot: null };
 
@@ -135,7 +136,7 @@ export const RobotSelector = () => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box sx={modalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Confirm Delete Robot
           </Typography>
@@ -192,16 +193,4 @@ export const RobotSelector = () => {
       </Stack>
     </Box>
   );
-};
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
 };

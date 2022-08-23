@@ -63,8 +63,6 @@ export const Sequence = () => {
     setTheRobot();
   }, []);
 
-  console.log(robot);
-
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
       <Box>

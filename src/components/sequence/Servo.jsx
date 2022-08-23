@@ -9,9 +9,8 @@ import {
 import Slider from "@mui/material/Slider";
 import React, { useState } from "react";
 
-export const Servo = ({ idx, label }) => {
+export const Servo = ({ label, idx, servo, onChange }) => {
   const [lastSent, setLastSent] = useState(null);
-  const [enabled, setEnabled] = useState(false);
 
   const handleChange = val => {
     if (val !== lastSent) {
@@ -19,9 +18,11 @@ export const Servo = ({ idx, label }) => {
       //console.log("Servo", idx, "->", val);
       window.electron.ipcRenderer
         .invoke("sendValue", [idx, val])
-        .then(res => console.log(res))
+        .then()
         .catch(err => console.log(err));
     }
+
+    onChange("value", val);
   };
 
   return (
@@ -30,8 +31,8 @@ export const Servo = ({ idx, label }) => {
         <FormControlLabel
           control={
             <Checkbox
-              checked={enabled}
-              onChange={e => setEnabled(e.target.checked)}
+              checked={servo.enabled}
+              onChange={e => onChange("enabled", e.target.checked)}
               size="small"
             />
           }
@@ -43,7 +44,8 @@ export const Servo = ({ idx, label }) => {
         </Typography>
       </Stack>
       <Slider
-        disabled={!enabled}
+        value={servo.value}
+        disabled={!servo.enabled}
         min={0}
         max={180}
         step={1}
