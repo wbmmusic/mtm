@@ -13,7 +13,7 @@ import AutoFixOffIcon from "@mui/icons-material/AutoFixOff";
 import { Routes, Route } from "react-router-dom";
 import { Home } from "./Home";
 import { useNavigate } from "react-router-dom";
-import { Robot } from "./Robot";
+import { Robot } from "./robot/Robot";
 import { GlobalContext } from "../contexts/GlobalContext";
 
 export default function Top() {

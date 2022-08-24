@@ -1,10 +1,10 @@
 import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { SequencePicker } from "./SequencePicker";
+import { SequencePicker } from "../sequence/SequencePicker";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { useParams } from "react-router-dom";
-import { getRobot } from "../helpers";
+import { getRobot } from "../../helpers";
 
 export const Robot = () => {
   const [robot, setRobot] = useState(null);

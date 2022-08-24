@@ -10,21 +10,22 @@ import {
 } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GlobalContext } from "../contexts/GlobalContext";
+import { GlobalContext } from "../../contexts/GlobalContext";
 import AddIcon from "@mui/icons-material/Add";
-import { EditRobotModal } from "./robot_modal/EditRobotModal";
+import { EditRobotModal } from "./EditRobotModal";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
-import { deleteRobot, getRobots } from "../helpers";
-import { modalStyle } from "../styles";
+import { deleteRobot, getRobots } from "../../helpers";
+import { modalStyle } from "../../styles";
 
 const defaultDeleteModal = { show: false, robot: null };
+const defaultRobotModal = { mode: null };
 
 export const RobotSelector = () => {
   const navigate = useNavigate();
   const { admin } = useContext(GlobalContext);
 
-  const [robotModal, setRobotModal] = useState({ mode: null });
+  const [robotModal, setRobotModal] = useState(defaultRobotModal);
   const [robots, setRobots] = useState([]);
   const [deleteModal, setDeleteModal] = useState(defaultDeleteModal);
 
@@ -59,14 +60,31 @@ export const RobotSelector = () => {
       >
         Create New Robot
       </Button>
+      <Button
+        color="error"
+        onClick={() => {
+          if (window.confirm("This will wipe all user saved data...")) {
+            window.electron.ipcRenderer
+              .invoke("deleteUserRobots")
+              .then(res => {
+                setRobots([]);
+                console.log(res);
+                setTheRobots();
+              })
+              .catch(err => console.error(err));
+          }
+        }}
+      >
+        Delete User Robots
+      </Button>
     </Box>
   );
 
   const handleModelOut = data => {
-    if (data === "close") setRobotModal({ mode: null });
+    if (data === "close") setRobotModal(defaultRobotModal);
     else if (data === "refresh") {
+      setRobotModal(defaultRobotModal);
       setTheRobots();
-      setRobotModal({ mode: null });
     }
   };
 
@@ -84,6 +102,17 @@ export const RobotSelector = () => {
         onClick={() => setRobotModal({ mode: "edit", robot })}
       >
         Edit
+      </Button>
+      <Button
+        size="small"
+        onClick={() => {
+          window.electron.ipcRenderer
+            .invoke("exportRobot", robot.path)
+            .then(res => console.log(res))
+            .catch(err => console.error(err));
+        }}
+      >
+        Export
       </Button>
     </Stack>
   );

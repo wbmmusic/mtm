@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import AddIcon from "@mui/icons-material/Add";
@@ -33,17 +33,17 @@ const defaultServo = { name: "" };
 
 export const EditRobotModal = ({ mode, data, out }) => {
   const makeRobot = () => {
-    if (mode === "edit") return JSON.parse(JSON.stringify(data));
+    if (mode === "edit" && data !== undefined)
+      return JSON.parse(JSON.stringify(data));
     else return defaultRobot;
   };
 
   const makeOgRobot = () => {
-    if (mode === "edit") return JSON.parse(JSON.stringify(data));
+    if (mode === "edit" && data !== undefined)
+      return JSON.parse(JSON.stringify(data));
     else return null;
   };
 
-  const [open, setOpen] = useState(true);
-  const handleClose = () => setOpen(false);
   const [robot, setRobot] = useState(makeRobot());
   const [ogRobot, setOgRobot] = useState(makeOgRobot());
 
@@ -125,10 +125,18 @@ export const EditRobotModal = ({ mode, data, out }) => {
     }));
   };
 
+  useEffect(() => {
+    console.log("OPEN");
+
+    return () => {
+      console.log("CLOSE");
+    };
+  }, []);
+
   return (
     <Modal
-      open={open}
-      onClose={handleClose}
+      open={true}
+      onClose={() => out("close")}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >

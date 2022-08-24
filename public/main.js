@@ -1,9 +1,9 @@
-const { app, BrowserWindow, ipcMain, protocol } = require('electron')
-const { join } = require('path')
+const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron')
+const { join, normalize } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
-const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync } = require('fs');
+const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync } = require('fs');
 
 let firstReactInit = true
 
@@ -275,6 +275,36 @@ app.on('ready', () => {
                             reject(error)
                         }
                     } else reject(new Error("Can't find robot at " + robot.path))
+                }
+            })
+        })
+
+        ipcMain.handle('deleteUserRobots', async() => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    const robots = getRobots()
+                    robots.forEach(robot => {
+                        rmdirSync(join(pathToRobots, robot.path), { recursive: true })
+                    })
+                    resolve('deleted user robots')
+                } catch (error) {
+                    reject(error)
+                }
+            })
+        })
+
+        ipcMain.handle('exportRobot', async(e, path) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    const res = await dialog.showSaveDialog(win, { title: 'Export Robot', filters: [{ name: 'Robot File', extensions: ['json'] }] })
+                    if (res.canceled) resolve('canceled')
+                    let outputPath = normalize(res.filePath)
+                    cpSync(robotFilePath, outputPath)
+                    resolve(outputPath)
+                } catch (error) {
+                    reject(error)
                 }
             })
         })
