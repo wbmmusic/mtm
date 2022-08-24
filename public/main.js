@@ -286,7 +286,7 @@ app.on('ready', () => {
                     robots.forEach(robot => {
                         rmdirSync(join(pathToRobots, robot.path), { recursive: true })
                     })
-                    resolve('deleted user robots')
+                    resolve('deleted all user robots')
                 } catch (error) {
                     reject(error)
                 }
