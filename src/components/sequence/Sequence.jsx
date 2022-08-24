@@ -86,6 +86,7 @@ export const Sequence = () => {
   }, [robot]);
 
   //useEffect(() => console.log(actions), [actions]);
+  console.log("Render Sequence");
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -487,7 +488,7 @@ export const Sequence = () => {
         </Box>
       </Stack>
       <Divider />
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={e => console.log(e)}>
+      <DragDropContext onDragEnd={onDragEnd}>
         <TimelineObjects />
         <Timeline />
         <Trash />
