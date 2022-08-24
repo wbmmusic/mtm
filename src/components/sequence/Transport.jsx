@@ -63,14 +63,16 @@ export const Transport = ({ actions }) => {
       if (mark.value === current) {
         let packet = [];
         mark.servos.forEach((servo, idx) => {
-          packet.push(idx + 1);
-          packet.push(servo);
+          if (servo.enabled) {
+            packet.push(idx + 1);
+            packet.push(servo.value);
+          }
         });
         if (packet.length > 0) {
-          console.log("Send", packet);
+          //console.log("Send", packet);
           window.electron.ipcRenderer
             .invoke("sendValue", packet)
-            .then(res => console.log(res))
+            .then()
             .catch(err => console.log(err));
         }
       }
@@ -84,7 +86,7 @@ export const Transport = ({ actions }) => {
 
   useEffect(() => {
     setMarks(makeMarks());
-    console.log("Make Marks");
+    // console.log("Make Marks");
   }, [actions]);
 
   return (

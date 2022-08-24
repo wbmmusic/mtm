@@ -13,41 +13,36 @@ import {
 } from "@mui/material";
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
-import { v4 as uuid } from "uuid";
 import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { EditPositionModal } from "./EditPositionModal";
-import { createPosition, getRobot } from "../../helpers";
+import { v4 as uuid } from "uuid";
+import {
+  createPosition,
+  deletePosition,
+  getRobot,
+  updatePosition,
+} from "../../helpers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { SelectPositionModal } from "./SelectPositionModal";
-
-const delays = [
-  { id: uuid(), content: "1s", type: "delay", value: 10 },
-  { id: uuid(), content: "3s", type: "delay", value: 30 },
-  { id: uuid(), content: "5s", type: "delay", value: 50 },
-  { id: uuid(), content: "10s", type: "delay", value: 100 },
-];
-
-const defaultPositions = [
-  { id: uuid(), content: "p1", type: "move", servos: [1, 1] },
-  { id: uuid(), content: "p2", type: "move", servos: [179, 179] },
-  { id: uuid(), content: "p3", type: "move", servos: [179, 1] },
-  { id: uuid(), content: "p4", type: "move", servos: [1, 179] },
-];
-
-const TIMELINE_ITEMS = [];
+import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal";
+import { delays } from "./Constants";
 
 const defaultPositionModal = { show: false, mode: null, position: null };
 const defaultSelectPositionModal = { show: false };
+const defaultDeletePositionModal = { show: false, position: null };
 
 export const Sequence = () => {
   const { robotPath, sequencePath } = useParams();
   const navigate = useNavigate();
 
-  const [actions, setActions] = useState(TIMELINE_ITEMS);
+  const [actions, setActions] = useState([]);
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
+  const [deletePositionModal, setDeletePositionModal] = useState(
+    defaultDeletePositionModal
+  );
   const [robot, setRobot] = useState(null);
 
   const [selectPositionModal, setSelectPositionModal] = useState(
@@ -62,7 +57,8 @@ export const Sequence = () => {
     let out = [...delays];
     robot.positions.forEach(position => {
       out.push({
-        id: uuid(),
+        id: position.appId,
+        appId: position.appId,
         content: position.name,
         type: "move",
         servos: position.servos,
@@ -89,9 +85,9 @@ export const Sequence = () => {
     if (robot) makeObjects();
   }, [robot]);
 
-  const handleClick = event => {
-    setAnchorEl(event.currentTarget);
-  };
+  //useEffect(() => console.log(actions), [actions]);
+
+  const handleClick = event => setAnchorEl(event.currentTarget);
 
   const handleClose = () => setAnchorEl(null);
 
@@ -120,8 +116,9 @@ export const Sequence = () => {
     <Box height={"100%"}>
       <Typography variant="body2">{itm.content}</Typography>
       <Stack spacing={0.5}>
-        {itm.servos.map(servo => (
+        {itm.servos.map((servo, idx) => (
           <LinearProgress
+            key={"servo" + idx + itm.name}
             color={servo.enabled ? "primary" : "inherit"}
             variant="determinate"
             max={180}
@@ -133,16 +130,18 @@ export const Sequence = () => {
   );
 
   const onDragEnd = res => {
+    console.log(res);
     if (
       res.source.droppableId === "objects" &&
       res.destination.droppableId === "timeline"
     ) {
+      let actionsCpy = JSON.parse(JSON.stringify(actions));
       let objCpy = JSON.parse(
         JSON.stringify(timelineObjects[res.source.index])
       );
-      objCpy.id = uuid();
-      let actionsCpy = JSON.parse(JSON.stringify(actions));
-      actionsCpy.splice(res.destination.index, 0, objCpy);
+
+      const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
+      actionsCpy.splice(res.destination.index, 0, insert);
       setActions(actionsCpy);
       window.electron.send("play", "timeline_add.mp3");
       console.log("Added Item To Timeline");
@@ -190,11 +189,16 @@ export const Sequence = () => {
   const handlePositionModal = async (type, data) => {
     console.log("Position Modal Out", type);
     if (type === "cancel") setPositionModal(defaultPositionModal);
-    if (type === "createPosition") {
+    else if (type === "createPosition") {
       // get positions
       setPositionModal(defaultPositionModal);
       let positions = await createPosition(robotPath, data);
       console.log(positions);
+      setTheRobot();
+    } else if (type === "updatePosition") {
+      await updatePosition(robotPath, data);
+      setPositionModal(defaultPositionModal);
+      setTheRobot();
     }
   };
 
@@ -276,30 +280,36 @@ export const Sequence = () => {
                 p={1}
                 width={"100%"}
                 spacing={0.5}
-                sx={{ border: "1px solid", overflowY: "auto" }}
+                sx={{ border: "1px solid" }}
               >
-                {actions.map((itm, idx) => (
-                  <Draggable
-                    key={"itm" + itm.id}
-                    draggableId={itm.id}
-                    index={idx}
-                  >
-                    {provided2 => {
-                      return (
-                        <Box
-                          component={Paper}
-                          ref={provided2.innerRef}
-                          {...provided2.draggableProps}
-                          {...provided2.dragHandleProps}
-                          p={0.5}
-                          sx={{ border: "1px solid" }}
-                        >
-                          {makeItem(itm)}
-                        </Box>
-                      );
-                    }}
-                  </Draggable>
-                ))}
+                {actions.map((act, idx) => {
+                  let itm = timelineObjects.find(
+                    obj => obj.appId === act.appId
+                  );
+                  itm.id = act.id;
+                  return (
+                    <Draggable
+                      key={"timelineItm" + itm.id}
+                      draggableId={"timelineItm" + itm.id}
+                      index={idx}
+                    >
+                      {provided2 => {
+                        return (
+                          <Box
+                            component={Paper}
+                            ref={provided2.innerRef}
+                            {...provided2.draggableProps}
+                            {...provided2.dragHandleProps}
+                            p={0.5}
+                            sx={{ border: "1px solid" }}
+                          >
+                            {makeItem(itm)}
+                          </Box>
+                        );
+                      }}
+                    </Draggable>
+                  );
+                })}
                 {provided.placeholder}
               </Stack>
             )}
@@ -363,9 +373,9 @@ export const Sequence = () => {
     return true;
   };
 
-  const handleSelectPosition = (type, data) => {
+  const handleSelectPosition = async (type, data) => {
     if (type === "cancel") setSelectPositionModal(defaultSelectPositionModal);
-    if (type === "edit") {
+    else if (type === "edit") {
       console.log("Edit", data);
       setSelectPositionModal(defaultSelectPositionModal);
       setPositionModal({
@@ -373,8 +383,34 @@ export const Sequence = () => {
         mode: "edit",
         position: data,
       });
+    } else if (type === "delete") {
+      setSelectPositionModal(defaultSelectPositionModal);
+      setDeletePositionModal({ show: true, position: data });
     }
   };
+
+  const handleConfirmDelete = async type => {
+    if (type === "cancel") setDeletePositionModal(defaultDeletePositionModal);
+    else if (type === "delete") {
+      try {
+        await deletePosition(robotPath, deletePositionModal.position);
+        setTheRobot();
+      } catch (error) {
+        console.error(error);
+      }
+      setDeletePositionModal(defaultDeletePositionModal);
+    }
+  };
+
+  const makeActionsFromRefs = () => {
+    let out = [];
+    actions.forEach(act =>
+      out.push(timelineObjects.find(obj => obj.appId === act.appId))
+    );
+    return out;
+  };
+
+  // console.log(actions, timelineObjects);
 
   return (
     <Stack
@@ -435,7 +471,7 @@ export const Sequence = () => {
           </Menu>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Button disbaled={!isSavable()} size="small">
+          <Button disbaled={isSavable() ? 0 : 1} size="small">
             Save
           </Button>
         </Box>
@@ -451,14 +487,13 @@ export const Sequence = () => {
         </Box>
       </Stack>
       <Divider />
-      <DragDropContext onDragEnd={onDragEnd}>
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={e => console.log(e)}>
         <TimelineObjects />
-        {/* <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box> */}
         <Timeline />
         <Trash />
       </DragDropContext>
-      <Box height={"100%"} sx={{ overflow: "auto" }} p={1}></Box>
-      <Transport actions={actions} />
+      <Box height={"100%"} p={1}></Box>
+      <Transport actions={makeActionsFromRefs()} />
       {positionModal.mode !== null ? (
         <EditPositionModal
           mode={positionModal.mode}
@@ -471,6 +506,12 @@ export const Sequence = () => {
         <SelectPositionModal
           positions={robot.positions}
           out={handleSelectPosition}
+        />
+      ) : null}
+      {deletePositionModal.show ? (
+        <ConfirmDeletePositionModal
+          position={deletePositionModal.position}
+          out={handleConfirmDelete}
         />
       ) : null}
     </Stack>

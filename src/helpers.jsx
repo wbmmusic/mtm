@@ -52,3 +52,21 @@ export const createPosition = async (path, position) => {
       .catch(err => reject(err));
   });
 };
+
+export const deletePosition = async (path, position) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("deletePosition", path, position)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};
+
+export const updatePosition = async (path, position) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("deletePosition", path, position)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};

@@ -9,12 +9,13 @@ import {
 import React, { useEffect, useState } from "react";
 import { modalStyle } from "../../styles";
 import { Servo } from "./Servo";
+import { v4 as uuid } from "uuid";
 
 const defaultServo = { enabled: false, value: 90 };
 
 export const EditPositionModal = ({ mode, position, robot, out }) => {
   const makePosition = () => {
-    let out = { name: "", servos: [] };
+    let out = { appId: uuid(), name: "", servos: [] };
     robot.servos.forEach(servo => out.servos.push({ ...defaultServo }));
     return out;
   };

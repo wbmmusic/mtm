@@ -300,6 +300,27 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('deletePosition', async(e, path, position) => {
+            return new Promise(async(resolve, reject) => {
+                console.log("Delete Position", position.name)
+                const robotPath = join(pathToRobots, path)
+                const robotFilePath = join(robotPath, 'robot.json')
+
+                if (existsSync(robotFilePath)) {
+                    try {
+                        let tempFile = JSON.parse(readFileSync(robotFilePath))
+                        tempFile.positions = tempFile.positions.filter(pos => pos.name !== position.name)
+                        writeFileSync(robotFilePath, JSON.stringify(tempFile, null, ' '))
+                        let positions = JSON.parse(readFileSync(robotFilePath)).positions
+                        resolve(positions)
+                    } catch (error) {
+                        reject(error)
+                    }
+                } else reject('Cand find robot file ' + path)
+
+            })
+        })
+
         createWindow()
     })
     ///////////////////////
