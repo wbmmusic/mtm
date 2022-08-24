@@ -18,6 +18,12 @@ export const Transport = ({ actions }) => {
   const makeMarks = () => {
     let out = [];
     let curTime = 0;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Need to handle two of same position at same time...
+    // perhaps double name and remove one..
+    // Causes not unique key error from slider
+
     actions.forEach(act => {
       if (act.type === "delay") {
         //out.push({ value: curTime, label: "" });
@@ -43,6 +49,8 @@ export const Transport = ({ actions }) => {
     });
     return dur;
   };
+
+  console.log(actions);
 
   const stop = () => {
     clearInterval(intervalId);

@@ -32,26 +32,31 @@ import { delays } from "./Constants";
 const defaultPositionModal = { show: false, mode: null, position: null };
 const defaultSelectPositionModal = { show: false };
 const defaultDeletePositionModal = { show: false, position: null };
+const defaultSequence = { appId: uuid(), name: "", actions: [] };
 
 export const Sequence = () => {
-  const { robotPath, sequencePath } = useParams();
   const navigate = useNavigate();
+  const { robotPath, sequencePath } = useParams();
 
-  const [actions, setActions] = useState([]);
+  const [robot, setRobot] = useState(null);
+  const [timelineObjects, setTimelineObjects] = useState([]);
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [deletePositionModal, setDeletePositionModal] = useState(
     defaultDeletePositionModal
   );
-  const [robot, setRobot] = useState(null);
-
   const [selectPositionModal, setSelectPositionModal] = useState(
     defaultSelectPositionModal
   );
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const open = Boolean(anchorEl);
 
-  const [timelineObjects, setTimelineObjects] = useState([]);
+  const makeSequence = () => {
+    if (sequencePath === "newsequenceplaceholder") return defaultSequence;
+  };
+
+  const [sequence, setSequence] = useState(makeSequence());
 
   const makeObjects = () => {
     let out = [...delays];
@@ -85,11 +90,25 @@ export const Sequence = () => {
     if (robot) makeObjects();
   }, [robot]);
 
-  //useEffect(() => console.log(actions), [actions]);
+  useEffect(() => {
+    console.log(sequence);
+    console.log(timelineObjects);
+    console.log(makeOutput());
+  }, [sequence]);
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
   const handleClose = () => setAnchorEl(null);
+
+  const makeOutput = () => {
+    // Strips unwanted keys from sequence.actions[]
+    let tempSeq = JSON.parse(JSON.stringify(sequence));
+    tempSeq.actions.forEach(act => {
+      delete act.type;
+      delete act.id;
+    });
+    return tempSeq;
+  };
 
   const DelayItem = ({ itm }) => (
     <Stack height={"40px"}>
@@ -139,11 +158,11 @@ export const Sequence = () => {
         JSON.stringify(timelineObjects[res.source.index])
       );
 
-      let actionsCopy = JSON.parse(JSON.stringify(actions));
+      let actionsCopy = JSON.parse(JSON.stringify(sequence.actions));
       const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
       actionsCopy.splice(res.destination.index, 0, insert);
 
-      setActions(actionsCopy);
+      setSequence(old => ({ ...old, actions: actionsCopy }));
 
       window.electron.send("play", "timeline_add.mp3");
       // console.log("Added Item To Timeline");
@@ -151,17 +170,20 @@ export const Sequence = () => {
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
     ) {
-      let actionsCpy = JSON.parse(JSON.stringify(actions));
+      let actionsCpy = JSON.parse(JSON.stringify(sequence.actions));
       let cutAction = actionsCpy.splice(res.source.index, 1)[0];
       actionsCpy.splice(res.destination.index, 0, cutAction);
-      setActions(actionsCpy);
+      setSequence(old => ({ ...old, actions: actionsCpy }));
       window.electron.send("play", "timeline_move.mp3");
       // console.log("Moved Item IN Timeline");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "trash"
     ) {
-      setActions(old => old.filter((x, idx) => idx !== res.source.index));
+      setSequence(old => ({
+        ...old,
+        actions: old.actions.filter((x, idx) => idx !== res.source.index),
+      }));
       window.electron.send("play", "trash.mp3");
       // console.log("TRASHED");
     }
@@ -276,7 +298,7 @@ export const Sequence = () => {
                 spacing={0.5}
                 sx={{ border: "1px solid" }}
               >
-                {actions.map((act, idx) => {
+                {sequence.actions.map((act, idx) => {
                   let itm = JSON.parse(
                     JSON.stringify(
                       timelineObjects.find(obj => obj.appId === act.appId)
@@ -285,8 +307,8 @@ export const Sequence = () => {
                   itm.id = act.id;
                   return (
                     <Draggable
-                      key={"timelineItm" + itm.id}
-                      draggableId={"timelineItm" + itm.id}
+                      key={"timelineItm" + act.id}
+                      draggableId={"timelineItmID" + act.id}
                       index={idx}
                     >
                       {provided2 => {
@@ -400,7 +422,7 @@ export const Sequence = () => {
 
   const makeActionsFromRefs = () => {
     let out = [];
-    actions.forEach(act =>
+    sequence.actions.forEach(act =>
       out.push(timelineObjects.find(obj => obj.appId === act.appId))
     );
     return out;
@@ -447,6 +469,10 @@ export const Sequence = () => {
             label="Sequence Name"
             size="small"
             variant="standard"
+            value={sequence.name}
+            onChange={e =>
+              setSequence(old => ({ ...old, name: e.target.value }))
+            }
           />
         </Box>
         <Box>

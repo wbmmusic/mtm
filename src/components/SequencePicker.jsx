@@ -14,7 +14,8 @@ const SequenceCard = ({ sequence }) => {
 
 export const SequencePicker = ({ robot }) => {
   const navigate = useNavigate();
-  const newSequence = () => navigate(`/sequence/${robot.path}/new`);
+  const newSequence = () =>
+    navigate(`/sequence/${robot.path}/newsequenceplaceholder`);
 
   const NewSequence = () => (
     <Box component={Paper} p={1} elevation={4}>
