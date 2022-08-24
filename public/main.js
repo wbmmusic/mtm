@@ -321,6 +321,29 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('updatePosition', async(e, path, position) => {
+            return new Promise(async(resolve, reject) => {
+                console.log("Update Position", position.name)
+                const robotPath = join(pathToRobots, path)
+                const robotFilePath = join(robotPath, 'robot.json')
+
+                if (existsSync(robotFilePath)) {
+                    try {
+                        let tempFile = JSON.parse(readFileSync(robotFilePath))
+                        const positionIdx = tempFile.positions.findIndex(pos => pos.appId === position.appId)
+                        if (positionIdx < 0) reject('Didnt find position with appID' + position.appId)
+                        tempFile.positions[positionIdx] = position
+                        writeFileSync(robotFilePath, JSON.stringify(tempFile, null, ' '))
+                        let positions = JSON.parse(readFileSync(robotFilePath)).positions
+                        resolve(positions)
+                    } catch (error) {
+                        reject(error)
+                    }
+                } else reject('Cand find robot file ' + path)
+
+            })
+        })
+
         createWindow()
     })
     ///////////////////////

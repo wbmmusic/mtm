@@ -57,7 +57,7 @@ export const Sequence = () => {
     let out = [...delays];
     robot.positions.forEach(position => {
       out.push({
-        id: position.appId,
+        id: uuid(),
         appId: position.appId,
         content: position.name,
         type: "move",
@@ -86,7 +86,6 @@ export const Sequence = () => {
   }, [robot]);
 
   //useEffect(() => console.log(actions), [actions]);
-  console.log("Render Sequence");
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -131,21 +130,23 @@ export const Sequence = () => {
   );
 
   const onDragEnd = res => {
-    console.log(res);
+    // console.log(res);
     if (
       res.source.droppableId === "objects" &&
       res.destination.droppableId === "timeline"
     ) {
-      let actionsCpy = JSON.parse(JSON.stringify(actions));
       let objCpy = JSON.parse(
         JSON.stringify(timelineObjects[res.source.index])
       );
 
+      let actionsCopy = JSON.parse(JSON.stringify(actions));
       const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
-      actionsCpy.splice(res.destination.index, 0, insert);
-      setActions(actionsCpy);
+      actionsCopy.splice(res.destination.index, 0, insert);
+
+      setActions(actionsCopy);
+
       window.electron.send("play", "timeline_add.mp3");
-      console.log("Added Item To Timeline");
+      // console.log("Added Item To Timeline");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
@@ -155,16 +156,18 @@ export const Sequence = () => {
       actionsCpy.splice(res.destination.index, 0, cutAction);
       setActions(actionsCpy);
       window.electron.send("play", "timeline_move.mp3");
-      console.log("Moved Item IN Timeline");
+      // console.log("Moved Item IN Timeline");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "trash"
     ) {
-      console.log(res);
       setActions(old => old.filter((x, idx) => idx !== res.source.index));
       window.electron.send("play", "trash.mp3");
-      console.log("TRASHED");
+      // console.log("TRASHED");
     }
+    // console.log("END", actions, timelineObjects);
+    // console.log("Actions", actions);
+    // console.log("Objects", timelineObjects);
   };
 
   const makeItem = itm => {
@@ -179,22 +182,12 @@ export const Sequence = () => {
     return null;
   };
 
-  const handleAddPosition = () => {
-    setPositionModal({
-      show: true,
-      mode: "new",
-      position: makeDefaultPosition(),
-    });
-  };
-
   const handlePositionModal = async (type, data) => {
-    console.log("Position Modal Out", type);
+    // console.log("Position Modal Out", type);
     if (type === "cancel") setPositionModal(defaultPositionModal);
     else if (type === "createPosition") {
-      // get positions
       setPositionModal(defaultPositionModal);
-      let positions = await createPosition(robotPath, data);
-      console.log(positions);
+      await createPosition(robotPath, data);
       setTheRobot();
     } else if (type === "updatePosition") {
       await updatePosition(robotPath, data);
@@ -284,8 +277,10 @@ export const Sequence = () => {
                 sx={{ border: "1px solid" }}
               >
                 {actions.map((act, idx) => {
-                  let itm = timelineObjects.find(
-                    obj => obj.appId === act.appId
+                  let itm = JSON.parse(
+                    JSON.stringify(
+                      timelineObjects.find(obj => obj.appId === act.appId)
+                    )
                   );
                   itm.id = act.id;
                   return (
@@ -377,7 +372,7 @@ export const Sequence = () => {
   const handleSelectPosition = async (type, data) => {
     if (type === "cancel") setSelectPositionModal(defaultSelectPositionModal);
     else if (type === "edit") {
-      console.log("Edit", data);
+      // console.log("Edit", data);
       setSelectPositionModal(defaultSelectPositionModal);
       setPositionModal({
         show: true,
@@ -410,6 +405,31 @@ export const Sequence = () => {
     );
     return out;
   };
+
+  const Modals = () => (
+    <>
+      {positionModal.mode !== null ? (
+        <EditPositionModal
+          mode={positionModal.mode}
+          position={positionModal.position}
+          robot={robot}
+          out={handlePositionModal}
+        />
+      ) : null}
+      {selectPositionModal.show ? (
+        <SelectPositionModal
+          positions={robot.positions}
+          out={handleSelectPosition}
+        />
+      ) : null}
+      {deletePositionModal.show ? (
+        <ConfirmDeletePositionModal
+          position={deletePositionModal.position}
+          out={handleConfirmDelete}
+        />
+      ) : null}
+    </>
+  );
 
   // console.log(actions, timelineObjects);
 
@@ -453,7 +473,11 @@ export const Sequence = () => {
             <MenuItem
               onClick={() => {
                 handleClose();
-                handleAddPosition();
+                setPositionModal({
+                  show: true,
+                  mode: "new",
+                  position: makeDefaultPosition(),
+                });
               }}
             >
               New Position
@@ -495,26 +519,7 @@ export const Sequence = () => {
       </DragDropContext>
       <Box height={"100%"} p={1}></Box>
       <Transport actions={makeActionsFromRefs()} />
-      {positionModal.mode !== null ? (
-        <EditPositionModal
-          mode={positionModal.mode}
-          position={positionModal.position}
-          robot={robot}
-          out={handlePositionModal}
-        />
-      ) : null}
-      {selectPositionModal.show ? (
-        <SelectPositionModal
-          positions={robot.positions}
-          out={handleSelectPosition}
-        />
-      ) : null}
-      {deletePositionModal.show ? (
-        <ConfirmDeletePositionModal
-          position={deletePositionModal.position}
-          out={handleConfirmDelete}
-        />
-      ) : null}
+      <Modals />
     </Stack>
   );
 };

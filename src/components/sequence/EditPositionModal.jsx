@@ -30,8 +30,6 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
     }
   }, []);
 
-  const handleCreatePosition = () => out("createPosition", pos);
-
   const makeTitle = () => {
     if (mode === "new") return "New";
     if (mode === "edit") return "Edit";
@@ -55,14 +53,18 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
         <Button
           size="small"
           disabled={!isCreatable()}
-          onClick={handleCreatePosition}
+          onClick={() => out("createPosition", pos)}
         >
           Create
         </Button>
       );
     } else if (mode === "edit") {
       return (
-        <Button size="small" disabled={!isSavable()}>
+        <Button
+          size="small"
+          disabled={!isSavable()}
+          onClick={() => out("updatePosition", pos)}
+        >
           Save
         </Button>
       );

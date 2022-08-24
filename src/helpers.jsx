@@ -62,10 +62,10 @@ export const deletePosition = async (path, position) => {
   });
 };
 
-export const updatePosition = async (path, position) => {
+export const updatePosition = async (robotPath, position) => {
   return new Promise(async (resolve, reject) => {
     window.electron.ipcRenderer
-      .invoke("deletePosition", path, position)
+      .invoke("updatePosition", robotPath, position)
       .then(res => resolve(res))
       .catch(err => reject(err));
   });
