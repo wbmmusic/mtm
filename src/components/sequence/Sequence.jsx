@@ -56,14 +56,6 @@ export const Sequence = () => {
 
   const open = Boolean(anchorEl);
 
-  const getObject = id => {
-    const objIdx = timelineObjects.findIndex(obj => obj.appId === id);
-    if (objIdx < 1) throw new Error("Didnt find object");
-    let objCpy = JSON.parse(JSON.stringify(timelineObjects[objIdx]));
-    const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
-    return insert;
-  };
-
   const initSequence = () => {
     if (sequenceId === "newsequenceplaceholder") return defaultSequence;
   };
