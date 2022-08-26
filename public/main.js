@@ -409,6 +409,7 @@ app.on('ready', () => {
             })
         })
 
+
         ipcMain.handle('updateSequence', async(e, path, sequence) => {
             return new Promise(async(resolve, reject) => {
                 try {
