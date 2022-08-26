@@ -31,16 +31,21 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { SelectPositionModal } from "./SelectPositionModal";
 import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal";
 import { delays } from "./Constants";
+import { ConfirmDeleteSequenceModal } from "./ConfirmDeleteSequenceModal";
 
 const defaultPositionModal = { show: false, mode: null, position: null };
 const defaultSelectPositionModal = { show: false };
 const defaultDeletePositionModal = { show: false, position: null };
 const defaultSequence = { appId: uuid(), name: "", actions: [] };
+const defaultConfirmDeleteSequenceModal = { show: false, name: null };
 
 export const Sequence = () => {
   const navigate = useNavigate();
   const { robotPath, sequenceId } = useParams();
 
+  const [confirmDeleteSequenceModal, setConfirmDeleteSequenceModal] = useState(
+    defaultConfirmDeleteSequenceModal
+  );
   const [robot, setRobot] = useState(null);
   const [timelineObjects, setTimelineObjects] = useState([]);
   const [trash, setTrash] = useState([]);
@@ -483,6 +488,12 @@ export const Sequence = () => {
     return out;
   };
 
+  const handleConfirmDeleteSequence = data => {
+    if (data === "cancel") {
+      setConfirmDeleteSequenceModal(defaultConfirmDeleteSequenceModal);
+    } else if (data === "delete") sequenceDelete();
+  };
+
   const Modals = () => (
     <>
       {positionModal.mode !== null ? (
@@ -503,6 +514,12 @@ export const Sequence = () => {
         <ConfirmDeletePositionModal
           position={deletePositionModal.position}
           out={handleConfirmDelete}
+        />
+      ) : null}
+      {confirmDeleteSequenceModal.show ? (
+        <ConfirmDeleteSequenceModal
+          name={confirmDeleteSequenceModal.name}
+          out={handleConfirmDeleteSequence}
         />
       ) : null}
     </>
@@ -582,8 +599,19 @@ export const Sequence = () => {
           </Button>
         </Box>
         {sequenceId !== "newsequenceplaceholder" ? (
+          // if nit read only //////////////////////////////////////////////////////////////////
           <Box>
-            <Button size="small" color="error" onClick={sequenceDelete}>
+            <Button
+              size="small"
+              color="error"
+              onClick={() => {
+                console.log(sequence.name);
+                setConfirmDeleteSequenceModal({
+                  show: true,
+                  name: sequence.name,
+                });
+              }}
+            >
               Delete
             </Button>
           </Box>
