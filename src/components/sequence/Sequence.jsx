@@ -24,6 +24,7 @@ import {
   getRobot,
   saveSequence,
   updatePosition,
+  updateSequence,
 } from "../../helpers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -45,6 +46,7 @@ export const Sequence = () => {
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [ogSequense, setOgSequense] = useState(null);
   const [deletePositionModal, setDeletePositionModal] = useState(
     defaultDeletePositionModal
   );
@@ -87,6 +89,7 @@ export const Sequence = () => {
 
     seq.actions = out;
     setSequence(seq);
+    setOgSequense(JSON.parse(JSON.stringify(seq)));
   };
 
   const makeObjects = () => {
@@ -147,14 +150,20 @@ export const Sequence = () => {
   };
 
   const sequenceSave = () => {
-    saveSequence(robotPath, makeOutput())
-      .then(res => console.log(res))
-      .catch(err => console.log(err));
+    if (sequenceId !== "newsequenceplaceholder") {
+      updateSequence(robotPath, makeOutput())
+        .then(res => setTheRobot())
+        .catch(err => console.log(err));
+    } else {
+      saveSequence(robotPath, makeOutput())
+        .then(res => navigate(`/sequence/${robotPath}/${sequence.appId}`))
+        .catch(err => console.log(err));
+    }
   };
 
   const sequenceDelete = () => {
     deleteSequence(robotPath, makeOutput())
-      .then(res => navigate(-1))
+      .then(res => navigate("/robot/" + robotPath))
       .catch(err => console.log(err));
   };
 
@@ -436,6 +445,12 @@ export const Sequence = () => {
   };
 
   const isSavable = () => {
+    if (sequence.name === "") return false;
+    if (sequenceId !== "newsequenceplaceholder") {
+      if (JSON.stringify(sequence) === JSON.stringify(ogSequense)) {
+        return false;
+      }
+    }
     return true;
   };
 
@@ -570,19 +585,18 @@ export const Sequence = () => {
           </Menu>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Button
-            disbaled={isSavable() ? 0 : 1}
-            size="small"
-            onClick={sequenceSave}
-          >
+          <Button disabled={!isSavable()} size="small" onClick={sequenceSave}>
             Save
           </Button>
         </Box>
-        <Box>
-          <Button size="small" color="error" onClick={sequenceDelete}>
-            Delete
-          </Button>
-        </Box>
+        {sequenceId !== "newsequenceplaceholder" ? (
+          <Box>
+            <Button size="small" color="error" onClick={sequenceDelete}>
+              Delete
+            </Button>
+          </Box>
+        ) : null}
+
         <Box>
           <Button
             startIcon={<KeyboardReturnIcon />}

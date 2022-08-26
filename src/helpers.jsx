@@ -88,3 +88,12 @@ export const deleteSequence = async (robotPath, sequence) => {
       .catch(err => reject(err));
   });
 };
+
+export const updateSequence = async (robotPath, sequence) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("updateSequence", robotPath, sequence)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};

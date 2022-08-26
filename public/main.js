@@ -409,6 +409,25 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('updateSequence', async(e, path, sequence) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    console.log("Update Sequence", sequence.appId)
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    let tempRobot = JSON.parse(readFileSync(robotFilePath))
+                    let seqId = tempRobot.sequences.findIndex(s => s.appId === sequence.appId)
+                    if (seqId < 0) throw new Error('Didnt Find Sequence')
+                    tempRobot.sequences.splice(seqId, 1, sequence)
+                    writeFileSync(robotFilePath, JSON.stringify(tempRobot, null, ' '))
+                    resolve("Updated Sequence " + sequence.name)
+                } catch (error) {
+                    reject(error)
+                }
+
+            })
+        })
+
         createWindow()
     })
     ///////////////////////
