@@ -20,7 +20,9 @@ import { v4 as uuid } from "uuid";
 import {
   createPosition,
   deletePosition,
+  deleteSequence,
   getRobot,
+  saveSequence,
   updatePosition,
 } from "../../helpers";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -36,7 +38,7 @@ const defaultSequence = { appId: uuid(), name: "", actions: [] };
 
 export const Sequence = () => {
   const navigate = useNavigate();
-  const { robotPath, sequencePath } = useParams();
+  const { robotPath, sequenceId } = useParams();
 
   const [robot, setRobot] = useState(null);
   const [timelineObjects, setTimelineObjects] = useState([]);
@@ -52,11 +54,40 @@ export const Sequence = () => {
 
   const open = Boolean(anchorEl);
 
-  const makeSequence = () => {
-    if (sequencePath === "newsequenceplaceholder") return defaultSequence;
+  const getObject = id => {
+    const objIdx = timelineObjects.findIndex(obj => obj.appId === id);
+    if (objIdx < 1) throw new Error("Didnt find object");
+    let objCpy = JSON.parse(JSON.stringify(timelineObjects[objIdx]));
+    const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
+    return insert;
   };
 
-  const [sequence, setSequence] = useState(makeSequence());
+  const initSequence = () => {
+    if (sequenceId === "newsequenceplaceholder") return defaultSequence;
+  };
+
+  const [sequence, setSequence] = useState(initSequence());
+
+  const loadSequence = () => {
+    if (!robot) return;
+    console.log("Load Sequence", sequenceId);
+    let seq = JSON.parse(
+      JSON.stringify(
+        robot.sequences.find(
+          se => se.appId.toString() === sequenceId.toString()
+        )
+      )
+    );
+    if (!seq) throw new Error("Didnt find sequence");
+    let out = [];
+    seq.actions.forEach(act => {
+      const insert = { type: act.type, appId: act.appId, id: uuid() };
+      out.push(insert);
+    });
+
+    seq.actions = out;
+    setSequence(seq);
+  };
 
   const makeObjects = () => {
     let out = [...delays];
@@ -87,14 +118,19 @@ export const Sequence = () => {
   }, []);
 
   useEffect(() => {
-    if (robot) makeObjects();
+    if (robot) {
+      makeObjects();
+      if (sequenceId !== "newsequenceplaceholder") loadSequence();
+    }
   }, [robot]);
 
   useEffect(() => {
-    console.log(sequence);
-    console.log(timelineObjects);
-    console.log(makeOutput());
+    //console.log(sequence);
+    //console.log(timelineObjects);
+    //console.log(makeOutput());
   }, [sequence]);
+
+  if (!sequence) return;
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -108,6 +144,18 @@ export const Sequence = () => {
       delete act.id;
     });
     return tempSeq;
+  };
+
+  const sequenceSave = () => {
+    saveSequence(robotPath, makeOutput())
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  };
+
+  const sequenceDelete = () => {
+    deleteSequence(robotPath, makeOutput())
+      .then(res => navigate(-1))
+      .catch(err => console.log(err));
   };
 
   const DelayItem = ({ itm }) => (
@@ -522,8 +570,17 @@ export const Sequence = () => {
           </Menu>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Button disbaled={isSavable() ? 0 : 1} size="small">
+          <Button
+            disbaled={isSavable() ? 0 : 1}
+            size="small"
+            onClick={sequenceSave}
+          >
             Save
+          </Button>
+        </Box>
+        <Box>
+          <Button size="small" color="error" onClick={sequenceDelete}>
+            Delete
           </Button>
         </Box>
         <Box>

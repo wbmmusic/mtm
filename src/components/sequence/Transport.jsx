@@ -50,7 +50,7 @@ export const Transport = ({ actions }) => {
     return dur;
   };
 
-  console.log(actions);
+  //console.log(actions);
 
   const stop = () => {
     clearInterval(intervalId);

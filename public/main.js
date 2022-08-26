@@ -374,6 +374,41 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('saveSequence', async(e, path, sequence) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    console.log("New Sequence", sequence.name)
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    let tempRobot = JSON.parse(readFileSync(robotFilePath))
+                    tempRobot.sequences.push(sequence)
+                    writeFileSync(robotFilePath, JSON.stringify(tempRobot, null, ' '))
+                    resolve("Saved New Sequence " + sequence.name)
+                } catch (error) {
+                    reject(error)
+                }
+            })
+        })
+
+        ipcMain.handle('deleteSequence', async(e, path, sequence) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    console.log("Delete Sequence", sequence.appId)
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    let tempRobot = JSON.parse(readFileSync(robotFilePath))
+                    let seqId = tempRobot.sequences.findIndex(s => s.appId === sequence.appId)
+                    if (seqId < 0) throw new Error('Didnt Find Sequence')
+                    tempRobot.sequences.splice(seqId, 1)
+                    writeFileSync(robotFilePath, JSON.stringify(tempRobot, null, ' '))
+                    resolve("Deleted Sequence " + sequence.name)
+                } catch (error) {
+                    reject(error)
+                }
+
+            })
+        })
+
         createWindow()
     })
     ///////////////////////

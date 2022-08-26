@@ -164,7 +164,7 @@ export default function Top() {
         <Routes>
           <Route path="robot/:robotPath" element={<Robot />} />
           <Route
-            path="sequence/:robotPath/:sequencePath"
+            path="sequence/:robotPath/:sequenceId"
             element={<Sequence />}
           />
           <Route path="*" element={<Home />} />

@@ -70,3 +70,21 @@ export const updatePosition = async (robotPath, position) => {
       .catch(err => reject(err));
   });
 };
+
+export const saveSequence = async (robotPath, sequence) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("saveSequence", robotPath, sequence)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};
+
+export const deleteSequence = async (robotPath, sequence) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("deleteSequence", robotPath, sequence)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};
