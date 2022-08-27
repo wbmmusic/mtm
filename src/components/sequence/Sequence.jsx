@@ -75,7 +75,7 @@ export const Sequence = () => {
   };
 
   const makeObjects = () => {
-    console.log("MakeObjects");
+    // console.log("MakeObjects");
     let out = [...delays];
     if (positions) {
       positions.forEach(position => {
@@ -95,7 +95,12 @@ export const Sequence = () => {
   const loadSequence = () => {
     console.log("Load Sequence", sequenceId);
     getSequence(robotPath, sequenceId)
-      .then(res => setTheSequences(res))
+      .then(res => {
+        let tempSeq = JSON.parse(JSON.stringify(res));
+        // Give each a unique id
+        tempSeq.actions.forEach(act => (act.id = uuid()));
+        setTheSequences(tempSeq);
+      })
       .catch(err => console.log(err));
   };
 
@@ -104,24 +109,15 @@ export const Sequence = () => {
     makeObjects();
 
     getPositions(robotPath)
-      .then(res => {
-        setPositions(res);
-        console.log("Set Positions", res);
-      })
-      .catch(err => {
-        console.log("ERROR");
-        console.error(err);
-      });
+      .then(res => setPositions(res))
+      .catch(err => console.error(err));
 
     if (sequenceId !== "newsequenceplaceholder") {
       loadSequence();
     }
   }, []);
 
-  useEffect(() => {
-    makeObjects();
-    console.log("POSITIONS EFFECT", positions);
-  }, [positions]);
+  useEffect(() => makeObjects(), [positions]);
 
   const haveEverything = () => {
     if (sequence) {
@@ -137,8 +133,6 @@ export const Sequence = () => {
   if (!positions || !sequence || !timelineObjects || !haveEverything()) {
     console.log("Skipping render");
     return;
-  } else {
-    console.log("Rendering");
   }
 
   const handleClick = event => setAnchorEl(event.currentTarget);
@@ -158,7 +152,7 @@ export const Sequence = () => {
   const sequenceSave = () => {
     if (sequenceId !== "newsequenceplaceholder") {
       updateSequence(robotPath, makeOutput())
-        .then(res => setTheSequences(res))
+        .then(res => loadSequence())
         .catch(err => console.log(err));
     } else {
       saveSequence(robotPath, makeOutput())
@@ -346,7 +340,6 @@ export const Sequence = () => {
   };
 
   const Timeline = () => {
-    console.log("XXX", sequence.actions);
     return (
       <Box p={1}>
         <Box width={"100%"} component={Paper} elevation={4}>
@@ -535,7 +528,7 @@ export const Sequence = () => {
     </>
   );
 
-  // console.log(actions, timelineObjects);
+  // console.log(sequence.actions, timelineObjects);
 
   return (
     <Stack
