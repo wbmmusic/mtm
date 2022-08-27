@@ -97,3 +97,21 @@ export const updateSequence = async (robotPath, sequence) => {
       .catch(err => reject(err));
   });
 };
+
+export const getSequence = async (robotPath, sequenceID) => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("getSequence", robotPath, sequenceID)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};
+
+export const getServos = async robotPath => {
+  return new Promise(async (resolve, reject) => {
+    window.electron.ipcRenderer
+      .invoke("getServos", robotPath)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  });
+};

@@ -374,6 +374,20 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle("getPositions", async(e, path) => {
+            return new Promise((resolve, reject) => {
+                console.log("Get Positions", path)
+                const robotPath = join(pathToRobots, path)
+                const robotFilePath = join(robotPath, 'robot.json')
+                try {
+                    let positions = JSON.parse(readFileSync(robotFilePath)).positions
+                    resolve(positions)
+                } catch (error) {
+                    reject(error)
+                }
+            })
+        })
+
         ipcMain.handle('saveSequence', async(e, path, sequence) => {
             return new Promise(async(resolve, reject) => {
                 try {
@@ -401,14 +415,14 @@ app.on('ready', () => {
                     if (seqId < 0) throw new Error('Didnt Find Sequence')
                     tempRobot.sequences.splice(seqId, 1)
                     writeFileSync(robotFilePath, JSON.stringify(tempRobot, null, ' '))
-                    resolve("Deleted Sequence " + sequence.name)
+                    let sequences = JSON.parse(readFileSync(robotFilePath)).sequences
+                    resolve(sequences)
                 } catch (error) {
                     reject(error)
                 }
 
             })
         })
-
 
         ipcMain.handle('updateSequence', async(e, path, sequence) => {
             return new Promise(async(resolve, reject) => {
@@ -417,15 +431,47 @@ app.on('ready', () => {
                     const robotPath = join(pathToRobots, path)
                     const robotFilePath = join(robotPath, 'robot.json')
                     let tempRobot = JSON.parse(readFileSync(robotFilePath))
-                    let seqId = tempRobot.sequences.findIndex(s => s.appId === sequence.appId)
-                    if (seqId < 0) throw new Error('Didnt Find Sequence')
-                    tempRobot.sequences.splice(seqId, 1, sequence)
+                    let seqIdx = tempRobot.sequences.findIndex(s => s.appId === sequence.appId)
+                    if (seqIdx < 0) throw new Error('Didnt Find Sequence')
+                    tempRobot.sequences.splice(seqIdx, 1, sequence)
                     writeFileSync(robotFilePath, JSON.stringify(tempRobot, null, ' '))
-                    resolve("Updated Sequence " + sequence.name)
+                    const sequences = JSON.parse(readFileSync(robotFilePath)).sequences
+                    resolve(sequences)
                 } catch (error) {
                     reject(error)
                 }
 
+            })
+        })
+
+        ipcMain.handle('getSequence', async(e, path, sequenceID) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    console.log("Get Sequence", path, sequenceID)
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    let tempSequences = JSON.parse(readFileSync(robotFilePath)).sequences
+                    let seqIdx = tempSequences.findIndex(s => s.appId === sequenceID)
+                    if (seqIdx < 0) throw new Error('Didnt Find Sequence')
+                    resolve(tempSequences[seqIdx])
+                } catch (error) {
+                    reject(error)
+                }
+
+            })
+        })
+
+        ipcMain.handle('getServos', async(e, path) => {
+            return new Promise(async(resolve, reject) => {
+                try {
+                    console.log("Get Servos Sequence", path)
+                    const robotPath = join(pathToRobots, path)
+                    const robotFilePath = join(robotPath, 'robot.json')
+                    const bot = JSON.parse(readFileSync(robotFilePath))
+                    resolve(bot.servos)
+                } catch (error) {
+                    reject(error)
+                }
             })
         })
 

@@ -21,7 +21,8 @@ import {
   createPosition,
   deletePosition,
   deleteSequence,
-  getRobot,
+  getPositions,
+  getSequence,
   saveSequence,
   updatePosition,
   updateSequence,
@@ -46,8 +47,8 @@ export const Sequence = () => {
   const [confirmDeleteSequenceModal, setConfirmDeleteSequenceModal] = useState(
     defaultConfirmDeleteSequenceModal
   );
-  const [robot, setRobot] = useState(null);
-  const [timelineObjects, setTimelineObjects] = useState([]);
+  const [timelineObjects, setTimelineObjects] = useState(null);
+  const [positions, setPositions] = useState(null);
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -63,74 +64,82 @@ export const Sequence = () => {
 
   const initSequence = () => {
     if (sequenceId === "newsequenceplaceholder") return defaultSequence;
+    else return null;
   };
 
   const [sequence, setSequence] = useState(initSequence());
 
-  const loadSequence = () => {
-    if (!robot) return;
-    console.log("Load Sequence", sequenceId);
-    let seq = JSON.parse(
-      JSON.stringify(
-        robot.sequences.find(
-          se => se.appId.toString() === sequenceId.toString()
-        )
-      )
-    );
-    if (!seq) throw new Error("Didnt find sequence");
-    let out = [];
-    seq.actions.forEach(act => {
-      const insert = { type: act.type, appId: act.appId, id: uuid() };
-      out.push(insert);
-    });
-
-    seq.actions = out;
-    setSequence(seq);
+  const setTheSequences = seq => {
+    setSequence(JSON.parse(JSON.stringify(seq)));
     setOgSequense(JSON.parse(JSON.stringify(seq)));
   };
 
   const makeObjects = () => {
+    console.log("MakeObjects");
     let out = [...delays];
-    robot.positions.forEach(position => {
-      out.push({
-        id: uuid(),
-        appId: position.appId,
-        content: position.name,
-        type: "move",
-        servos: position.servos,
+    if (positions) {
+      positions.forEach(position => {
+        out.push({
+          id: uuid(),
+          appId: position.appId,
+          content: position.name,
+          type: "move",
+          servos: position.servos,
+        });
       });
-    });
+    }
+
     setTimelineObjects(out);
   };
 
-  const setTheRobot = async () => {
-    try {
-      const theRobot = await getRobot(robotPath);
-      setRobot(theRobot);
-    } catch (error) {
-      console.error(error);
-    }
+  const loadSequence = () => {
+    console.log("Load Sequence", sequenceId);
+    getSequence(robotPath, sequenceId)
+      .then(res => setTheSequences(res))
+      .catch(err => console.log(err));
   };
 
   useEffect(() => {
     window.electron.send("play", "sequence.mp3");
-    setTheRobot();
+    makeObjects();
+
+    getPositions(robotPath)
+      .then(res => {
+        setPositions(res);
+        console.log("Set Positions", res);
+      })
+      .catch(err => {
+        console.log("ERROR");
+        console.error(err);
+      });
+
+    if (sequenceId !== "newsequenceplaceholder") {
+      loadSequence();
+    }
   }, []);
 
   useEffect(() => {
-    if (robot) {
-      makeObjects();
-      if (sequenceId !== "newsequenceplaceholder") loadSequence();
+    makeObjects();
+    console.log("POSITIONS EFFECT", positions);
+  }, [positions]);
+
+  const haveEverything = () => {
+    if (sequence) {
+      let out = true;
+      sequence.actions.forEach(act => {
+        const idx = timelineObjects.findIndex(obj => obj.appId === act.appId);
+        if (idx < 0) out = false;
+      });
+      return out;
     }
-  }, [robot]);
+  };
 
-  useEffect(() => {
-    //console.log(sequence);
-    //console.log(timelineObjects);
-    //console.log(makeOutput());
-  }, [sequence]);
-
-  if (!sequence) return;
+  if (!positions || !sequence || !timelineObjects || !haveEverything()) {
+    console.log("Skipping render");
+    return;
+  } else {
+    console.log("Rendering");
+  }
 
   const handleClick = event => setAnchorEl(event.currentTarget);
 
@@ -149,7 +158,7 @@ export const Sequence = () => {
   const sequenceSave = () => {
     if (sequenceId !== "newsequenceplaceholder") {
       updateSequence(robotPath, makeOutput())
-        .then(res => setTheRobot())
+        .then(res => setTheSequences(res))
         .catch(err => console.log(err));
     } else {
       saveSequence(robotPath, makeOutput())
@@ -258,17 +267,19 @@ export const Sequence = () => {
     return null;
   };
 
-  const handlePositionModal = async (type, data) => {
+  const handlePositionModal = (type, data) => {
     // console.log("Position Modal Out", type);
     if (type === "cancel") setPositionModal(defaultPositionModal);
     else if (type === "createPosition") {
       setPositionModal(defaultPositionModal);
-      await createPosition(robotPath, data);
-      setTheRobot();
+      createPosition(robotPath, data)
+        .then(res => setPositions(res))
+        .catch(err => console.log(err));
     } else if (type === "updatePosition") {
-      await updatePosition(robotPath, data);
       setPositionModal(defaultPositionModal);
-      setTheRobot();
+      updatePosition(robotPath, data)
+        .then(res => setPositions(res))
+        .catch(err => console.log(err));
     }
   };
 
@@ -335,6 +346,7 @@ export const Sequence = () => {
   };
 
   const Timeline = () => {
+    console.log("XXX", sequence.actions);
     return (
       <Box p={1}>
         <Box width={"100%"} component={Paper} elevation={4}>
@@ -353,6 +365,11 @@ export const Sequence = () => {
                 sx={{ border: "1px solid" }}
               >
                 {sequence.actions.map((act, idx) => {
+                  // console.log("ACT ->", act.appId);
+                  // console.log(timelineObjects);
+                  // console.log(
+                  //   timelineObjects.find(obj => obj.appId === act.appId)
+                  // );
                   let itm = JSON.parse(
                     JSON.stringify(
                       timelineObjects.find(obj => obj.appId === act.appId)
@@ -470,13 +487,10 @@ export const Sequence = () => {
   const handleConfirmDelete = async type => {
     if (type === "cancel") setDeletePositionModal(defaultDeletePositionModal);
     else if (type === "delete") {
-      try {
-        await deletePosition(robotPath, deletePositionModal.position);
-        setTheRobot();
-      } catch (error) {
-        console.error(error);
-      }
       setDeletePositionModal(defaultDeletePositionModal);
+      deletePosition(robotPath, deletePositionModal.position)
+        .then(res => setPositions(res))
+        .catch(err => console.error(err));
     }
   };
 
@@ -500,15 +514,11 @@ export const Sequence = () => {
         <EditPositionModal
           mode={positionModal.mode}
           position={positionModal.position}
-          robot={robot}
           out={handlePositionModal}
         />
       ) : null}
       {selectPositionModal.show ? (
-        <SelectPositionModal
-          positions={robot.positions}
-          out={handleSelectPosition}
-        />
+        <SelectPositionModal positions={positions} out={handleSelectPosition} />
       ) : null}
       {deletePositionModal.show ? (
         <ConfirmDeletePositionModal
@@ -585,7 +595,7 @@ export const Sequence = () => {
                 handleClose();
                 setSelectPositionModal({
                   show: true,
-                  positions: robot.positions,
+                  positions,
                 });
               }}
             >

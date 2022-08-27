@@ -10,13 +10,19 @@ import React, { useEffect, useState } from "react";
 import { modalStyle } from "../../styles";
 import { Servo } from "./Servo";
 import { v4 as uuid } from "uuid";
+import { getServos } from "../../helpers";
+import { useParams } from "react-router-dom";
 
 const defaultServo = { enabled: false, value: 90 };
 
-export const EditPositionModal = ({ mode, position, robot, out }) => {
+export const EditPositionModal = ({ mode, position, out }) => {
+  const { robotPath } = useParams();
+
+  const [servos, setServos] = useState([]);
+
   const makePosition = () => {
     let out = { appId: uuid(), name: "", servos: [] };
-    robot.servos.forEach(servo => out.servos.push({ ...defaultServo }));
+    servos.forEach(servo => out.servos.push({ ...defaultServo }));
     return out;
   };
 
@@ -28,6 +34,10 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
       setOgPos(JSON.parse(JSON.stringify(position)));
       setPos(JSON.parse(JSON.stringify(position)));
     }
+
+    getServos(robotPath)
+      .then(res => setServos(res))
+      .catch(err => console.error(err));
   }, []);
 
   const makeTitle = () => {
@@ -71,6 +81,13 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
     }
   };
 
+  useEffect(() => {
+    console.log(servos);
+    setPos(makePosition());
+  }, [servos]);
+
+  if (!pos) return <div>LOADING</div>;
+
   return (
     <Modal
       open={true}
@@ -92,7 +109,7 @@ export const EditPositionModal = ({ mode, position, robot, out }) => {
           {pos.servos.map((servo, idx) => (
             <Servo
               key={"servo" + idx}
-              label={robot.servos[idx].name}
+              label={servos[idx].name}
               idx={idx + 1}
               servo={servo}
               onChange={(type, val) => {
