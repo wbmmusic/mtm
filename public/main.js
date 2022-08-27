@@ -475,6 +475,10 @@ app.on('ready', () => {
             })
         })
 
+        ipcMain.handle('getSound', () => {
+            return settings.sound
+        })
+
         createWindow()
     })
     ///////////////////////

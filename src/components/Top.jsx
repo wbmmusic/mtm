@@ -27,11 +27,22 @@ export default function Top() {
   const playerRef = useRef(null);
 
   useEffect(() => {
+    window.electron.ipcRenderer
+      .invoke("getSound")
+      .then(res => {
+        if (res !== sound) setSound(res);
+      })
+      .catch(err => console.error(err));
+
     window.electron.send("play", "open.mp3");
 
     window.electron.receive("play_file", file => {
       setAudioFile({ file });
     });
+
+    return () => {
+      window.electron.removeListener("play_file");
+    };
   }, []);
 
   useEffect(() => {
@@ -50,9 +61,9 @@ export default function Top() {
   const makeMute = () => {
     if (!sound) {
       return (
-        <Tooltip title="Sound On">
+        <Tooltip title="Sound">
           <IconButton
-            color="inherit"
+            color="error"
             size={"small"}
             onClick={() => soundOn(true)}
           >
@@ -62,7 +73,7 @@ export default function Top() {
       );
     } else {
       return (
-        <Tooltip title="Sound Off">
+        <Tooltip title="Sound">
           <IconButton
             color="inherit"
             size={"small"}
