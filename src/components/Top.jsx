@@ -36,9 +36,7 @@ export default function Top() {
 
     window.electron.send("play", "open.mp3");
 
-    window.electron.receive("play_file", file => {
-      setAudioFile({ file });
-    });
+    window.electron.receive("play_file", file => setAudioFile({ file }));
 
     return () => {
       window.electron.removeListener("play_file");
