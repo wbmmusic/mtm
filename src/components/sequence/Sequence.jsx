@@ -5,12 +5,13 @@ import {
   Paper,
   Typography,
   TextField,
-  Button,
   Divider,
   LinearProgress,
-  Menu,
-  MenuItem,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { useNavigate, useParams } from "react-router-dom";
@@ -27,8 +28,8 @@ import {
   updatePosition,
   updateSequence,
 } from "../../helpers";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import EditIcon from "@mui/icons-material/Edit";
+import ControlPointDuplicateIcon from "@mui/icons-material/ControlPointDuplicate";
 import { SelectPositionModal } from "./SelectPositionModal";
 import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal";
 import { delays } from "./Constants";
@@ -51,7 +52,6 @@ export const Sequence = () => {
   const [positions, setPositions] = useState(null);
   const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [ogSequense, setOgSequense] = useState(null);
   const [deletePositionModal, setDeletePositionModal] = useState(
     defaultDeletePositionModal
@@ -59,8 +59,6 @@ export const Sequence = () => {
   const [selectPositionModal, setSelectPositionModal] = useState(
     defaultSelectPositionModal
   );
-
-  const open = Boolean(anchorEl);
 
   const initSequence = () => {
     if (sequenceId === "newsequenceplaceholder") return defaultSequence;
@@ -132,10 +130,6 @@ export const Sequence = () => {
     console.log("Skipping render");
     return;
   }
-
-  const handleClick = event => setAnchorEl(event.currentTarget);
-
-  const handleClose = () => setAnchorEl(null);
 
   const makeOutput = () => {
     // Strips unwanted keys from sequence.actions[]
@@ -581,29 +575,11 @@ export const Sequence = () => {
           />
         </Box>
         <Box>
-          <Button
-            size="small"
-            startIcon={anchorEl ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            id="basic-button"
-            aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-            onClick={handleClick}
-          >
-            Position
-          </Button>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
-          >
-            <MenuItem
+          <Tooltip title="New Position">
+            <IconButton
+              color="inherit"
+              size="small"
               onClick={() => {
-                handleClose();
                 setPositionModal({
                   show: true,
                   mode: "new",
@@ -611,54 +587,70 @@ export const Sequence = () => {
                 });
               }}
             >
-              New Position
-            </MenuItem>
-            <MenuItem
+              <ControlPointDuplicateIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <Box>
+          <Tooltip title="Edit Position">
+            <IconButton
+              size="small"
+              color="inherit"
               onClick={() => {
-                handleClose();
                 setSelectPositionModal({
                   show: true,
                   positions,
                 });
               }}
             >
-              Edit Position
-            </MenuItem>
-          </Menu>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Button disabled={!isSavable()} size="small" onClick={sequenceSave}>
-            Save
-          </Button>
+          <Tooltip title="Save Sequence">
+            <IconButton
+              color="inherit"
+              disabled={!isSavable()}
+              size="small"
+              onClick={sequenceSave}
+            >
+              <SaveIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
         {sequenceId !== "newsequenceplaceholder" ? (
           // if nit read only //////////////////////////////////////////////////////////////////
           <Box>
-            <Button
-              size="small"
-              color="error"
-              onClick={() => {
-                console.log(sequence.name);
-                setConfirmDeleteSequenceModal({
-                  show: true,
-                  name: sequence.name,
-                });
-              }}
-            >
-              Delete
-            </Button>
+            <Tooltip title="Delete Sequence">
+              <IconButton
+                size="small"
+                color="error"
+                onClick={() => {
+                  console.log(sequence.name);
+                  setConfirmDeleteSequenceModal({
+                    show: true,
+                    name: sequence.name,
+                  });
+                }}
+              >
+                <DeleteForeverIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         ) : null}
 
         <Box>
-          <Button
-            startIcon={<KeyboardReturnIcon />}
-            sx={{ whiteSpace: "nowrap" }}
-            size="small"
-            onClick={() => navigate("/robot/" + robotPath)}
-          >
-            Back to robot
-          </Button>
+          <Tooltip title="Return to robot">
+            <IconButton
+              color="inherit"
+              sx={{ whiteSpace: "nowrap" }}
+              size="small"
+              onClick={() => navigate("/robot/" + robotPath)}
+            >
+              <KeyboardReturnIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
       </Stack>
       <Divider />
