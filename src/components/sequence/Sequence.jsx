@@ -487,9 +487,41 @@ export const Sequence = () => {
 
   const makeActionsFromRefs = () => {
     let out = [];
-    sequence.actions.forEach(act =>
-      out.push(timelineObjects.find(obj => obj.appId === act.appId))
-    );
+    let lastType = null;
+
+    sequence.actions.forEach(act => {
+      let theObj = timelineObjects.find(obj => obj.appId === act.appId);
+      if (!theObj) {
+        throw new Error("Didn't find object with appId " + act.appId);
+      }
+
+      // Clone the object for editing
+      theObj = JSON.parse(JSON.stringify(theObj));
+
+      // Remove unneeded keys
+      delete theObj.id;
+      delete theObj.appId;
+
+      // If there are multiple moves in a row
+      if (theObj.type === "move" && lastType === "move") {
+        // console.log("Found Double");
+        let previouState = out.pop();
+
+        // Combine Names
+        previouState.content = previouState.content + "/" + theObj.content;
+
+        // update servo value
+        theObj.servos.forEach((servo, idx) => {
+          if (servo.enabled) previouState.servos[idx] = servo;
+        });
+
+        // console.log(previouState);
+        out.push(previouState);
+      } else out.push(theObj);
+
+      lastType = theObj.type;
+    });
+    //console.log(out);
     return out;
   };
 
