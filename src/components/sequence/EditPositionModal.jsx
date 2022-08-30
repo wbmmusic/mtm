@@ -18,7 +18,7 @@ const defaultServo = { enabled: false, value: 90 };
 export const EditPositionModal = ({ mode, position, out }) => {
   const { robotPath } = useParams();
 
-  const [servos, setServos] = useState([]);
+  const [servos, setServos] = useState(null);
 
   const makePosition = () => {
     let out = { appId: uuid(), name: "", servos: [] };
@@ -27,7 +27,7 @@ export const EditPositionModal = ({ mode, position, out }) => {
   };
 
   const [ogPos, setOgPos] = useState(null);
-  const [pos, setPos] = useState(makePosition());
+  const [pos, setPos] = useState(null);
 
   useEffect(() => {
     if (position) {
@@ -39,6 +39,8 @@ export const EditPositionModal = ({ mode, position, out }) => {
       .then(res => setServos(res))
       .catch(err => console.error(err));
   }, []);
+
+  // useEffect(() => console.log(pos), [pos]);
 
   const makeTitle = () => {
     if (mode === "new") return "New";
@@ -82,11 +84,13 @@ export const EditPositionModal = ({ mode, position, out }) => {
   };
 
   useEffect(() => {
-    console.log(servos);
-    setPos(makePosition());
+    //setPos(makePosition());
+    if (!position && servos) {
+      setPos(makePosition());
+    }
   }, [servos]);
 
-  if (!pos) return <div>LOADING</div>;
+  if (!pos || !servos) return <div>LOADING</div>;
 
   return (
     <Modal

@@ -112,9 +112,7 @@ export const Sequence = () => {
       .then(res => setPositions(res))
       .catch(err => console.error(err));
 
-    if (sequenceId !== "newsequenceplaceholder") {
-      loadSequence();
-    }
+    if (sequenceId !== "newsequenceplaceholder") loadSequence();
   }, []);
 
   useEffect(() => makeObjects(), [positions]);
