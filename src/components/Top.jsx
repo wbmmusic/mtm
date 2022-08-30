@@ -38,9 +38,7 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
-    return () => {
-      window.electron.removeListener("play_file");
-    };
+    return () => window.electron.removeListener("play_file");
   }, []);
 
   useEffect(() => {
