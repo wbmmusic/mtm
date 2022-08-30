@@ -40,6 +40,7 @@ const defaultSelectPositionModal = { show: false };
 const defaultDeletePositionModal = { show: false, position: null };
 const defaultSequence = { appId: uuid(), name: "", actions: [] };
 const defaultConfirmDeleteSequenceModal = { show: false, name: null };
+const trash = [];
 
 export const Sequence = () => {
   const navigate = useNavigate();
@@ -50,7 +51,6 @@ export const Sequence = () => {
   );
   const [timelineObjects, setTimelineObjects] = useState(null);
   const [positions, setPositions] = useState(null);
-  const [trash, setTrash] = useState([]);
   const [positionModal, setPositionModal] = useState(defaultPositionModal);
   const [ogSequense, setOgSequense] = useState(null);
   const [deletePositionModal, setDeletePositionModal] = useState(
