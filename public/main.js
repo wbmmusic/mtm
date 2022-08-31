@@ -101,11 +101,12 @@ const tryToOpenPort = async() => {
     try {
         await openPort()
     } catch (error) {
+        console.log("Error on 1st atempt to connect", error)
         setTimeout(async() => {
             try {
                 await openPort()
             } catch (error) {
-
+                console.log("Error on 2nd atempt to connect", error)
             }
         }, 1000);
     }
