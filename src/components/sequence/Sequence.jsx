@@ -556,7 +556,7 @@ export const Sequence = () => {
         </Box>
         <Box sx={{ justifyContent: "center" }}>
           <IconButton
-            color="inherit"
+            color="info"
             disabled={!isSavable()}
             size="small"
             onClick={sequenceSave}
