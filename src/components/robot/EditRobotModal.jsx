@@ -151,6 +151,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
             size="small"
             variant="standard"
             value={robot.name}
+            error={robot.name === ""}
             onChange={e =>
               setRobot(old => ({
                 ...old,

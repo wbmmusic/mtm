@@ -109,6 +109,7 @@ export const EditPositionModal = ({ mode, position, out }) => {
             onChange={e => setPos(old => ({ ...old, name: e.target.value }))}
             variant="standard"
             label="Position Name"
+            error={pos.name === ""}
           />
           {pos.servos.map((servo, idx) => (
             <Servo

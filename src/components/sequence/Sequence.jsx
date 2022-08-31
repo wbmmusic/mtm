@@ -40,7 +40,6 @@ const defaultSelectPositionModal = { show: false };
 const defaultDeletePositionModal = { show: false, position: null };
 const defaultSequence = { appId: uuid(), name: "", actions: [] };
 const defaultConfirmDeleteSequenceModal = { show: false, name: null };
-const trash = [];
 
 export const Sequence = () => {
   const navigate = useNavigate();
@@ -215,6 +214,13 @@ export const Sequence = () => {
 
       window.electron.send("play", "timeline_add.mp3");
       // console.log("Added Item To Timeline");
+    } else if (res.source.droppableId === "timeline" && !res.destination) {
+      setSequence(old => ({
+        ...old,
+        actions: old.actions.filter((x, idx) => idx !== res.source.index),
+      }));
+      window.electron.send("play", "trash.mp3");
+      // console.log("TRASHED");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
@@ -225,16 +231,6 @@ export const Sequence = () => {
       setSequence(old => ({ ...old, actions: actionsCpy }));
       window.electron.send("play", "timeline_move.mp3");
       // console.log("Moved Item IN Timeline");
-    } else if (
-      res.source.droppableId === "timeline" &&
-      res.destination.droppableId === "trash"
-    ) {
-      setSequence(old => ({
-        ...old,
-        actions: old.actions.filter((x, idx) => idx !== res.source.index),
-      }));
-      window.electron.send("play", "trash.mp3");
-      // console.log("TRASHED");
     }
     // console.log("END", actions, timelineObjects);
     // console.log("Actions", actions);
@@ -393,56 +389,6 @@ export const Sequence = () => {
     );
   };
 
-  const Trash = () => {
-    return (
-      <Box p={1}>
-        <Box component={Paper} elevation={4}>
-          <Box sx={{ paddingLeft: "4px" }}>
-            <Typography variant="h6">Trash</Typography>
-          </Box>
-          <Droppable droppableId="trash" direction="horizontal">
-            {provided => (
-              <Stack
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                direction={"row"}
-                p={1}
-                width={"100%"}
-                spacing={1}
-                sx={{ border: "1px solid" }}
-                height={"50px"}
-              >
-                {trash.map((itm, idx) => (
-                  <Draggable
-                    key={"itm" + itm.id}
-                    draggableId={itm.id}
-                    index={idx}
-                  >
-                    {provided2 => {
-                      return (
-                        <Box
-                          component={Paper}
-                          ref={provided2.innerRef}
-                          {...provided2.draggableProps}
-                          {...provided2.dragHandleProps}
-                          p={1}
-                          sx={{ border: "1px solid" }}
-                        >
-                          {makeItem(itm)}
-                        </Box>
-                      );
-                    }}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </Stack>
-            )}
-          </Droppable>
-        </Box>
-      </Box>
-    );
-  };
-
   const isSavable = () => {
     if (sequence.name === "") return false;
     if (sequenceId !== "newsequenceplaceholder") {
@@ -566,6 +512,7 @@ export const Sequence = () => {
           <TextField
             sx={{ width: "100%" }}
             label="Sequence Name"
+            error={sequence.name === ""}
             size="small"
             variant="standard"
             value={sequence.name}
@@ -608,16 +555,16 @@ export const Sequence = () => {
           </Tooltip>
         </Box>
         <Box sx={{ justifyContent: "center" }}>
-          <Tooltip title="Save Sequence">
-            <IconButton
-              color="inherit"
-              disabled={!isSavable()}
-              size="small"
-              onClick={sequenceSave}
-            >
+          <IconButton
+            color="inherit"
+            disabled={!isSavable()}
+            size="small"
+            onClick={sequenceSave}
+          >
+            <Tooltip title="Save Sequence">
               <SaveIcon />
-            </IconButton>
-          </Tooltip>
+            </Tooltip>
+          </IconButton>
         </Box>
         {sequenceId !== "newsequenceplaceholder" ? (
           // if nit read only //////////////////////////////////////////////////////////////////
@@ -657,7 +604,6 @@ export const Sequence = () => {
       <DragDropContext onDragEnd={onDragEnd}>
         <TimelineObjects />
         <Timeline />
-        <Trash />
       </DragDropContext>
       <Box height={"100%"} p={1}></Box>
       <Transport actions={makeActionsFromRefs()} />
