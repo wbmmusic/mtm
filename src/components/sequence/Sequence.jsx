@@ -9,6 +9,7 @@ import {
   LinearProgress,
   IconButton,
   Tooltip,
+  Button,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -108,9 +109,11 @@ export const Sequence = () => {
     getPositions(robotPath)
       .then(res => setPositions(res))
       .catch(err => console.error(err));
-
-    if (sequenceId !== "newsequenceplaceholder") loadSequence();
   }, []);
+
+  useEffect(() => {
+    if (sequenceId !== "newsequenceplaceholder") loadSequence();
+  }, [sequenceId]);
 
   useEffect(() => makeObjects(), [positions]);
 
@@ -332,7 +335,18 @@ export const Sequence = () => {
       <Box p={1}>
         <Box width={"100%"} component={Paper} elevation={4}>
           <Box sx={{ paddingLeft: "4px" }}>
-            <Typography variant="h6">Timeline</Typography>
+            <Stack direction="row" spacing={4}>
+              <Typography variant="h6">Timeline</Typography>
+              {sequence.actions.length > 0 ? (
+                <Button
+                  color="error"
+                  size="small"
+                  onClick={() => setSequence(old => ({ ...old, actions: [] }))}
+                >
+                  Clear Timeline
+                </Button>
+              ) : null}
+            </Stack>
           </Box>
           <Droppable droppableId="timeline" direction="horizontal">
             {provided => (
@@ -574,7 +588,7 @@ export const Sequence = () => {
                 size="small"
                 color="error"
                 onClick={() => {
-                  console.log(sequence.name);
+                  // console.log(sequence.name);
                   setConfirmDeleteSequenceModal({
                     show: true,
                     name: sequence.name,
