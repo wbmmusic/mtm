@@ -71,24 +71,45 @@ const getRobots = () => {
     return robots
 }
 
-const tryToOpenPort = async() => {
-    let tempPorts = await getPorts()
-    let thePort = tempPorts.find(prt => Number("0x" + prt.vendorId) === usbTarget.vid && Number("0x" + prt.productId) === usbTarget.pid)
-    if (thePort) {
-        console.log('Found devide', thePort.friendlyName)
-        port = new SerialPort({ path: thePort.path, baudRate: 115200 })
-        port.on('open', () => {
-            console.log('PORT OPENED')
-            win.webContents.send('usb_status', true)
-            resolve(true)
-        })
-        port.on('close', () => {
-            port = null
-            console.log("Port Closed")
-            win.webContents.send('usb_status', false)
-        })
+const openPort = async() => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let tempPorts = await getPorts()
+            let thePort = tempPorts.find(prt => Number("0x" + prt.vendorId) === usbTarget.vid && Number("0x" + prt.productId) === usbTarget.pid)
+            if (thePort) {
+                console.log('Found devide', thePort.friendlyName)
+                port = new SerialPort({ path: thePort.path, baudRate: 115200 })
+                port.on('open', () => {
+                    console.log('PORT OPENED')
+                    win.webContents.send('usb_status', true)
+                    resolve(true)
+                })
+                port.on('close', () => {
+                    port = null
+                    console.log("Port Closed")
+                    win.webContents.send('usb_status', false)
+                })
 
-    } else console.log("Didn't Find target Device")
+            } else console.log("Didn't Find target Device")
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const tryToOpenPort = async() => {
+    try {
+        await openPort()
+    } catch (error) {
+        setTimeout(async() => {
+            try {
+                await openPort()
+            } catch (error) {
+
+            }
+        }, 1000);
+    }
+
 }
 
 ////////  SINGLE INSTANCE //////////
