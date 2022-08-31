@@ -29,7 +29,8 @@ export const Transport = ({ actions }) => {
         //out.push({ value: curTime, label: "" });
         curTime = curTime + act.value;
       } else if (act.type === "move") {
-        out.push({ value: curTime, label: act.content, servos: act.servos });
+        out.push({ value: curTime, label: null, servos: act.servos });
+        // out.push({ value: curTime, label: act.content, servos: act.servos });
       }
     });
     return out;
@@ -102,7 +103,6 @@ export const Transport = ({ actions }) => {
       <Stack>
         <Box sx={{ padding: "0px 15px" }}>
           <Slider
-            size="small"
             marks={marks}
             value={current}
             min={0}
