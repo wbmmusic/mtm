@@ -1,5 +1,12 @@
 export const delays = [
   {
+    id: "idforhalfsec",
+    appId: "half_sec_delay",
+    content: ".5s",
+    type: "delay",
+    value: 5,
+  },
+  {
     id: "idfor1sec",
     appId: "one_sec_dly",
     content: "1s",
@@ -19,12 +26,5 @@ export const delays = [
     content: "5s",
     type: "delay",
     value: 50,
-  },
-  {
-    id: "idfor10sec",
-    appId: "ten_sec_delay",
-    content: "10s",
-    type: "delay",
-    value: 100,
   },
 ];

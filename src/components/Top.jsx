@@ -1,7 +1,5 @@
-import { Box, IconButton, InputLabel, MenuItem, Tooltip } from "@mui/material";
+import { Box, IconButton, MenuItem, Tooltip } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Sequence } from "./sequence/Sequence";
@@ -15,13 +13,15 @@ import { Home } from "./Home";
 import { useNavigate } from "react-router-dom";
 import { Robot } from "./robot/Robot";
 import { GlobalContext } from "../contexts/GlobalContext";
+import UsbIcon from "@mui/icons-material/Usb";
+import UsbOffIcon from "@mui/icons-material/UsbOff";
 
 export default function Top() {
   const navigate = useNavigate();
   const { admin, toggleAdmin } = useContext(GlobalContext);
 
-  const [ports, setPorts] = useState([]);
-  const [selectedPort, setSelectedPort] = useState("");
+  const [usbConnected, setUsbConnected] = useState(false);
+
   const [audioFile, setAudioFile] = useState({ file: null });
   const [sound, setSound] = useState(true);
   const playerRef = useRef(null);
@@ -38,7 +38,13 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
-    return () => window.electron.removeListener("play_file");
+    window.electron.receive("usb_status", status => setUsbConnected(status));
+    window.electron.send("get_usb_status");
+
+    return () => {
+      window.electron.removeListener("play_file");
+      window.electron.removeListener("usb_status");
+    };
   }, []);
 
   useEffect(() => {
@@ -102,39 +108,6 @@ export default function Top() {
     }
   };
 
-  const updatePorts = () => {
-    window.electron.send("play", "open_com.mp3");
-    window.electron.ipcRenderer
-      .invoke("getPorts")
-      .then(prts => setPorts(prts))
-      .catch(err => console.log(err));
-  };
-
-  const openPrt = prt => {
-    //console.log(prt);
-    window.electron.send("play", "select_com.mp3");
-    window.electron.ipcRenderer
-      .invoke("openPort", prt)
-      .then(res => console.log(res))
-      .catch(err => console.log(err));
-  };
-
-  const handleSelectPort = idx => {
-    let targetPort = ports[idx];
-    openPrt(targetPort.path);
-    setSelectedPort(idx);
-  };
-
-  const makeNone = () => {
-    if (ports.length === 0) {
-      return (
-        <MenuItem key={"portItemNone"} value={0} disabled>
-          No Device Found
-        </MenuItem>
-      );
-    }
-  };
-
   return (
     <Stack height={"100%"}>
       <Stack
@@ -143,26 +116,20 @@ export default function Top() {
         spacing={1}
         sx={{ backgroundColor: admin ? "salmon" : "" }}
       >
-        <IconButton color="inherit" onClick={() => navigate("/")}>
+        <IconButton size="small" color="inherit" onClick={() => navigate("/")}>
           <HomeIcon />
         </IconButton>
-        <FormControl fullWidth size={"small"}>
-          <InputLabel id="demo-simple-select-label">COM Port</InputLabel>
-          <Select
-            onOpen={updatePorts}
-            onChange={e => handleSelectPort(e.target.value)}
-            width={200}
-            label={"COM Port"}
-            value={selectedPort}
-          >
-            {makeNone()}
-            {ports.map((prt, idx) => (
-              <MenuItem key={"portItem" + idx} value={idx}>
-                {prt.path}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Box width={"100%"}>
+          {usbConnected ? (
+            <IconButton size="small" disabled>
+              <UsbIcon color="success" />
+            </IconButton>
+          ) : (
+            <IconButton size="small" disabled>
+              <UsbOffIcon color="error" />
+            </IconButton>
+          )}
+        </Box>
         {makeMute()}
         {makeAdminMode()}
       </Stack>
