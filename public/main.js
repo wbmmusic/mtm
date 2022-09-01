@@ -77,7 +77,7 @@ const openPort = async() => {
             let tempPorts = await getPorts()
             let thePort = tempPorts.find(prt => Number("0x" + prt.vendorId) === usbTarget.vid && Number("0x" + prt.productId) === usbTarget.pid)
             if (thePort) {
-                console.log('Found devide', thePort.friendlyName)
+                console.log('Found device', thePort.friendlyName)
                 port = new SerialPort({ path: thePort.path, baudRate: 115200 })
                 port.on('open', () => {
                     console.log('PORT OPENED')
@@ -90,7 +90,7 @@ const openPort = async() => {
                     win.webContents.send('usb_status', false)
                 })
 
-            } else console.log("Didn't Find target Device")
+            } else reject("Didn't Find target Device")
         } catch (error) {
             reject(error)
         }
@@ -523,7 +523,7 @@ app.on('ready', () => {
             const pid = e.deviceDescriptor.idProduct
             if (vid === usbTarget.vid && pid === usbTarget.pid) {
                 console.log("Arduino UNO was detached")
-                port.close()
+                if (port) port.close()
             }
         })
 
