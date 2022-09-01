@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 export default function Updates() {
   const defaultDownloadSnack = { show: false, progress: 0 };
   const defaultInstallSnack = { show: false, version: "x.x.x" };
+  const defaultRelaunchSnack = { show: false };
   const [downloadSnack, setDownloadSnack] = useState(defaultDownloadSnack);
   const [installSnack, setInstallSnack] = useState(defaultInstallSnack);
   const [relaunchSnack, setRelaunchSnack] = useState({ show: false });
@@ -50,6 +51,17 @@ export default function Updates() {
     </Fragment>
   );
 
+  const relaunchAction = (
+    <IconButton
+      size="small"
+      aria-label="close"
+      color="inherit"
+      onClick={() => setRelaunchSnack(defaultRelaunchSnack)}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  );
+
   useEffect(() => {
     window.electron.send("reactIsReady");
     window.electron.receive("updater", (a, b) => {
@@ -85,7 +97,6 @@ export default function Updates() {
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={downloadSnack.show}
-        autoHideDuration={30000}
         onClose={handleClose}
         message={`Downloading Update ${downloadSnack.progress}%`}
         action={action}
@@ -93,7 +104,6 @@ export default function Updates() {
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={installSnack.show}
-        autoHideDuration={30000}
         onClose={handleClose}
         message={`Relaunch to install ${installSnack.version}`}
         action={installAction}
@@ -101,8 +111,8 @@ export default function Updates() {
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={relaunchSnack.show}
-        autoHideDuration={30000}
         message={`Relaunching ...`}
+        action={relaunchAction}
       />
     </div>
   );
