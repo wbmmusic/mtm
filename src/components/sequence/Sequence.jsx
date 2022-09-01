@@ -288,7 +288,7 @@ export const Sequence = () => {
                 p={0.5}
                 width={"100%"}
                 spacing={0.5}
-                sx={{ border: "1px solid" }}
+                sx={{ border: "1px solid", overflowX: "auto" }}
               >
                 {timelineObjects.map((itm, idx) => (
                   <Draggable
@@ -341,7 +341,15 @@ export const Sequence = () => {
                 <Button
                   color="error"
                   size="small"
-                  onClick={() => setSequence(old => ({ ...old, actions: [] }))}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Are you sure you want to clear the timeline?"
+                      )
+                    ) {
+                      setSequence(old => ({ ...old, actions: [] }));
+                    }
+                  }}
                 >
                   Clear Timeline
                 </Button>
@@ -357,7 +365,7 @@ export const Sequence = () => {
                 p={1}
                 width={"100%"}
                 spacing={0.5}
-                sx={{ border: "1px solid" }}
+                sx={{ border: "1px solid", overflowX: "auto" }}
               >
                 {sequence.actions.map((act, idx) => {
                   // console.log("ACT ->", act.appId);

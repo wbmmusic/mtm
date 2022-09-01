@@ -9,6 +9,7 @@ export default function Updates() {
   const defaultInstallSnack = { show: false, version: "x.x.x" };
   const [downloadSnack, setDownloadSnack] = useState(defaultDownloadSnack);
   const [installSnack, setInstallSnack] = useState(defaultInstallSnack);
+  const [relaunchSnack, setRelaunchSnack] = useState({ show: false });
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") return;
@@ -64,6 +65,9 @@ export default function Updates() {
         console.log("Downloaded", b);
         setDownloadSnack(defaultDownloadSnack);
         setInstallSnack({ show: true, version: b.tag });
+      } else if (a === "relaunching") {
+        setInstallSnack(defaultInstallSnack);
+        setRelaunchSnack({ show: true });
       } else if (a === "error") console.log("Update Error", b);
       else console.log(a, b);
     });
@@ -93,6 +97,12 @@ export default function Updates() {
         onClose={handleClose}
         message={`Relaunch to install ${installSnack.version}`}
         action={installAction}
+      />
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={relaunchSnack.show}
+        autoHideDuration={30000}
+        message={`Relaunching ...`}
       />
     </div>
   );
