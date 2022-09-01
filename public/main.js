@@ -508,6 +508,7 @@ app.on('ready', () => {
         initIpcHandlers()
 
         usb.on('attach', async(e) => {
+            console.log("Attatch", e)
             const vid = e.deviceDescriptor.idVendor
             const pid = e.deviceDescriptor.idProduct
             if (vid === usbTarget.vid && pid === usbTarget.pid) {
@@ -517,6 +518,7 @@ app.on('ready', () => {
         })
 
         usb.on('detach', (e) => {
+            console.log("Detatch", e)
             const vid = e.deviceDescriptor.idVendor
             const pid = e.deviceDescriptor.idProduct
             if (vid === usbTarget.vid && pid === usbTarget.pid) {
