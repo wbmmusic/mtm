@@ -270,10 +270,10 @@ export const Sequence = () => {
 
   const TimelineObjects = () => {
     return (
-      <Box p={1}>
-        <Box component={Paper} elevation={4}>
+      <Box p={1} sx={{ border: "3px dashed limegreen" }}>
+        <Box>
           <Box sx={{ paddingLeft: "4px" }}>
-            <Typography variant="h6">OBJECTS</Typography>
+            <Typography variant="h6">ACTIONS</Typography>
           </Box>
           <Droppable
             droppableId="objects"
@@ -282,13 +282,22 @@ export const Sequence = () => {
           >
             {provided => (
               <Stack
+                component={Paper}
+                elevation={4}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 direction={"row"}
                 p={0.5}
                 width={"100%"}
                 spacing={0.5}
-                sx={{ border: "1px solid", overflowX: "auto" }}
+                sx={{
+                  overflowX: "auto",
+                  border: "6px solid #55533c",
+                  borderLeft: "20px solid #55533c",
+                  borderRight: "20px solid #55533c",
+                  minHeight: "80px",
+                  backgroundColor: "lightGrey",
+                }}
               >
                 {timelineObjects.map((itm, idx) => (
                   <Draggable
@@ -304,16 +313,11 @@ export const Sequence = () => {
                           {...provided.dragHandleProps}
                           component={Paper}
                           p={0.5}
-                          sx={{ border: "1px solid" }}
                         >
                           {makeItem(itm)}
                         </Box>
                         {snapshot.isDragging && (
-                          <Box
-                            component={Paper}
-                            p={0.5}
-                            sx={{ border: "1px solid" }}
-                          >
+                          <Box component={Paper} p={0.5}>
                             {makeItem(itm)}
                           </Box>
                         )}
@@ -332,11 +336,11 @@ export const Sequence = () => {
 
   const Timeline = () => {
     return (
-      <Box p={1}>
-        <Box width={"100%"} component={Paper} elevation={4}>
+      <Box p={1} sx={{ border: "3px dashed limegreen" }}>
+        <Box width={"100%"}>
           <Box sx={{ paddingLeft: "4px" }}>
             <Stack direction="row" spacing={4}>
-              <Typography variant="h6">Timeline</Typography>
+              <Typography variant="h6">MY SEQUENCE</Typography>
               {sequence.actions.length > 0 ? (
                 <Button
                   color="error"
@@ -359,13 +363,22 @@ export const Sequence = () => {
           <Droppable droppableId="timeline" direction="horizontal">
             {provided => (
               <Stack
+                component={Paper}
+                // elevation={4}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 direction={"row"}
                 p={1}
                 width={"100%"}
                 spacing={0.5}
-                sx={{ border: "1px solid", overflowX: "auto" }}
+                sx={{
+                  border: "6px solid #55533c",
+                  borderLeft: "20px solid #55533c",
+                  borderRight: "20px solid #55533c",
+                  overflowX: "auto",
+                  minHeight: "80px",
+                  backgroundColor: "lightGrey",
+                }}
               >
                 {sequence.actions.map((act, idx) => {
                   // console.log("ACT ->", act.appId);
@@ -393,7 +406,6 @@ export const Sequence = () => {
                             {...provided2.draggableProps}
                             {...provided2.dragHandleProps}
                             p={0.5}
-                            sx={{ border: "1px solid" }}
                           >
                             {makeItem(itm)}
                           </Box>
@@ -520,6 +532,20 @@ export const Sequence = () => {
     </>
   );
 
+  const TypeSelector = () => (
+    <Box p={1} sx={{ border: "3px dashed  limegreen" }}>
+      <Stack direction="row-reverse">
+        <Box width="40px" />
+        <Box component={Paper}>
+          <Stack direction="row" p={1} spacing={1}>
+            <Button variant="contained">Wait</Button>
+            <Button variant="contained">Move</Button>
+          </Stack>
+        </Box>
+      </Stack>
+    </Box>
+  );
+
   // console.log(sequence.actions, timelineObjects);
 
   return (
@@ -623,11 +649,15 @@ export const Sequence = () => {
         </Box>
       </Stack>
       <Divider />
-      <DragDropContext onDragEnd={onDragEnd}>
-        <TimelineObjects />
-        <Timeline />
-      </DragDropContext>
-      <Box height={"100%"} p={1}></Box>
+      <Box height={"100%"} p={1}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Stack height={"100%"} justifyContent={"space-around"}>
+            <TypeSelector />
+            <TimelineObjects />
+            <Timeline />
+          </Stack>
+        </DragDropContext>
+      </Box>
       <Transport actions={makeActionsFromRefs()} />
       <Modals />
     </Stack>

@@ -2,7 +2,6 @@ import {
   Box,
   Divider,
   IconButton,
-  Paper,
   Slider,
   Stack,
   Tooltip,
@@ -99,7 +98,7 @@ export const Transport = ({ actions }) => {
   }, [actions]);
 
   return (
-    <Box component={Paper} elevation={4}>
+    <Box>
       <Stack>
         <Box sx={{ padding: "0px 15px" }}>
           <Slider
@@ -115,8 +114,8 @@ export const Transport = ({ actions }) => {
         <Stack direction="row">
           <Tooltip title="Go to start">
             <IconButton
-              aria-label="delete"
-              size="small"
+              aria-label="return"
+              size="large"
               onMouseDown={returnToStart}
               color="inherit"
             >
@@ -125,8 +124,8 @@ export const Transport = ({ actions }) => {
           </Tooltip>
           <Tooltip title="Play">
             <IconButton
-              aria-label="delete"
-              size="small"
+              aria-label="play"
+              size="large"
               onMouseDown={play}
               color="inherit"
             >
@@ -136,7 +135,7 @@ export const Transport = ({ actions }) => {
           <Tooltip title="Stop">
             <IconButton
               aria-label="delete"
-              size="small"
+              size="large"
               onMouseDown={stop}
               color="inherit"
             >
@@ -145,8 +144,8 @@ export const Transport = ({ actions }) => {
           </Tooltip>
           <Tooltip title="Repeat">
             <IconButton
-              aria-label="delete"
-              size="small"
+              aria-label="repeat"
+              size="large"
               color={repeat ? "success" : "inherit"}
               onMouseDown={() => setRepeat(prev => !prev)}
             >
