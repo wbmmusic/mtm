@@ -148,8 +148,22 @@ export const RobotSelector = () => {
             sx={{ maxHeight: "100%", maxWidth: "100px" }}
             src="img://robot.png"
           />
-          <Box m={1} p={1} width={"100%"} component={Paper}>
-            <Typography variant="body2">{robot.description}</Typography>
+          <Box
+            m={1}
+            p={1}
+            width={"100%"}
+            component={Paper}
+            color="black"
+            sx={{
+              backgroundColor: "olive",
+              fontFamily: "Arcade",
+              fontSize: "22px",
+              lineHeight: "80%",
+              border: "5px solid",
+              borderRadius: "3px",
+            }}
+          >
+            {robot.description}
           </Box>
         </Stack>
       </Box>
@@ -211,10 +225,14 @@ export const RobotSelector = () => {
   };
 
   return (
-    <Box m={1} p={1} component={Paper} elevation={4}>
-      <Box>
-        <Typography variant="h5">Robots</Typography>
-      </Box>
+    <Box
+      m={1}
+      p={1}
+      component={Paper}
+      elevation={4}
+      sx={{ backgroundColor: "orange" }}
+    >
+      <Typography variant="h5">Robots</Typography>
       <Stack spacing={1}>
         {admin ? <AddRobotBlock /> : null}
         {robots.map((robot, idx) => {

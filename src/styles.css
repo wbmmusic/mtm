@@ -22,3 +22,8 @@
     font-family: 'Nine Pin';
     src: local('Nine Pin'), url(./fonts/NinePin.ttf) format('opentype');
 }
+
+@font-face {
+    font-family: 'Arcade';
+    src: local('Arcade'), url(./fonts/Arcade.ttf) format('opentype');
+}

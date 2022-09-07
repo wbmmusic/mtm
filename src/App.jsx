@@ -10,21 +10,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    h4: {
-      fontFamily: ["Nine Pin"],
-    },
-    h5: {
-      fontFamily: ["Bit"],
-    },
-    h6: {
-      fontFamily: ["Bit"],
-    },
-    body2: {
-      fontFamily: ["Video"],
-    },
-    button: {
-      fontFamily: ["Seven Segment"],
-    },
+    fontFamily: ["Bit"],
   },
 });
 
