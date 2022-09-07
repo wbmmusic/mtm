@@ -108,6 +108,24 @@ export const Transport = ({ actions }) => {
             step={1}
             max={duration()}
             onChange={e => setCurrent(parseInt(e.target.value))}
+            componentsProps={{
+              rail: {
+                style: { color: "red", height: "14px", borderRadius: "0px" },
+              },
+              track: {
+                style: {
+                  color: "limeGreen",
+                  height: "14px",
+                  borderRadius: "0px",
+                },
+              },
+              thumb: {
+                style: { display: "none" },
+              },
+              mark: {
+                style: { color: "blue", padding: "3px" },
+              },
+            }}
           />
         </Box>
         <Divider />

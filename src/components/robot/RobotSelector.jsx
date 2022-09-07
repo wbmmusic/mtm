@@ -125,7 +125,7 @@ export const RobotSelector = () => {
         sx={{ cursor: "pointer" }}
         onClick={() => navigate("/robot/" + robot.path)}
       >
-        <Stack direction="row" width={"100%"} spacing={1}>
+        <Stack direction="row" width={"100%"} spacing={1} alignItems="center">
           <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
             {robot.name}
           </Typography>
@@ -143,11 +143,13 @@ export const RobotSelector = () => {
         </Stack>
         <Divider />
         <Stack direction="row">
-          <Box
-            component="img"
-            sx={{ maxHeight: "100%", maxWidth: "100px" }}
-            src="img://robot.png"
-          />
+          <Box>
+            <Box
+              component="img"
+              sx={{ maxHeight: "100%", maxWidth: "100px" }}
+              src="img://robot.png"
+            />
+          </Box>
           <Box
             m={1}
             p={1}
@@ -155,7 +157,7 @@ export const RobotSelector = () => {
             component={Paper}
             color="black"
             sx={{
-              backgroundColor: "olive",
+              backgroundColor: "#BBCC00",
               fontFamily: "Arcade",
               fontSize: "22px",
               lineHeight: "80%",

@@ -166,7 +166,7 @@ export const Sequence = () => {
       <Box>
         <Typography
           variant="body2"
-          sx={{ textAlign: "center", whiteSpace: "nowrap" }}
+          sx={{ textAlign: "center", whiteSpace: "nowrap", fontSize: "9px" }}
         >
           {itm.content}
         </Typography>
@@ -184,7 +184,9 @@ export const Sequence = () => {
 
   const PositionItem = ({ itm }) => (
     <Box height={"100%"}>
-      <Typography variant="body2">{itm.content}</Typography>
+      <Typography sx={{ fontSize: "9px" }} variant="body2">
+        {itm.content}
+      </Typography>
       <Stack spacing={0.5}>
         {itm.servos.map((servo, idx) => (
           <LinearProgress

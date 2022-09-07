@@ -12,6 +12,9 @@ const theme = createTheme({
   typography: {
     fontFamily: ["Bit"],
   },
+  shape: {
+    borderRadius: 0,
+  },
 });
 
 function App() {

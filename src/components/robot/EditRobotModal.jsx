@@ -140,7 +140,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={modalStyle}>
+      <Box sx={{ ...modalStyle, overflowX: "auto" }} maxHeight={"98%"}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {makeTitle()}
         </Typography>
@@ -166,6 +166,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
             variant="standard"
             value={robot.description}
             multiline
+            inputProps={{ style: { fontSize: "11px", lineHeight: "170%" } }}
             onChange={e =>
               setRobot(old => ({ ...old, description: e.target.value }))
             }
@@ -205,7 +206,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
               ))}
               <Box>
                 <Button
-                  size="small"
+                  variant="contained"
                   startIcon={<AddIcon />}
                   onClick={() => {
                     setRobot(old => ({
