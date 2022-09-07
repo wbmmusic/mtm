@@ -30,7 +30,7 @@ export const SequencePicker = ({ robot }) => {
   const NewSequence = () => (
     <Box component={Paper} p={1} elevation={2}>
       <Tooltip title="New Sequence">
-        <IconButton color="inherit" onClick={newSequence}>
+        <IconButton size="large" color="inherit" onClick={newSequence}>
           <AddIcon />
         </IconButton>
       </Tooltip>
