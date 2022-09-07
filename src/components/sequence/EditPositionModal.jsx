@@ -63,7 +63,7 @@ export const EditPositionModal = ({ mode, position, out }) => {
     if (mode === "new") {
       return (
         <Button
-          size="small"
+          variant="contained"
           disabled={!isCreatable()}
           onClick={() => out("createPosition", pos)}
         >
@@ -73,7 +73,7 @@ export const EditPositionModal = ({ mode, position, out }) => {
     } else if (mode === "edit") {
       return (
         <Button
-          size="small"
+          variant="contained"
           disabled={!isSavable()}
           onClick={() => out("updatePosition", pos)}
         >
@@ -131,7 +131,7 @@ export const EditPositionModal = ({ mode, position, out }) => {
         </Stack>
         <Box p={1} />
         <Stack direction="row-reverse" spacing={1}>
-          <Button size="small" onClick={() => out("cancel")}>
+          <Button variant="contained" onClick={() => out("cancel")}>
             Cancel
           </Button>
           {makeBtn()}

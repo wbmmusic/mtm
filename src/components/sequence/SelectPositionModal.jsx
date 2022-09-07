@@ -60,7 +60,7 @@ export const SelectPositionModal = ({ out, positions }) => {
             </Box>
           ))}
           <Stack direction="row-reverse">
-            <Button size="small" onClick={() => out("cancel")}>
+            <Button variant="contained" onClick={() => out("cancel")}>
               Cancel
             </Button>
           </Stack>

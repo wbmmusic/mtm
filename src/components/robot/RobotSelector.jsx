@@ -53,14 +53,16 @@ export const RobotSelector = () => {
   };
 
   const AddRobotBlock = () => (
-    <Box>
+    <Stack direction="row" spacing={1}>
       <Button
+        variant="contained"
         startIcon={<AddIcon />}
         onClick={() => setRobotModal({ mode: "new" })}
       >
         Create New Robot
       </Button>
       <Button
+        variant="contained"
         color="error"
         onClick={() => {
           if (window.confirm("This will wipe all user saved data...")) {
@@ -77,7 +79,7 @@ export const RobotSelector = () => {
       >
         Delete User Robots
       </Button>
-    </Box>
+    </Stack>
   );
 
   const handleModelOut = data => {
@@ -89,22 +91,22 @@ export const RobotSelector = () => {
   };
 
   const Buttons = ({ robot }) => (
-    <Stack direction="row-reverse">
+    <Stack direction="row-reverse" spacing={1}>
       <Button
+        variant="contained"
         color="error"
-        size="small"
         onClick={() => setDeleteModal({ show: true, robot })}
       >
         Delete
       </Button>
       <Button
-        size="small"
+        variant="contained"
         onClick={() => setRobotModal({ mode: "edit", robot })}
       >
         Edit
       </Button>
       <Button
-        size="small"
+        variant="contained"
         onClick={() => {
           window.electron.ipcRenderer
             .invoke("exportRobot", robot.path)

@@ -18,10 +18,14 @@ export const ConfirmDeletePositionModal = ({ out, position }) => {
           Are you sure you want to delete position named <b>{position.name}</b>
         </Typography>
         <Stack direction="row-reverse" spacing={1}>
-          <Button size="small" onClick={() => out("cancel")}>
+          <Button variant="contained" onClick={() => out("cancel")}>
             cancel
           </Button>
-          <Button size="small" color="error" onClick={() => out("delete")}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => out("delete")}
+          >
             Delete
           </Button>
         </Stack>

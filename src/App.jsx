@@ -1,7 +1,32 @@
-import { Box, CssBaseline } from "@mui/material";
+import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import Top from "./components/Top";
 import Updates from "./components/Updates";
 import GlobalContextProvider from "./contexts/GlobalContext";
+
+const theme = createTheme({
+  palette: {
+    background: {
+      default: "#ffe400",
+    },
+  },
+  typography: {
+    h4: {
+      fontFamily: ["Nine Pin"],
+    },
+    h5: {
+      fontFamily: ["Bit"],
+    },
+    h6: {
+      fontFamily: ["Bit"],
+    },
+    body2: {
+      fontFamily: ["Video"],
+    },
+    button: {
+      fontFamily: ["Seven Segment"],
+    },
+  },
+});
 
 function App() {
   return (
@@ -12,11 +37,13 @@ function App() {
         userSelect: "none",
       }}
     >
-      <CssBaseline />
-      <Updates />
-      <GlobalContextProvider>
-        <Top />
-      </GlobalContextProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Updates />
+        <GlobalContextProvider>
+          <Top />
+        </GlobalContextProvider>
+      </ThemeProvider>
     </Box>
   );
 }

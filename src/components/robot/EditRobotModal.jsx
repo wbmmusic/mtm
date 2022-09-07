@@ -82,7 +82,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
     if (mode === "new") {
       return (
         <Button
-          size="small"
+          variant="contained"
           disabled={saveDisabled()}
           onClick={async () => {
             try {
@@ -99,7 +99,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
     } else if (mode === "edit") {
       return (
         <Button
-          size="small"
+          variant="contained"
           disabled={saveChangesDisabled()}
           onClick={updateRobot}
         >
@@ -220,7 +220,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
             </Stack>
           </Box>
           <Stack direction="row-reverse" spacing={1}>
-            <Button size="small" onClick={() => out("close")}>
+            <Button variant="contained" onClick={() => out("close")}>
               Cancel
             </Button>
             {makeBtns()}

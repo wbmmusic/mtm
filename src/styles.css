@@ -1,0 +1,24 @@
+@font-face {
+    font-family: 'Bitwise';
+    src: local('Bitwise'), url(./fonts/Bitwise.ttf) format('opentype');
+}
+
+@font-face {
+    font-family: 'Seven Segment';
+    src: local('sevenSegment'), url(./fonts/sevenSegment.ttf) format('opentype');
+}
+
+@font-face {
+    font-family: 'Bit';
+    src: local('Bit'), url(./fonts/Bit.ttf) format('opentype');
+}
+
+@font-face {
+    font-family: 'Video';
+    src: local('Video'), url(./fonts/Video.ttf) format('opentype');
+}
+
+@font-face {
+    font-family: 'Nine Pin';
+    src: local('Nine Pin'), url(./fonts/NinePin.ttf) format('opentype');
+}
