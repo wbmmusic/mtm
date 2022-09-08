@@ -10,7 +10,7 @@ export default function Updates() {
   const defaultRelaunchSnack = { show: false };
   const [downloadSnack, setDownloadSnack] = useState(defaultDownloadSnack);
   const [installSnack, setInstallSnack] = useState(defaultInstallSnack);
-  const [relaunchSnack, setRelaunchSnack] = useState({ show: false });
+  const [relaunchSnack, setRelaunchSnack] = useState(defaultRelaunchSnack);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") return;
