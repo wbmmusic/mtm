@@ -18,7 +18,10 @@ const pathToUserData = join(app.getPath('userData'), 'data')
 const pathToUserSettings = join(pathToUserData, 'settings.json')
 const pathToRobots = join(pathToUserData, 'robots')
 
-const usbTarget = { vid: 0x2341, pid: 0x43 }
+const usbTarget = [
+    { vid: 0x2341, pid: 0x43 },
+    { vid: 0x03EB, pid: 0x2404 }
+]
 
 const readSettings = () => {
     return JSON.parse(readFileSync(pathToUserSettings))
@@ -75,10 +78,18 @@ const openPort = async() => {
     return new Promise(async(resolve, reject) => {
         try {
             let tempPorts = await getPorts()
-            let thePort = tempPorts.find(prt => Number("0x" + prt.vendorId) === usbTarget.vid && Number("0x" + prt.productId) === usbTarget.pid)
-            if (thePort) {
-                console.log('Found device', thePort.friendlyName)
-                port = new SerialPort({ path: thePort.path, baudRate: 115200 })
+            let thePorts = tempPorts.filter(prt => {
+                for (let i = 0; i < usbTarget.length; i++) {
+                    if (Number("0x" + prt.vendorId) === usbTarget[i].vid && Number("0x" + prt.productId) === usbTarget[i].pid) return true
+                }
+            })
+
+            if (thePorts.length > 0) {
+                if (thePorts.length > 1) {
+                    console.log("MORE THAN ONE DEVICE CONNECTED")
+                }
+                console.log('Found device', thePorts[0].friendlyName)
+                port = new SerialPort({ path: thePorts[0].path, baudRate: 115200 })
                 port.on('open', () => {
                     console.log('PORT OPENED')
                     win.webContents.send('usb_status', true)
@@ -511,22 +522,34 @@ app.on('ready', () => {
         initIpcHandlers()
 
         usb.on('attach', async(e) => {
-            console.log("Attatch", e)
+            // console.log("Attatch")
             const vid = e.deviceDescriptor.idVendor
             const pid = e.deviceDescriptor.idProduct
-            if (vid === usbTarget.vid && pid === usbTarget.pid) {
-                console.log("Arduino UNO was attached")
-                if (!port) tryToOpenPort()
+
+            for (let i = 0; i < usbTarget.length; i++) {
+                if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
+                    // console.log("Arduino UNO was attached")
+                    if (!port) {
+                        tryToOpenPort()
+                        break
+                    } else console.log("Device Attached but another is already connected")
+                }
             }
+
         })
 
         usb.on('detach', (e) => {
-            console.log("Detatch", e)
+            // console.log("Detatch")
             const vid = e.deviceDescriptor.idVendor
             const pid = e.deviceDescriptor.idProduct
-            if (vid === usbTarget.vid && pid === usbTarget.pid) {
-                console.log("Arduino UNO was detached")
-                if (port) port.close()
+            for (let i = 0; i < usbTarget.length; i++) {
+                if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
+                    console.log("Device was detached")
+                    if (port) {
+                        port.close()
+                        break
+                    }
+                }
             }
         })
 
