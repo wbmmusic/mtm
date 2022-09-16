@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Divider,
   IconButton,
   Slider,
@@ -14,6 +15,7 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import RepeatIcon from "@mui/icons-material/Repeat";
 
 export const Transport = ({ actions }) => {
+  // console.log(actions);
   const makeMarks = () => {
     let out = [];
     let curTime = 0;
@@ -97,6 +99,11 @@ export const Transport = ({ actions }) => {
     // console.log("Make Marks");
   }, [actions]);
 
+  const handleUpload = () => {
+    console.log("Upload");
+    window.electron.ipcRenderer.invoke("upload", actions);
+  };
+
   return (
     <Box>
       <Stack>
@@ -170,7 +177,15 @@ export const Transport = ({ actions }) => {
               <RepeatIcon fontSize="inherit" />
             </IconButton>
           </Tooltip>
-          <Box width={"100%"} />
+          <Stack width={"100%"}>
+            <Button
+              sx={{ margin: "auto" }}
+              variant="contained"
+              onClick={handleUpload}
+            >
+              Upload
+            </Button>
+          </Stack>
           <Box sx={{ margin: "auto" }}>
             <Typography
               sx={{ whiteSpace: "nowrap", marginRight: "4px" }}

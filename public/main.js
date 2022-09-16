@@ -167,7 +167,67 @@ function createWindow() {
 
 }
 
+const prepareActions = (actions) => {
+    let out = []
+    actions.forEach((act, idx) => {
+        delete act.content
+        if (idx === 0) out.push(act)
+        else {
+            if (out[out.length - 1].type === act.type) {
+                if (act.type === 'delay') {
+                    out[out.length - 1].value = out[out.length - 1].value + act.value
+                } else if (act.type === 'move') {
+                    act.servos.forEach((srv, idx) => {
+                        if (srv.enabled) {
+                            out[out.length - 1].servos[idx].value = srv.value
+                            out[out.length - 1].servos[idx].enabled = true
+                        }
+                    })
+                } else {
+                    console.log("ERROR HERE 872341")
+                    out.push(act)
+                }
+
+            } else out.push(act)
+        }
+    })
+    return out
+}
+
+const makeTime = (time) => new Buffer.from([(time >> 8) & 0x1F, time & 0xFF])
+const makeServo = (servo, idx) => new Buffer.from([idx + 1, servo.value])
+
+const generateSequenceArray = (actions) => {
+    let out = []
+    let curTimePos = 0;
+    actions.forEach(action => {
+        if (action.type === 'delay') {
+            curTimePos = curTimePos + action.value
+            out.push(makeTime(curTimePos))
+        } else if (action.type === 'move') {
+            action.servos.forEach((servo, idx) => {
+                // console.log(servo)
+                if (servo.enabled) {
+                    out.push(makeServo(servo, idx))
+                }
+            })
+        }
+    })
+
+    out.push(new Buffer.from([255, 255, 255, 255]))
+
+    return Buffer.concat(out)
+}
+
 const initIpcHandlers = () => {
+    ipcMain.handle('upload', async(e, actions) => {
+        const out = generateSequenceArray(prepareActions(actions))
+        console.log("Buffer Length =", out.length)
+        console.log(out)
+        return true
+    })
+
+
     ipcMain.on('play', (e, file) => {
         if (settings.sound) win.webContents.send('play_file', file)
     })
