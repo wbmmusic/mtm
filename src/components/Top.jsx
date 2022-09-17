@@ -20,9 +20,7 @@ import UsbOffIcon from "@mui/icons-material/UsbOff";
 
 export default function Top() {
   const navigate = useNavigate();
-  const { admin, toggleAdmin } = useContext(GlobalContext);
-
-  const [usbConnected, setUsbConnected] = useState(false);
+  const { admin, toggleAdmin, usbConnected } = useContext(GlobalContext);
 
   const [audioFile, setAudioFile] = useState({ file: null });
   const [sound, setSound] = useState(true);
@@ -40,12 +38,8 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
-    window.electron.receive("usb_status", status => setUsbConnected(status));
-    window.electron.send("get_usb_status");
-
     return () => {
       window.electron.removeListener("play_file");
-      window.electron.removeListener("usb_status");
     };
   }, []);
 

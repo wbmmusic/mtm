@@ -13,8 +13,11 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import RepeatIcon from "@mui/icons-material/Repeat";
+import { useContext } from "react";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export const Transport = ({ actions }) => {
+  const { usbConnected } = useContext(GlobalContext);
   // console.log(actions);
   const makeMarks = () => {
     let out = [];
@@ -104,6 +107,10 @@ export const Transport = ({ actions }) => {
     window.electron.ipcRenderer.invoke("upload", actions);
   };
 
+  const uploadable = () => {
+    return usbConnected;
+  };
+
   return (
     <Box>
       <Stack>
@@ -182,6 +189,7 @@ export const Transport = ({ actions }) => {
               sx={{ margin: "auto" }}
               variant="contained"
               onClick={handleUpload}
+              disabled={!uploadable()}
             >
               Upload
             </Button>
