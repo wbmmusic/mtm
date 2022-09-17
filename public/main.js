@@ -222,7 +222,7 @@ const prepareActions = (actions) => {
 }
 
 const makeTime = (time) => new Buffer.from([(time >> 8) & 0x1F, time & 0xFF])
-const makeServo = (servo, idx) => new Buffer.from([idx + 1, servo.value])
+const makeServo = (servo, idx) => new Buffer.from([(idx + 1) | 0x40, servo.value])
 
 const generateSequenceArray = (actions) => {
     let out = []
@@ -354,6 +354,7 @@ const upload = async(data) => {
 
         const handleData = async(pageSize, eepromSize) => {
             console.log("GOT A FLASH INFO EVENT")
+            console.log(pageSize, eepromSize)
             try {
                 await sendSequence(pageSize, eepromSize, data)
                 exit()
