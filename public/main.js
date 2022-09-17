@@ -5,7 +5,11 @@ const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
 const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync } = require('fs');
 const { usb } = require('usb');
+const { EventEmitter } = require('node:events');
+const { exit } = require('process');
 
+class MyEmitter extends EventEmitter {}
+const uploadEmitter = new MyEmitter();
 let firstReactInit = true
 
 ////////////////// App Startup ////////////////////////////////////////////////////////////////////
@@ -74,6 +78,28 @@ const getRobots = () => {
     return robots
 }
 
+const handleData = (data) => {
+    console.log('DATA =>', data.toString())
+    if (data.toString().includes('WBM:FLASHINFO')) {
+        console.log('Flash Info', data)
+        const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
+        const eepromSize = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
+        console.log("Page Size", pageSize)
+        console.log("EEPROM Size", eepromSize)
+        uploadEmitter.emit('flashInfo', pageSize, eepromSize)
+    } else if (data.toString().includes('WBM:PAGE')) {
+        console.log('Page was received')
+        uploadEmitter.emit('gotPage')
+    } else if (data.toString().includes('WBM:READY')) {
+        uploadEmitter.emit('ready')
+    } else if (data.toString().includes('WBM:DONE')) {
+        console.log('Device is done and wtvr')
+        uploadEmitter.emit('gotDone')
+    } else {
+        console.log(data.toString())
+    }
+}
+
 const openPort = async() => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -100,6 +126,8 @@ const openPort = async() => {
                     console.log("Port Closed")
                     win.webContents.send('usb_status', false)
                 })
+                port.on('data', (d) => handleData(d))
+                port.on('error', (err) => console.error(err))
 
             } else reject("Didn't Find target Device")
         } catch (error) {
@@ -219,12 +247,143 @@ const generateSequenceArray = (actions) => {
     return Buffer.concat(out)
 }
 
+const sendProgramCommand = async() => {
+    return new Promise(async(resolve, reject) => {
+        const handleData = () => {
+            console.log('Device is ready for sequence')
+            exit()
+        }
+        const exit = () => {
+            uploadEmitter.removeListener('ready', handleData)
+            resolve()
+        }
+        uploadEmitter.on('ready', handleData)
+        port.write('WBM:LOAD')
+    })
+}
+
+const sendPage = async(data) => {
+    return new Promise(async(resolve, reject) => {
+        const handleData = () => {
+            console.log("Sent Page")
+            exit()
+        }
+        const exit = () => {
+            uploadEmitter.removeListener('gotPage', handleData)
+            resolve()
+        }
+        uploadEmitter.on('gotPage', handleData)
+        port.write(new Buffer.from([1, 2, 3]))
+        console.log("Send Page")
+    })
+
+}
+
+const sendDone = async() => {
+    return new Promise(async(resolve, reject) => {
+        const exit = () => {
+            uploadEmitter.removeListener('gotDone', handleData)
+            resolve()
+        }
+        const handleData = () => exit()
+        uploadEmitter.on('gotDone', handleData)
+        port.write('WBM:DONE')
+    })
+}
+
+const sendPages = async(pages) => {
+    console.log("Sending Pages")
+    await pages.reduce(async(acc, thePage) => {
+        try {
+            await acc
+            await sendPage(thePage)
+        } catch (error) {
+            throw error
+        }
+    }, Promise.resolve([]))
+    return true
+}
+
+const sendSequence = async(pageSize, eepromSize, data) => {
+    return new Promise(async(resolve, reject) => {
+        console.log("Send Sequence", pageSize, eepromSize, data)
+        if (data.length > eepromSize) throw new Error('Sequence will not fit in EEPROM')
+
+        let pages = []
+        let page = []
+        for (let i = 0; i < data.length; i++) {
+            page.push(data[i])
+            if (page.length >= pageSize) {
+                pages.push(page)
+                page = []
+            }
+        }
+        while (page.length < pageSize) page.push(255)
+        pages.push(page)
+
+        console.log(pages.length, "Pages prepared")
+
+        try {
+
+            // send program command
+            console.log("Sending program command")
+            await sendProgramCommand()
+            console.log("Sent Program Command")
+
+            // send pages
+            await sendPages(pages)
+            console.log('Sent Pages')
+
+            // send done
+            console.log("Send Done")
+            await sendDone()
+            console.log("Upload is done")
+            resolve()
+        } catch (error) {
+            reject(errpr)
+        }
+
+    })
+}
+
+const upload = async(data) => {
+    return new Promise(async(resolve, reject) => {
+        const exit = () => {
+            console.log("In exit upload")
+            uploadEmitter.removeListener('flashInfo', handleData)
+            resolve()
+        }
+
+        const handleData = async(pageSize, eepromSize) => {
+            console.log("GOT A FLASH INFO EVENT")
+            try {
+                await sendSequence(pageSize, eepromSize, data)
+                exit()
+            } catch (error) {
+                throw error
+            }
+        }
+
+        uploadEmitter.on('flashInfo', handleData)
+
+        console.log("Buffer Length =", data.length)
+        console.log(data)
+
+        // get flash info from mcu
+        console.log('Get flash Info')
+        port.write('WBM:GETFLASHINFO')
+
+    })
+}
+
 const initIpcHandlers = () => {
     ipcMain.handle('upload', async(e, actions) => {
-        const out = generateSequenceArray(prepareActions(actions))
-        console.log("Buffer Length =", out.length)
-        console.log(out)
-        return true
+        if (port) {
+            const sequenceArray = generateSequenceArray(prepareActions(actions))
+            await upload(sequenceArray)
+            console.log("DONE IN IPC HANDLER")
+            return true
+        } else return false
     })
 
 
