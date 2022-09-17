@@ -6,7 +6,6 @@ const { SerialPort } = require('serialport');
 const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync } = require('fs');
 const { usb } = require('usb');
 const { EventEmitter } = require('node:events');
-const { exit } = require('process');
 
 class MyEmitter extends EventEmitter {}
 const uploadEmitter = new MyEmitter();
@@ -92,6 +91,9 @@ const handleData = (data) => {
         uploadEmitter.emit('ready')
     } else if (data.toString().includes('WBM:DONE')) {
         uploadEmitter.emit('gotDone')
+    } else if (data.toString().includes('WBM:XXXX')) {
+        // response to stream data
+        // console.log('XXXX')
     } else {
         console.log(data.toString())
     }
@@ -270,7 +272,7 @@ const sendPage = async(data) => {
             resolve()
         }
         uploadEmitter.on('gotPage', handleData)
-        port.write(new Buffer.from([1, 2, 3]))
+        port.write(new Buffer.from(data))
     })
 
 }
@@ -398,8 +400,10 @@ const initIpcHandlers = () => {
     })
 
     ipcMain.handle('sendValue', async(e, data) => {
-        //console.log("Send Serial", data)
-        if (port) port.write(new Buffer.from(data))
+        if (port) {
+            // console.log("Send Serial", data)
+            port.write(new Buffer.from(data), (err) => console.log(err))
+        }
         return true
     })
 
