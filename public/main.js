@@ -95,7 +95,7 @@ const handleData = (data) => {
         // response to stream data
         // console.log('XXXX')
     } else {
-        console.log(data.toString())
+        //console.log(data.toString())
     }
 }
 
@@ -384,7 +384,6 @@ const initIpcHandlers = () => {
         } else return false
     })
 
-
     ipcMain.on('play', (e, file) => {
         if (settings.sound) win.webContents.send('play_file', file)
     })
@@ -403,7 +402,7 @@ const initIpcHandlers = () => {
     ipcMain.handle('sendValue', async(e, data) => {
         if (port) {
             // console.log("Send Serial", data)
-            port.write(new Buffer.from(data), (err) => console.log(err))
+            port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
         }
         return true
     })
