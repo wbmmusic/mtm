@@ -79,21 +79,18 @@ const getRobots = () => {
 }
 
 const handleData = (data) => {
-    console.log('DATA =>', data.toString())
+    // console.log('DATA =>', data.toString())
     if (data.toString().includes('WBM:FLASHINFO')) {
-        console.log('Flash Info', data)
         const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
         const eepromSize = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
-        console.log("Page Size", pageSize)
-        console.log("EEPROM Size", eepromSize)
+            // console.log("Page Size", pageSize)
+            // console.log("EEPROM Size", eepromSize)
         uploadEmitter.emit('flashInfo', pageSize, eepromSize)
     } else if (data.toString().includes('WBM:PAGE')) {
-        console.log('Page was received')
         uploadEmitter.emit('gotPage')
     } else if (data.toString().includes('WBM:READY')) {
         uploadEmitter.emit('ready')
     } else if (data.toString().includes('WBM:DONE')) {
-        console.log('Device is done and wtvr')
         uploadEmitter.emit('gotDone')
     } else {
         console.log(data.toString())
@@ -274,7 +271,6 @@ const sendPage = async(data) => {
         }
         uploadEmitter.on('gotPage', handleData)
         port.write(new Buffer.from([1, 2, 3]))
-        console.log("Send Page")
     })
 
 }
@@ -326,7 +322,7 @@ const sendSequence = async(pageSize, eepromSize, data) => {
         try {
 
             // send program command
-            console.log("Sending program command")
+            // console.log("Sending program command")
             await sendProgramCommand()
             console.log("Sent Program Command")
 
@@ -335,7 +331,7 @@ const sendSequence = async(pageSize, eepromSize, data) => {
             console.log('Sent Pages')
 
             // send done
-            console.log("Send Done")
+            // console.log("Send Done")
             await sendDone()
             console.log("Upload is done")
             resolve()
@@ -349,7 +345,7 @@ const sendSequence = async(pageSize, eepromSize, data) => {
 const upload = async(data) => {
     return new Promise(async(resolve, reject) => {
         const exit = () => {
-            console.log("In exit upload")
+            // console.log("In exit upload")
             uploadEmitter.removeListener('flashInfo', handleData)
             resolve()
         }
@@ -381,7 +377,6 @@ const initIpcHandlers = () => {
         if (port) {
             const sequenceArray = generateSequenceArray(prepareActions(actions))
             await upload(sequenceArray)
-            console.log("DONE IN IPC HANDLER")
             return true
         } else return false
     })
