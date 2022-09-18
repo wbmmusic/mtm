@@ -308,7 +308,6 @@ const sendSequence = async(pageSize, eepromSize, data) => {
         if (data.length > eepromSize) throw new Error('Sequence will not fit in EEPROM')
 
         let pages = makePages(data, pageSize)
-        console.log(pages.length, "Pages prepared")
 
         try {
 
@@ -345,7 +344,12 @@ const makePages = (data, pageSize) => {
     })
     while (page.length < pageSize) page.push(0xFF)
     pages.push(page)
+    console.log("Prepared", pages.length, "pages")
     return pages
+}
+
+const getDeviceInfo = async() => {
+
 }
 
 const uploadFirmware = async() => {
@@ -357,8 +361,12 @@ const uploadFirmware = async() => {
     const pathToFile = normalize(res.filePaths[0])
     console.log(pathToFile)
     const file = readFileSync(pathToFile)
+
+    await getDeviceInfo()
+
     let pages = makePages(file, 64)
-    console.log("Pages Length", pages.length)
+
+    await sendPages(pages)
 
     return true
 }
