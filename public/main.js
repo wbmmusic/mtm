@@ -3,7 +3,7 @@ const { join, normalize } = require('path')
 const url = require('url')
 const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
-const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync } = require('fs');
+const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync, readFile } = require('fs');
 const { usb } = require('usb');
 const { EventEmitter } = require('node:events');
 
@@ -307,18 +307,7 @@ const sendSequence = async(pageSize, eepromSize, data) => {
         console.log("Send Sequence", pageSize, eepromSize, data)
         if (data.length > eepromSize) throw new Error('Sequence will not fit in EEPROM')
 
-        let pages = []
-        let page = []
-        for (let i = 0; i < data.length; i++) {
-            page.push(data[i])
-            if (page.length >= pageSize) {
-                pages.push(page)
-                page = []
-            }
-        }
-        while (page.length < pageSize) page.push(255)
-        pages.push(page)
-
+        let pages = makePages(data, pageSize)
         console.log(pages.length, "Pages prepared")
 
         try {
@@ -342,6 +331,36 @@ const sendSequence = async(pageSize, eepromSize, data) => {
         }
 
     })
+}
+
+const makePages = (data, pageSize) => {
+    let pages = []
+    let page = []
+    data.forEach(byte => {
+        page.push(byte)
+        if (page.length === pageSize) {
+            pages.push(page)
+            page = []
+        }
+    })
+    while (page.length < pageSize) page.push(0xFF)
+    pages.push(page)
+    return pages
+}
+
+const uploadFirmware = async() => {
+    const res = await dialog.showOpenDialog(win, {
+        title: 'Upload Firmware',
+        filters: [{ name: 'Binary File', extensions: ['bin'] }]
+    })
+    if (res.canceled === true) return false
+    const pathToFile = normalize(res.filePaths[0])
+    console.log(pathToFile)
+    const file = readFileSync(pathToFile)
+    let pages = makePages(file, 64)
+    console.log("Pages Length", pages.length)
+
+    return true
 }
 
 const upload = async(data) => {
@@ -376,6 +395,11 @@ const upload = async(data) => {
 }
 
 const initIpcHandlers = () => {
+    ipcMain.handle('uploadFirmware', async() => {
+        await uploadFirmware()
+        return true
+    })
+
     ipcMain.handle('upload', async(e, actions) => {
         if (port) {
             const sequenceArray = generateSequenceArray(prepareActions(actions))

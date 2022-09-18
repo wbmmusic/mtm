@@ -15,6 +15,7 @@ import { Robot } from "./robot/Robot";
 import { GlobalContext } from "../contexts/GlobalContext";
 import UsbIcon from "@mui/icons-material/Usb";
 import UsbOffIcon from "@mui/icons-material/UsbOff";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 
 //delete me
 
@@ -54,6 +55,13 @@ export default function Top() {
     window.electron.ipcRenderer
       .invoke("sound", mute)
       .then(res => setSound(res));
+  };
+
+  const handleUploadFirmware = () => {
+    window.electron.ipcRenderer
+      .invoke("uploadFirmware")
+      .then(res => console.log(res))
+      .catch(err => console.error(err));
   };
 
   const makeMute = () => {
@@ -126,6 +134,11 @@ export default function Top() {
             </IconButton>
           )}
         </Box>
+        <IconButton size="small" color="inherit">
+          <Tooltip title="Upload Firmware" onClick={handleUploadFirmware}>
+            <FileUploadIcon />
+          </Tooltip>
+        </IconButton>
         {makeMute()}
         {makeAdminMode()}
       </Stack>
