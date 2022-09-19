@@ -57,13 +57,6 @@ export default function Top() {
       .then(res => setSound(res));
   };
 
-  const handleUploadFirmware = () => {
-    window.electron.ipcRenderer
-      .invoke("uploadFirmware")
-      .then(res => console.log(res))
-      .catch(err => console.error(err));
-  };
-
   const makeMute = () => {
     if (!sound) {
       return (
@@ -135,7 +128,10 @@ export default function Top() {
           )}
         </Box>
         <IconButton size="small" color="inherit">
-          <Tooltip title="Upload Firmware" onClick={handleUploadFirmware}>
+          <Tooltip
+            title="Upload Firmware"
+            onClick={() => window.electron.send("uploadFirmware")}
+          >
             <FileUploadIcon />
           </Tooltip>
         </IconButton>

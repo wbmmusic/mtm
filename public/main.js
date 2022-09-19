@@ -77,28 +77,6 @@ const getRobots = () => {
     return robots
 }
 
-const handleData = (data) => {
-    // console.log('DATA =>', data.toString())
-    if (data.toString().includes('WBM:FLASHINFO')) {
-        const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
-        const eepromSize = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
-            // console.log("Page Size", pageSize)
-            // console.log("EEPROM Size", eepromSize)
-        uploadEmitter.emit('flashInfo', pageSize, eepromSize)
-    } else if (data.toString().includes('WBM:PAGE')) {
-        uploadEmitter.emit('gotPage')
-    } else if (data.toString().includes('WBM:READY')) {
-        uploadEmitter.emit('ready')
-    } else if (data.toString().includes('WBM:DONE')) {
-        uploadEmitter.emit('gotDone')
-    } else if (data.toString().includes('WBM:XXXX')) {
-        // response to stream data
-        // console.log('XXXX')
-    } else {
-        //console.log(data.toString())
-    }
-}
-
 const openPort = async() => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -125,7 +103,6 @@ const openPort = async() => {
                     console.log("Port Closed")
                     win.webContents.send('usb_status', false)
                 })
-                port.on('data', (d) => handleData(d))
                 port.on('error', (err) => console.error(err))
 
             } else reject("Didn't Find target Device")
@@ -248,68 +225,91 @@ const generateSequenceArray = (actions) => {
 
 const sendProgramCommand = async() => {
     return new Promise(async(resolve, reject) => {
-        const handleData = () => {
-            console.log('Device is ready for sequence')
-            exit()
+        const exit = (data, err) => {
+            clearTimeout(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
         }
-        const exit = () => {
-            uploadEmitter.removeListener('ready', handleData)
-            resolve()
+        const handleData = (data) => {
+            if (data.toString().includes('WBM:READY')) {
+                console.log('Device is ready for sequence')
+                exit({})
+            } else exit({}, new Error('Didnt get expected response in sendProgramCommand'))
         }
-        uploadEmitter.on('ready', handleData)
+        const timer = setTimeout(() => exit({}, new Error('sendProgramCommand timed out')), 1000);
+        port.on('data', handleData)
         port.write('WBM:LOAD')
     })
 }
 
-const sendPage = async(data) => {
+const sendPage = async(page) => {
     return new Promise(async(resolve, reject) => {
-        const handleData = () => {
-            console.log("Sent Page")
-            exit()
+        const exit = (data, err) => {
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
         }
-        const exit = () => {
-            uploadEmitter.removeListener('gotPage', handleData)
-            resolve()
-        }
-        uploadEmitter.on('gotPage', handleData)
-        port.write(new Buffer.from(data))
+        const handleData = (data) => {
+                if (data.toString().includes('WBM:PAGE')) {
+                    // console.log("Sent Page")
+                    exit({})
+                } else exit({}, new Error('Unexpected response in sendPage'))
+            }
+            // console.log("Send Page")
+        const timer = setTimeout(() => exit({}, new Error('sendPage timed out')), 1000);
+        port.on('data', handleData)
+        port.write(new Buffer.from(page))
     })
 
 }
 
 const sendDone = async() => {
     return new Promise(async(resolve, reject) => {
-        const exit = () => {
-            uploadEmitter.removeListener('gotDone', handleData)
-            resolve()
+        const exit = (data, err) => {
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
         }
-        const handleData = () => exit()
-        uploadEmitter.on('gotDone', handleData)
+        const handleData = (data) => {
+            if (data.toString().includes('WBM:DONE')) {
+                // console.log("Got Done")
+                exit({})
+            } else exit({}, new Error('Unexpected Response in sendDone'))
+        }
+        const timer = setTimeout(() => exit({}, new Error('sendDone timed out')), 1000);
+        port.on('data', handleData)
         port.write('WBM:DONE')
     })
 }
 
 const sendPages = async(pages) => {
-    console.log("Sending Pages")
+    let pagesSent = 0;
     await pages.reduce(async(acc, thePage) => {
         try {
             await acc
             await sendPage(thePage)
+            pagesSent++
         } catch (error) {
             throw error
         }
     }, Promise.resolve([]))
+    console.log("Sent", pagesSent, "pages")
     return true
 }
 
-const sendSequence = async(pageSize, eepromSize, data) => {
+const writeMcuFlash = async(data) => {
     return new Promise(async(resolve, reject) => {
-        console.log("Send Sequence", pageSize, eepromSize, data)
-        if (data.length > eepromSize) throw new Error('Sequence will not fit in EEPROM')
-
-        let pages = makePages(data, pageSize)
-
         try {
+
+            const { pageSize, availableSpace } = await getDeviceInfo()
+            console.log('Got Info')
+
+            if (data.length > availableSpace) reject(new Error('Sequence will not fit in EEPROM'))
+
+            let pages = makePages(data, pageSize)
 
             // send program command
             // console.log("Sending program command")
@@ -321,14 +321,14 @@ const sendSequence = async(pageSize, eepromSize, data) => {
             console.log('Sent Pages')
 
             // send done
-            // console.log("Send Done")
             await sendDone()
+
             console.log("Upload is done")
             resolve()
-        } catch (error) {
-            reject(errpr)
-        }
 
+        } catch (error) {
+            reject(error)
+        }
     })
 }
 
@@ -349,7 +349,39 @@ const makePages = (data, pageSize) => {
 }
 
 const getDeviceInfo = async() => {
+    return new Promise(async(resolve, reject) => {
+        const exit = (data, err) => {
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
+        }
+        const handleData = (data) => {
+            if (data.toString().includes('WBM:FLASHINFO')) {
+                console.log("Got Device Info")
+                const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
+                const availableSpace = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
+                exit({ pageSize, availableSpace })
+            } else exit({}, new Error(`Unexpected data in getDeviceInfo ${data.toString()}`))
 
+        }
+        const timer = setTimeout(() => exit({}, new Error('getDeviceInfo timed out')), 1000);
+        port.on('data', handleData)
+        port.write('WBM:GETFLASHINFO')
+    })
+}
+
+const upload = async(data) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+
+            const send = await writeMcuFlash(data)
+            console.log('Upload Complete')
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
+    })
 }
 
 const uploadFirmware = async() => {
@@ -362,51 +394,13 @@ const uploadFirmware = async() => {
     console.log(pathToFile)
     const file = readFileSync(pathToFile)
 
-    await getDeviceInfo()
-
-    let pages = makePages(file, 64)
-
-    await sendPages(pages)
+    await upload(file)
 
     return true
 }
 
-const upload = async(data) => {
-    return new Promise(async(resolve, reject) => {
-        const exit = () => {
-            // console.log("In exit upload")
-            uploadEmitter.removeListener('flashInfo', handleData)
-            resolve()
-        }
-
-        const handleData = async(pageSize, eepromSize) => {
-            console.log("GOT A FLASH INFO EVENT")
-            console.log(pageSize, eepromSize)
-            try {
-                await sendSequence(pageSize, eepromSize, data)
-                exit()
-            } catch (error) {
-                throw error
-            }
-        }
-
-        uploadEmitter.on('flashInfo', handleData)
-
-        console.log("Buffer Length =", data.length)
-        console.log(data)
-
-        // get flash info from mcu
-        console.log('Get flash Info')
-        port.write('WBM:GETFLASHINFO')
-
-    })
-}
-
 const initIpcHandlers = () => {
-    ipcMain.handle('uploadFirmware', async() => {
-        await uploadFirmware()
-        return true
-    })
+    ipcMain.on('uploadFirmware', () => uploadFirmware())
 
     ipcMain.handle('upload', async(e, actions) => {
         if (port) {
