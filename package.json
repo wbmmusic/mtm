@@ -69,7 +69,8 @@
             "icon": "public/dmg.icns"
         },
         "win": {
-            "icon": "public/icon.ico"
+            "icon": "public/icon.ico",
+            "publisherName": "WBM Tek"
         },
         "linux": {
             "icon": "public/icon.icns",
