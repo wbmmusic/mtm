@@ -104,7 +104,7 @@ export const Transport = ({ actions }) => {
 
   const handleUpload = () => {
     console.log("Upload");
-    window.electron.ipcRenderer.invoke("upload", actions);
+    window.electron.send("upload", actions);
   };
 
   const uploadable = () => {

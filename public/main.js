@@ -248,17 +248,19 @@ const sendPage = async(page) => {
         const exit = (data, err) => {
             clearInterval(timer)
             port.removeListener('data', handleData)
-            if (err) reject(err)
+            if (err) throw err
             else resolve(data)
         }
         const handleData = (data) => {
-                if (data.toString().includes('WBM:PAGE')) {
-                    // console.log("Sent Page")
+                if (JSON.stringify([...data]) === JSON.stringify([...page])) {
                     exit({})
-                } else exit({}, new Error('Unexpected response in sendPage'))
+                } else {
+                    exit({}, new Error('Unexpected response in sendPage'))
+                }
             }
             // console.log("Send Page")
         const timer = setTimeout(() => exit({}, new Error('sendPage timed out')), 1000);
+        // console.log('Sending Page', page.length)
         port.on('data', handleData)
         port.write(new Buffer.from(page))
     })
@@ -303,9 +305,9 @@ const sendPages = async(pages) => {
 const writeMcuFlash = async(data) => {
     return new Promise(async(resolve, reject) => {
         try {
-
+            console.log("In writeMcuFlash")
             const { pageSize, availableSpace } = await getDeviceInfo()
-            console.log('Got Info')
+            console.log('Got Info | Page Size =', pageSize, "| Available Space =", availableSpace)
 
             if (data.length > availableSpace) reject(new Error('Sequence will not fit in EEPROM'))
 
@@ -327,7 +329,7 @@ const writeMcuFlash = async(data) => {
             resolve()
 
         } catch (error) {
-            reject(error)
+            throw error
         }
     })
 }
@@ -350,13 +352,18 @@ const makePages = (data, pageSize) => {
 
 const getDeviceInfo = async() => {
     return new Promise(async(resolve, reject) => {
+
         const exit = (data, err) => {
             clearInterval(timer)
             port.removeListener('data', handleData)
-            if (err) reject(err)
-            else resolve(data)
+            if (err !== undefined) {
+                throw err
+                reject(err)
+            } else resolve(data)
         }
         const handleData = (data) => {
+            console.log("-------------------------------------")
+            console.log(data.toString())
             if (data.toString().includes('WBM:FLASHINFO')) {
                 console.log("Got Device Info")
                 const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
@@ -367,14 +374,14 @@ const getDeviceInfo = async() => {
         }
         const timer = setTimeout(() => exit({}, new Error('getDeviceInfo timed out')), 1000);
         port.on('data', handleData)
-        port.write('WBM:GETFLASHINFO')
+        port.write('WBM:GETFLASHINFO', () => console.log("Wrote WBM:GETFLASHINFO"))
     })
 }
 
 const upload = async(data) => {
     return new Promise(async(resolve, reject) => {
         try {
-
+            console.log("in Upload")
             const send = await writeMcuFlash(data)
             console.log('Upload Complete')
             resolve()
@@ -394,7 +401,13 @@ const uploadFirmware = async() => {
     console.log(pathToFile)
     const file = readFileSync(pathToFile)
 
-    await upload(file)
+
+    try {
+        await upload(file)
+    } catch (error) {
+        throw error
+    }
+
 
     return true
 }
@@ -402,12 +415,17 @@ const uploadFirmware = async() => {
 const initIpcHandlers = () => {
     ipcMain.on('uploadFirmware', () => uploadFirmware())
 
-    ipcMain.handle('upload', async(e, actions) => {
+    ipcMain.on('upload', async(e, actions) => {
         if (port) {
             const sequenceArray = generateSequenceArray(prepareActions(actions))
-            await upload(sequenceArray)
-            return true
-        } else return false
+            try {
+                await upload(sequenceArray)
+            } catch (error) {
+                throw error
+            }
+        } else {
+            console.log('NO PORT!!!!')
+        }
     })
 
     ipcMain.on('play', (e, file) => {
