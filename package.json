@@ -70,7 +70,7 @@
         },
         "win": {
             "icon": "public/icon.ico",
-            "publisherName": "WBM Tek"
+            "publisherName": "William Mareci"
         },
         "linux": {
             "icon": "public/icon.icns",
