@@ -224,25 +224,25 @@ const generateSequenceArray = (actions) => {
 }
 
 const sendProgramCommand = async() => {
-    return new Promise(async(resolve, reject) => {
-        const exit = (data, err) => {
-            clearTimeout(timer)
-            port.removeListener('data', handleData)
-            if (err) reject(err)
-            else resolve(data)
-        }
-        const handleData = (data) => {
-            if (data.toString().includes('WBM:READY')) {
-                console.log('Device is ready for sequence')
-                exit({})
-            } else exit({}, new Error('Didnt get expected response in sendProgramCommand'))
-        }
-        const timer = setTimeout(() => exit({}, new Error('sendProgramCommand timed out')), 1000);
-        port.on('data', handleData)
-        port.write('WBM:LOAD')
-    })
-}
-
+        return new Promise(async(resolve, reject) => {
+            const exit = (data, err) => {
+                clearTimeout(timer)
+                port.removeListener('data', handleData)
+                if (err) reject(err)
+                else resolve(data)
+            }
+            const handleData = (data) => {
+                if (data.toString().includes('WBM:READY')) {
+                    console.log('Device is ready for sequence')
+                    exit({})
+                } else exit({}, new Error('Didnt get expected response in sendProgramCommand'))
+            }
+            const timer = setTimeout(() => exit({}, new Error('sendProgramCommand timed out')), 1000);
+            port.on('data', handleData)
+            port.write('WBM:LOAD')
+        })
+    }
+    // delete me
 const sendPage = async(page) => {
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
