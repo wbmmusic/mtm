@@ -107,9 +107,7 @@ export const Transport = ({ actions }) => {
     window.electron.send("upload", actions);
   };
 
-  const uploadable = () => {
-    return usbConnected;
-  };
+  const uploadable = () => usbConnected;
 
   return (
     <Box>
@@ -128,7 +126,7 @@ export const Transport = ({ actions }) => {
               },
               track: {
                 style: {
-                  color: "limeGreen",
+                  color: "orangeRed",
                   height: "14px",
                   borderRadius: "0px",
                 },
@@ -137,54 +135,61 @@ export const Transport = ({ actions }) => {
                 style: { display: "none" },
               },
               mark: {
-                style: { color: "blue", padding: "3px" },
+                style: { color: "dodgerBlue", padding: "3px" },
               },
             }}
           />
         </Box>
         <Divider />
-        <Stack direction="row">
-          <Tooltip title="Go to start">
-            <IconButton
-              aria-label="return"
-              size="large"
-              onMouseDown={returnToStart}
-              color="inherit"
-            >
-              <SkipPreviousIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Play">
-            <IconButton
-              aria-label="play"
-              size="large"
-              onMouseDown={play}
-              color="inherit"
-            >
-              <PlayArrowIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Stop">
-            <IconButton
-              aria-label="delete"
-              size="large"
-              onMouseDown={stop}
-              color="inherit"
-            >
-              <StopIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Repeat">
-            <IconButton
-              aria-label="repeat"
-              size="large"
-              color={repeat ? "success" : "inherit"}
-              onMouseDown={() => setRepeat(prev => !prev)}
-            >
-              <RepeatIcon fontSize="inherit" />
-            </IconButton>
-          </Tooltip>
-          <Stack width={"100%"}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          width="100%"
+          sx={{ backgroundColor: "lime" }}
+        >
+          <Stack direction="row">
+            <Tooltip title="Go to start">
+              <IconButton
+                aria-label="return"
+                size="large"
+                onMouseDown={returnToStart}
+                color="inherit"
+              >
+                <SkipPreviousIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Play">
+              <IconButton
+                aria-label="play"
+                size="large"
+                onMouseDown={play}
+                color="inherit"
+              >
+                <PlayArrowIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Stop">
+              <IconButton
+                aria-label="delete"
+                size="large"
+                onMouseDown={stop}
+                color="inherit"
+              >
+                <StopIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Repeat">
+              <IconButton
+                aria-label="repeat"
+                size="large"
+                color={repeat ? "success" : "inherit"}
+                onMouseDown={() => setRepeat(prev => !prev)}
+              >
+                <RepeatIcon fontSize="inherit" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+          <Stack>
             <Button
               sx={{ margin: "auto" }}
               variant="contained"
@@ -194,9 +199,14 @@ export const Transport = ({ actions }) => {
               Upload
             </Button>
           </Stack>
-          <Box sx={{ margin: "auto" }}>
+          <Box sx={{ margin: "auto 0px" }}>
             <Typography
-              sx={{ whiteSpace: "nowrap", marginRight: "4px" }}
+              width="200px"
+              sx={{
+                whiteSpace: "nowrap",
+                marginRight: "4px",
+                textAlign: "right",
+              }}
               variant="body2"
             >
               {current / 10 + " / " + duration() / 10 + " sec"}

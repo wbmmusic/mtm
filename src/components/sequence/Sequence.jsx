@@ -42,6 +42,16 @@ const defaultDeletePositionModal = { show: false, position: null };
 const defaultSequence = { appId: uuid(), name: "", actions: [] };
 const defaultConfirmDeleteSequenceModal = { show: false, name: null };
 
+const droppableStyle = {
+  border: "6px solid #55533c",
+  borderLeft: "20px solid #55533c",
+  borderRight: "20px solid #55533c",
+  overflowX: "auto",
+  minHeight: "80px",
+  backgroundColor: "lightGrey",
+  boxShadow: "2px 2px magenta, 6px 6px black",
+};
+
 export const Sequence = () => {
   const navigate = useNavigate();
   const { robotPath, sequenceId } = useParams();
@@ -210,31 +220,31 @@ export const Sequence = () => {
       let objCpy = JSON.parse(
         JSON.stringify(timelineObjects[res.source.index])
       );
-
+      window.electron.send("play", "timeline_add.mp3");
       let actionsCopy = JSON.parse(JSON.stringify(sequence.actions));
       const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
       actionsCopy.splice(res.destination.index, 0, insert);
 
       setSequence(old => ({ ...old, actions: actionsCopy }));
 
-      window.electron.send("play", "timeline_add.mp3");
       // console.log("Added Item To Timeline");
     } else if (res.source.droppableId === "timeline" && !res.destination) {
+      window.electron.send("play", "trash.mp3");
       setSequence(old => ({
         ...old,
         actions: old.actions.filter((x, idx) => idx !== res.source.index),
       }));
-      window.electron.send("play", "trash.mp3");
+
       // console.log("TRASHED");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
     ) {
+      window.electron.send("play", "timeline_move.mp3");
       let actionsCpy = JSON.parse(JSON.stringify(sequence.actions));
       let cutAction = actionsCpy.splice(res.source.index, 1)[0];
       actionsCpy.splice(res.destination.index, 0, cutAction);
       setSequence(old => ({ ...old, actions: actionsCpy }));
-      window.electron.send("play", "timeline_move.mp3");
       // console.log("Moved Item IN Timeline");
     }
     // console.log("END", actions, timelineObjects);
@@ -285,21 +295,13 @@ export const Sequence = () => {
             {provided => (
               <Stack
                 component={Paper}
-                elevation={4}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 direction={"row"}
                 p={0.5}
                 width={"100%"}
                 spacing={0.5}
-                sx={{
-                  overflowX: "auto",
-                  border: "6px solid #55533c",
-                  borderLeft: "20px solid #55533c",
-                  borderRight: "20px solid #55533c",
-                  minHeight: "80px",
-                  backgroundColor: "lightGrey",
-                }}
+                sx={droppableStyle}
               >
                 {timelineObjects.map((itm, idx) => (
                   <Draggable
@@ -366,21 +368,13 @@ export const Sequence = () => {
             {provided => (
               <Stack
                 component={Paper}
-                // elevation={4}
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 direction={"row"}
                 p={1}
                 width={"100%"}
                 spacing={0.5}
-                sx={{
-                  border: "6px solid #55533c",
-                  borderLeft: "20px solid #55533c",
-                  borderRight: "20px solid #55533c",
-                  overflowX: "auto",
-                  minHeight: "80px",
-                  backgroundColor: "lightGrey",
-                }}
+                sx={droppableStyle}
               >
                 {sequence.actions.map((act, idx) => {
                   // console.log("ACT ->", act.appId);
@@ -557,7 +551,7 @@ export const Sequence = () => {
       maxWidth={"100vw"}
       sx={{ overflow: "hidden" }}
     >
-      <Stack direction="row" width={"100vw"} spacing={1} p={1}>
+      <Stack direction="row" width={"100vw"} spacing={1} p={1} bgcolor="orange">
         <Box width={"100%"}>
           <TextField
             sx={{ width: "100%" }}

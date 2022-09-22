@@ -125,7 +125,7 @@ export const RobotSelector = () => {
         sx={{ cursor: "pointer" }}
         onClick={() => navigate("/robot/" + robot.path)}
       >
-        <Stack direction="row" width={"100%"} spacing={1} alignItems="center">
+        <Stack direction="row" width={"100%"} spacing={3} alignItems="center">
           <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
             {robot.name}
           </Typography>
@@ -159,7 +159,7 @@ export const RobotSelector = () => {
             sx={{
               backgroundColor: "#BBCC00",
               fontFamily: "Arcade",
-              fontSize: "22px",
+              fontSize: "26px",
               lineHeight: "80%",
               border: "5px solid",
               borderRadius: "3px",

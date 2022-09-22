@@ -111,7 +111,7 @@ export default function Top() {
         p={1}
         direction={"row"}
         spacing={1}
-        sx={{ backgroundColor: admin ? "salmon" : "" }}
+        sx={{ backgroundColor: admin ? "salmon" : "paleTurquoise" }}
       >
         <IconButton size="small" color="inherit" onClick={() => navigate("/")}>
           <HomeIcon />
