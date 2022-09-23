@@ -73,7 +73,6 @@
             "publisherName": "William Mareci"
         },
         "linux": {
-            "icon": "public/icon.icns",
             "target": "AppImage"
         }
     },
