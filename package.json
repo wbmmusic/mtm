@@ -74,7 +74,9 @@
             "publisherName": "William Mareci"
         },
         "linux": {
-            "target": "AppImage"
+            "target": "AppImage",
+            "vendor": "WBM Tek",
+            "category": "Education"
         }
     },
     "eslintConfig": {
