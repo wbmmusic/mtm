@@ -2,7 +2,11 @@
     "name": "mtm",
     "version": "0.0.30",
     "private": true,
-    "author": "Marece Williams",
+    "author": {
+        "name": "WBM Tek",
+        "url": "https://www.wbmtek.com",
+        "email": "info@wbmtek.com"
+    },
     "description": "MTM Copmoser",
     "homepage": "./",
     "main": "public/main.js",
