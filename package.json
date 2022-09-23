@@ -7,7 +7,7 @@
         "url": "https://www.wbmtek.com",
         "email": "info@wbmtek.com"
     },
-    "description": "MTM Copmoser",
+    "description": "MTM Composer",
     "homepage": "./",
     "main": "public/main.js",
     "dependencies": {
