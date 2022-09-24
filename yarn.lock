@@ -10121,10 +10121,10 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-usb@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/usb/-/usb-2.5.1.tgz#27550f078a785144fbc19b5f6664742a066b961f"
-  integrity sha512-/VNr4wUL32KVqyrVJ1HGBhDEvklhouVh+8ehIGKv6FsOKz6MWlkYLLAEyXbRo72HXhhiFNj6bwz6L+bIk8F0Yw==
+usb@^2.5.2:
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/usb/-/usb-2.5.2.tgz#081b83aff83279c6d7605608880009ad698bc2c8"
+  integrity sha512-/7hWfbPL4ExGTQO2v2XfuKoBHDwNMoNPZmyKjsPpS4bnEY3BIsaanPpGsLmaI4MOq9pAWDrIz0DwRA8SqJ1pVQ==
   dependencies:
     "@types/w3c-web-usb" "1.0.6"
     node-addon-api "^4.2.0"
