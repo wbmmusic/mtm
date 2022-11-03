@@ -15,6 +15,7 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { useContext } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { makeServoPositionData } from "../../utils/msgMaker";
 
 export const Transport = ({ actions }) => {
   const { usbConnected } = useContext(GlobalContext);
@@ -35,6 +36,8 @@ export const Transport = ({ actions }) => {
       } else if (act.type === "move") {
         out.push({ value: curTime, label: null, servos: act.servos });
         // out.push({ value: curTime, label: act.content, servos: act.servos });
+      } else if (act.type === "wait") {
+        out.push({ value: curTime, label: "wait", key: act.key });
       }
     });
     return out;
@@ -44,6 +47,7 @@ export const Transport = ({ actions }) => {
   const [intervalId, setIntervalId] = useState(0);
   const [repeat, setRepeat] = useState(false);
   const [marks, setMarks] = useState(makeMarks());
+  const [waitingOnKey, setWaitingOnKey] = useState(null);
 
   const returnToStart = () => setCurrent(0);
 
@@ -71,22 +75,42 @@ export const Transport = ({ actions }) => {
     setIntervalId(newIntervalId);
   };
 
+  const waitOnKey = key => {};
+
+  const makeServoPacket = (servoNumber, position) => {
+    let out = [];
+    out.push(servoNumber);
+    out.push(position);
+    return out;
+  };
+
+  const makeWaitStatePacket = key => {
+    let out = [];
+    return out;
+  };
+
   useEffect(() => {
     marks.forEach(mark => {
       if (mark.value === current) {
         let packet = [];
-        mark.servos.forEach((servo, idx) => {
-          if (servo.enabled) {
-            packet.push(idx + 1);
-            packet.push(servo.value);
+        if (mark.servos !== undefined) {
+          mark.servos.forEach((servo, idx) => {
+            if (servo.enabled) {
+              makeServoPositionData(idx, servo.value);
+              packet.push(...makeServoPacket(idx + 1, servo.value));
+            }
+          });
+          if (packet.length > 0) {
+            window.electron.ipcRenderer
+              .invoke("sendValue", packet)
+              .then()
+              .catch(err => console.log(err));
           }
-        });
-        if (packet.length > 0) {
-          //console.log("Send", packet);
-          window.electron.ipcRenderer
-            .invoke("sendValue", packet)
-            .then()
-            .catch(err => console.log(err));
+        } else if (mark.key !== undefined) {
+          // This is a wait state
+          console.log("Waiting on key", mark.key);
+          //packet.push(...makeWaitStatePacket(act.key))
+          waitOnKey(mark.key);
         }
       }
     });
@@ -101,6 +125,24 @@ export const Transport = ({ actions }) => {
     setMarks(makeMarks());
     // console.log("Make Marks");
   }, [actions]);
+
+  useEffect(() => {
+    if (waitingOnKey) {
+      window.electron.receive("keyPress", key => {
+        // If the key that was pressed is the key we were waiting for
+        if (key === waitingOnKey) {
+          //resume playback
+
+          // No longer waiting for a key press
+          setWaitingOnKey(null);
+        }
+      });
+    }
+
+    return () => {
+      window.electron.removeListener("keyPress");
+    };
+  }, [waitingOnKey]);
 
   const handleUpload = () => {
     console.log("Upload");

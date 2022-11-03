@@ -28,3 +28,14 @@ export const delays = [
     value: 50,
   },
 ];
+
+export const waitStates = [
+  {
+    id: "waitForA",
+    appId: "wait_for_a",
+    content: "A",
+    type: "wait",
+    key: 0,
+    value: 10,
+  },
+];

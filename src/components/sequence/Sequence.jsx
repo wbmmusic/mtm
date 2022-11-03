@@ -17,6 +17,7 @@ import { Transport } from "./Transport";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import SettingsRemoteIcon from "@mui/icons-material/SettingsRemote";
 import { EditPositionModal } from "./EditPositionModal";
 import { v4 as uuid } from "uuid";
 import {
@@ -33,7 +34,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ControlPointDuplicateIcon from "@mui/icons-material/ControlPointDuplicate";
 import { SelectPositionModal } from "./SelectPositionModal";
 import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal";
-import { delays } from "./Constants";
+import { delays, waitStates } from "./Constants";
 import { ConfirmDeleteSequenceModal } from "./ConfirmDeleteSequenceModal";
 
 const defaultPositionModal = { show: false, mode: null, position: null };
@@ -84,7 +85,7 @@ export const Sequence = () => {
 
   const makeObjects = () => {
     // console.log("MakeObjects");
-    let out = [...delays];
+    let out = [...delays, ...waitStates];
     if (positions) {
       positions.forEach(position => {
         out.push({
@@ -172,7 +173,7 @@ export const Sequence = () => {
   };
 
   const DelayItem = ({ itm }) => (
-    <Stack height={"40px"}>
+    <Stack height={"100%"}>
       <Box>
         <Typography
           variant="body2"
@@ -188,6 +189,24 @@ export const Sequence = () => {
           width={itm.value / 2 + "px"}
           sx={{ backgroundColor: "lightGrey" }}
         />
+      </Box>
+    </Stack>
+  );
+
+  const WaitItem = ({ itm }) => (
+    <Stack height={"100%"}>
+      <Box>
+        <Typography
+          variant="body2"
+          sx={{ textAlign: "center", whiteSpace: "nowrap", fontSize: "9px" }}
+        >
+          {itm.content}
+        </Typography>
+      </Box>
+      <Box height={"100%"}>
+        <Stack height="100%" justifyContent="center">
+          <SettingsRemoteIcon />
+        </Stack>
       </Box>
     </Stack>
   );
@@ -257,6 +276,8 @@ export const Sequence = () => {
       return <DelayItem itm={itm} />;
     } else if (itm.type === "move") {
       return <PositionItem itm={itm} />;
+    } else if (itm.type === "wait") {
+      return <WaitItem itm={itm} />;
     }
   };
 
