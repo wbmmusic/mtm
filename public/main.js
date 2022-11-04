@@ -199,10 +199,7 @@ const prepareActions = (actions) => {
     return out
 }
 
-const makeTime = (time) => new Buffer.from([(time >> 8) & 0x1F, time & 0xFF])
-const makeServo = (servo, idx) => new Buffer.from([(idx + 1) | 0x40, servo.value])
-
-const generateSequenceArray = (actions) => {
+const generateSequenceBuffer = (actions) => {
     console.log(actions)
     let out = []
     let curTimePos = 0;
@@ -425,9 +422,9 @@ const initIpcHandlers = () => {
 
     ipcMain.on('upload', async(e, actions) => {
         if (port) {
-            const sequenceArray = generateSequenceArray(prepareActions(actions))
+            const sequenceBuffer = generateSequenceBuffer(prepareActions(actions))
             try {
-                await upload(sequenceArray)
+                await upload(sequenceBuffer)
             } catch (error) {
                 throw error
             }
