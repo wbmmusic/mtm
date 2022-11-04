@@ -37,7 +37,6 @@ const checkForFirmwareUpdates = async() => {
             }
             resolve()
         } catch (error) {
-            throw error
             reject(error)
         }
     })
