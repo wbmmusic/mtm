@@ -4,7 +4,7 @@ const url = require('node:url')
 const { autoUpdater } = require('electron-updater');
 const { initUSB, } = require('./usb');
 const { checkFolders, getRobots, pathToRobots } = require('./utils');
-const { checkForFirmwareUpdates } = require('./firmware');
+const { checkForFirmwareUpdates, compareToLatest } = require('./firmware');
 
 let firstReactInit = true
 
@@ -77,6 +77,7 @@ app.on('ready', () => {
             if (firstReactInit === true) {
                 firstReactInit = false
                 console.log('React Is Ready')
+                compareToLatest()
                 if (app.isPackaged) {
                     win.webContents.send('message', 'App is packaged')
 
@@ -104,6 +105,10 @@ app.on('ready', () => {
         createWindow()
 
         checkForFirmwareUpdates()
+
+        // setInterval(() => {
+        //     console.log(connectedDeviceInfo)
+        // }, 1000);
     })
     ///////////////////////
 

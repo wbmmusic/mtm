@@ -1,12 +1,22 @@
 const { dialog } = require('electron');
 const { SerialPort } = require('serialport');
 const { usb } = require('usb');
+const { join } = require('node:path');
 const { compareToLatest } = require('./firmware');
+const { pathToFirmwareFolder } = require('./utils');
+const { existsSync, readFileSync } = require('node:fs');
 
 const usbTarget = [
     { vid: 0x2341, pid: 0x0043 },
     { vid: 0x03EB, pid: 0x2404 }
 ]
+
+const defaultBootloader = {
+    waiting: false,
+    serialNumber: ''
+}
+
+let bootloader = {...defaultBootloader }
 
 global.connectedDeviceInfo = null
 global.port = null // The serialport for the connected device
@@ -24,9 +34,8 @@ const getPorts = async() => {
 
 }
 
-const getConnectedDeviceInfo = async() => {
+const getConnectedDeviceInfo = async(serialNumber) => {
     return new Promise(async(resolve, reject) => {
-
         const exit = (err) => {
             clearTimeout(timeout)
             port.removeListener('data', handleData)
@@ -37,7 +46,7 @@ const getConnectedDeviceInfo = async() => {
 
         const handleData = (data) => {
             const pairs = data.toString().split(";")
-            out = {}
+            out = { serialNumber }
             pairs.forEach(pair => {
                 const keyVal = pair.split(':')
                 out[keyVal[0]] = keyVal[1]
@@ -75,10 +84,24 @@ const openPort = async() => {
                 port = new SerialPort({ path: thePorts[0].path, baudRate: 115200 })
                 port.on('open', async() => {
                     // console.log('PORT OPENED')
-                    win.webContents.send('usb_status', true)
-                    await getConnectedDeviceInfo()
-                    compareToLatest()
-                    resolve(true)
+
+                    if (thePorts[0].serialNumber.includes("BOOT:")) {
+                        console.log()
+                        if (bootloader.waiting && thePorts[0].serialNumber.includes(bootloader.serialNumber)) {
+
+                        } else {
+                            console.log("SETTING THIS STUFF")
+                            connectedDeviceInfo = {
+                                serialNumber: thePorts[0].serialNumber,
+                                model: "mtm2s"
+                            }
+                        }
+                    } else {
+                        win.webContents.send('usb_status', true)
+                        await getConnectedDeviceInfo(thePorts[0].serialNumber)
+                        compareToLatest()
+                        resolve(true)
+                    }
                 })
                 port.on('close', () => {
                     port = null
@@ -158,7 +181,7 @@ const sendDone = async() => {
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
             clearInterval(timer)
-            port.removeListener('data', handleData)
+            if (port) port.removeListener('data', handleData)
             if (err) reject(err)
             else resolve(data)
         }
@@ -174,12 +197,42 @@ const sendDone = async() => {
     })
 }
 
+const sendBootToBootloader = async() => {
+    const serial = connectedDeviceInfo.serialNumber.split(':')[1]
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            clearTimeout(timeout)
+            this.port.removeListener('data', handleData)
+            if (err) reject(err)
+            else {
+                bootloader.waiting = true
+                bootloader.serialNumber = serial
+                resolve()
+            }
+        }
+
+        const handleData = (data) => {
+            if (data.toString() === "WBM:BOOT") {}
+        }
+
+        const timeout = setTimeout(() => {
+            exit(new Error('Timed Out sending boot to bootloader'))
+        }, 1000);
+
+        port.on('data', handleData)
+
+        port.write('WBM:BOOTLOADER', () => console.log("Sent Boot To Bootloader"))
+    })
+
+}
+
 const sendPages = async(pages) => {
     let pagesSent = 0;
     await pages.reduce(async(acc, thePage) => {
         try {
             await acc
             await sendPage(thePage)
+            console.log("Sent Page", pagesSent)
             pagesSent++
         } catch (error) {
             throw error
@@ -279,8 +332,8 @@ const upload = async(data) => {
     })
 }
 
-const uploadFirmware = async() => {
-    console.log("Upload Firmware")
+const uploadCustomFirmware = async() => {
+    console.log("Upload Custom Firmware")
     const res = await dialog.showOpenDialog(win, {
         title: 'Upload Firmware',
         filters: [{ name: 'Binary File', extensions: ['bin'] }]
@@ -290,6 +343,25 @@ const uploadFirmware = async() => {
     console.log(pathToFile)
     const file = readFileSync(pathToFile)
 
+
+    try {
+        await upload(file)
+    } catch (error) {
+        throw error
+    }
+
+
+    return true
+}
+
+const uploadFirmware = async() => {
+    console.log("Upload Latest Firmware")
+    console.log(connectedDeviceInfo)
+    const pathToDeviceFolder = join(pathToFirmwareFolder, connectedDeviceInfo.model.toLowerCase())
+    if (!existsSync(pathToDeviceFolder)) throw new Error('Folder Doesnt Exist')
+    const devLatest = JSON.parse(readFileSync(join(pathToDeviceFolder, 'latest.json')))
+    const pathToLatestFirmwareFile = join(pathToDeviceFolder, devLatest.name)
+    const file = readFileSync(pathToLatestFirmwareFile)
 
     try {
         await upload(file)
@@ -338,4 +410,4 @@ const initUSB = () => {
     tryToOpenPort()
 }
 
-module.exports = { initUSB, upload, uploadFirmware, port }
+module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, port }

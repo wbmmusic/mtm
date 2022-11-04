@@ -40,7 +40,10 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
-    window.electron.receive("firmwareAvailable", latest => setFirmware(latest));
+    window.electron.receive("firmwareAvailable", latest => {
+      console.log("Latest Firmware", latest);
+      setFirmware(latest);
+    });
 
     return () => {
       window.electron.removeListener("play_file");
@@ -131,7 +134,7 @@ export default function Top() {
             </IconButton>
           )}
         </Box>
-        {firmware ? (
+        {!firmware ? (
           <IconButton size="small" color="inherit">
             <Tooltip
               title="Update Firmware"
