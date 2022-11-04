@@ -42,4 +42,8 @@ const checkForFirmwareUpdates = async() => {
     })
 }
 
-module.exports = { checkForFirmwareUpdates }
+const compareToLatest = (devInfo) => {
+    console.log("Compare to latest", devInfo)
+}
+
+module.exports = { checkForFirmwareUpdates, compareToLatest }

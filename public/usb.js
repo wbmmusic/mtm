@@ -1,6 +1,7 @@
 const { dialog } = require('electron');
 const { SerialPort } = require('serialport');
 const { usb } = require('usb');
+const { compareToLatest } = require('./firmware');
 
 const usbTarget = [
     { vid: 0x2341, pid: 0x0043 },
@@ -76,7 +77,8 @@ const openPort = async() => {
                 port.on('open', () => {
                     console.log('PORT OPENED')
                     win.webContents.send('usb_status', true)
-                    getConnectedDeviceInfo()
+                    getConnectedDeviceInfo(connectedDeviceInfo)
+                    compareToLatest()
                     resolve(true)
                 })
                 port.on('close', () => {
