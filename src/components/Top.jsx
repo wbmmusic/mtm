@@ -25,6 +25,7 @@ export default function Top() {
 
   const [audioFile, setAudioFile] = useState({ file: null });
   const [sound, setSound] = useState(true);
+  const [firmware, setFirmware] = useState(null);
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -39,8 +40,11 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
+    window.electron.receive("firmwareAvailable", latest => setFirmware(latest));
+
     return () => {
       window.electron.removeListener("play_file");
+      window.electron.removeListener("firmwareAvailable");
     };
   }, []);
 
@@ -127,14 +131,16 @@ export default function Top() {
             </IconButton>
           )}
         </Box>
-        <IconButton size="small" color="inherit">
-          <Tooltip
-            title="Upload Firmware"
-            onClick={() => window.electron.send("uploadFirmware")}
-          >
-            <FileUploadIcon />
-          </Tooltip>
-        </IconButton>
+        {firmware ? (
+          <IconButton size="small" color="inherit">
+            <Tooltip
+              title="Update Firmware"
+              onClick={() => window.electron.send("uploadFirmware")}
+            >
+              <FileUploadIcon />
+            </Tooltip>
+          </IconButton>
+        ) : null}
         {makeMute()}
         {makeAdminMode()}
       </Stack>

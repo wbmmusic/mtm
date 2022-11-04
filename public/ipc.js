@@ -39,7 +39,7 @@ ipcMain.handle('sound', (e, onOff) => {
 
 ipcMain.handle('sendValue', async(e, data) => {
     if (port) {
-        console.log("Send Serial", data)
+        // console.log("Send Serial", data)
         port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
     }
     return true
@@ -232,7 +232,7 @@ ipcMain.handle('updatePosition', async(e, path, position) => {
 
 ipcMain.handle("getPositions", async(e, path) => {
     return new Promise((resolve, reject) => {
-        console.log("Get Positions", path)
+        // console.log("Get Positions", path)
         const robotPath = join(pathToRobots, path)
         const robotFilePath = join(robotPath, 'robot.json')
         try {
@@ -303,7 +303,7 @@ ipcMain.handle('updateSequence', async(e, path, sequence) => {
 ipcMain.handle('getSequence', async(e, path, sequenceID) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log("Get Sequence", path, sequenceID)
+            // console.log("Get Sequence", path, sequenceID)
             const robotPath = join(pathToRobots, path)
             const robotFilePath = join(robotPath, 'robot.json')
             let tempSequences = JSON.parse(readFileSync(robotFilePath)).sequences

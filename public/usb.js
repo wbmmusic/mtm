@@ -36,7 +36,6 @@ const getConnectedDeviceInfo = async() => {
         }
 
         const handleData = (data) => {
-            console.log("Connected Device Info", data)
             const pairs = data.toString().split(";")
             out = {}
             pairs.forEach(pair => {
@@ -58,7 +57,7 @@ const getConnectedDeviceInfo = async() => {
 }
 
 const openPort = async() => {
-    console.log("Try to open port")
+    // console.log("Try to open port")
     return new Promise(async(resolve, reject) => {
         try {
             let tempPorts = await getPorts()
@@ -74,10 +73,10 @@ const openPort = async() => {
                 }
                 console.log('Found device', thePorts[0].friendlyName)
                 port = new SerialPort({ path: thePorts[0].path, baudRate: 115200 })
-                port.on('open', () => {
-                    console.log('PORT OPENED')
+                port.on('open', async() => {
+                    // console.log('PORT OPENED')
                     win.webContents.send('usb_status', true)
-                    getConnectedDeviceInfo(connectedDeviceInfo)
+                    await getConnectedDeviceInfo()
                     compareToLatest()
                     resolve(true)
                 })
