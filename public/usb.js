@@ -3,7 +3,7 @@ const { SerialPort } = require('serialport');
 const { usb } = require('usb');
 
 const usbTarget = [
-    { vid: 0x2341, pid: 0x43 },
+    { vid: 0x2341, pid: 0x0043 },
     { vid: 0x03EB, pid: 0x2404 }
 ]
 
@@ -27,17 +27,26 @@ const getConnectedDeviceInfo = async() => {
     return new Promise(async(resolve, reject) => {
 
         const exit = (err) => {
+            clearTimeout(timeout)
+            port.removeListener('data', handleData)
             if (err) {
                 reject(err)
             } else resolve()
         }
 
         const handleData = (data) => {
-            console.log("Connected Device Info", data.toString())
+            console.log("Connected Device Info", data)
+            const pairs = data.toString().split(";")
+            out = {}
+            pairs.forEach(pair => {
+                const keyVal = pair.split(':')
+                out[keyVal[0]] = keyVal[1]
+            })
+            connectedDeviceInfo = out
             exit()
         }
 
-        setTimeout(() => {
+        let timeout = setTimeout(() => {
             exit(new Error("Timed Out Waiting For Device Info"))
         }, 1000);
 
@@ -73,6 +82,7 @@ const openPort = async() => {
                 port.on('close', () => {
                     port = null
                     console.log("Port Closed")
+                    connectedDeviceInfo = null
                     win.webContents.send('usb_status', false)
                 })
                 port.on('error', (err) => console.error(err))
@@ -316,6 +326,7 @@ const initUSB = () => {
             if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
                 console.log("Device was detached")
                 if (port) {
+                    connectedDeviceInfo = null
                     port.close()
                     break
                 }
