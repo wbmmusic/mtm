@@ -15,10 +15,11 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { useContext } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext";
-import { makeServoPositionData } from "../../utils/msgMaker";
 
 export const Transport = ({ actions }) => {
   const { usbConnected } = useContext(GlobalContext);
+  const { makeServoPositionData, makeWaitData, waitTypes } =
+    window.electron.msgMkr;
   // console.log(actions);
   const makeMarks = () => {
     let out = [];
@@ -84,11 +85,6 @@ export const Transport = ({ actions }) => {
     return out;
   };
 
-  const makeWaitStatePacket = key => {
-    let out = [];
-    return out;
-  };
-
   useEffect(() => {
     marks.forEach(mark => {
       if (mark.value === current) {
@@ -96,21 +92,23 @@ export const Transport = ({ actions }) => {
         if (mark.servos !== undefined) {
           mark.servos.forEach((servo, idx) => {
             if (servo.enabled) {
-              makeServoPositionData(idx, servo.value);
-              packet.push(...makeServoPacket(idx + 1, servo.value));
+              console.log("YEAH");
+              packet.push(...makeServoPositionData(idx, servo.value));
+              //packet.push(...makeServoPacket(idx, servo.value));
             }
           });
-          if (packet.length > 0) {
-            window.electron.ipcRenderer
-              .invoke("sendValue", packet)
-              .then()
-              .catch(err => console.log(err));
-          }
         } else if (mark.key !== undefined) {
           // This is a wait state
           console.log("Waiting on key", mark.key);
-          //packet.push(...makeWaitStatePacket(act.key))
-          waitOnKey(mark.key);
+
+          packet.push(...makeWaitData(waitTypes.remote, 1));
+          //waitOnKey(mark.key);
+        }
+        if (packet.length > 0) {
+          window.electron.ipcRenderer
+            .invoke("sendValue", packet)
+            .then()
+            .catch(err => console.log(err));
         }
       }
     });

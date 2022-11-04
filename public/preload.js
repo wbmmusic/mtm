@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron')
 const version = require('../package.json').version
+const msgMkr = require('./msgMaker')
 
 contextBridge.exposeInMainWorld('electron', {
     ipcRenderer: ipcRenderer,
@@ -7,5 +8,5 @@ contextBridge.exposeInMainWorld('electron', {
     receive: (channel, func) => ipcRenderer.on(channel, (event, ...args) => func(...args)),
     removeListener: (channel) => ipcRenderer.removeAllListeners(channel),
     ver: () => version,
-
+    msgMkr: msgMkr,
 })

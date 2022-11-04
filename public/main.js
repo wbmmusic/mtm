@@ -6,6 +6,7 @@ const { SerialPort } = require('serialport');
 const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync, readFile } = require('fs');
 const { usb } = require('usb');
 const { EventEmitter } = require('node:events');
+const { makeDelayData, makeServoPositionData, makeWaitData, waitTypes } = require('./msgMaker');
 
 class MyEmitter extends EventEmitter {}
 const uploadEmitter = new MyEmitter();
@@ -202,25 +203,32 @@ const makeTime = (time) => new Buffer.from([(time >> 8) & 0x1F, time & 0xFF])
 const makeServo = (servo, idx) => new Buffer.from([(idx + 1) | 0x40, servo.value])
 
 const generateSequenceArray = (actions) => {
+    console.log(actions)
     let out = []
     let curTimePos = 0;
     actions.forEach(action => {
         if (action.type === 'delay') {
             curTimePos = curTimePos + action.value
-            out.push(makeTime(curTimePos))
+                // out.push(makeTime(curTimePos))
+            out.push(...makeDelayData(curTimePos))
         } else if (action.type === 'move') {
             action.servos.forEach((servo, idx) => {
                 // console.log(servo)
                 if (servo.enabled) {
-                    out.push(makeServo(servo, idx))
+                    // out.push(makeServo(servo, idx))
+                    out.push(...makeServoPositionData(idx, servo.value))
                 }
             })
+        } else if (action.type === 'wait') {
+            out.push(...makeWaitData(waitTypes.remote, 1))
         }
     })
 
-    out.push(new Buffer.from([255, 255, 255, 255]))
+    // out.push(new Buffer.from([255, 255, 255, 255]))
+    out.push(...[255, 255, 255, 255])
 
-    return Buffer.concat(out)
+    // return Buffer.concat(out)
+    return new Buffer.from(out)
 }
 
 const sendProgramCommand = async() => {
@@ -445,7 +453,7 @@ const initIpcHandlers = () => {
 
     ipcMain.handle('sendValue', async(e, data) => {
         if (port) {
-            // console.log("Send Serial", data)
+            console.log("Send Serial", data)
             port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
         }
         return true
