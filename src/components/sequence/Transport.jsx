@@ -32,11 +32,9 @@ export const Transport = ({ actions }) => {
 
     actions.forEach(act => {
       if (act.type === "delay") {
-        //out.push({ value: curTime, label: "" });
         curTime = curTime + act.value;
       } else if (act.type === "move") {
         out.push({ value: curTime, label: null, servos: act.servos });
-        // out.push({ value: curTime, label: act.content, servos: act.servos });
       } else if (act.type === "wait") {
         out.push({ value: curTime, label: "wait", key: act.key });
       }
@@ -76,13 +74,9 @@ export const Transport = ({ actions }) => {
     setIntervalId(newIntervalId);
   };
 
-  const waitOnKey = key => {};
-
-  const makeServoPacket = (servoNumber, position) => {
-    let out = [];
-    out.push(servoNumber);
-    out.push(position);
-    return out;
+  const waitOnKey = key => {
+    setWaitingOnKey(0);
+    stop();
   };
 
   useEffect(() => {
@@ -92,7 +86,6 @@ export const Transport = ({ actions }) => {
         if (mark.servos !== undefined) {
           mark.servos.forEach((servo, idx) => {
             if (servo.enabled) {
-              console.log("YEAH");
               packet.push(...makeServoPositionData(idx, servo.value));
               //packet.push(...makeServoPacket(idx, servo.value));
             }
