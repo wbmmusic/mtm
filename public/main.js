@@ -1,15 +1,12 @@
 const { app, BrowserWindow, ipcMain, protocol, dialog } = require('electron')
-const { join, normalize } = require('path')
-const url = require('url')
+const { join, normalize } = require('node:path')
+const url = require('node:url')
 const { autoUpdater } = require('electron-updater');
 const { SerialPort } = require('serialport');
-const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync, readFile } = require('fs');
+const { mkdirSync, existsSync, writeFileSync, readFileSync, readdirSync, rmdirSync, cpSync } = require('node:fs');
 const { usb } = require('usb');
-const { EventEmitter } = require('node:events');
 const { makeDelayData, makeServoPositionData, makeWaitData, waitTypes } = require('./msgMaker');
 
-class MyEmitter extends EventEmitter {}
-const uploadEmitter = new MyEmitter();
 let firstReactInit = true
 
 ////////////////// App Startup ////////////////////////////////////////////////////////////////////
@@ -172,59 +169,83 @@ function createWindow() {
 
 }
 
+// Merge serial positions and serial delays & Strip unnecessary elements
 const prepareActions = (actions) => {
     let out = []
+
     actions.forEach((act, idx) => {
+        // Strip elements we no longer need
         delete act.content
+            // If it is a wait we don't need the value element (we use .key)
+        if (act.type === 'wait') delete act.value
+
+        const prevIdx = out.length - 1
+
+        // If this is the first action we know it needs to go into the ouput
         if (idx === 0) out.push(act)
         else {
-            if (out[out.length - 1].type === act.type) {
+            // If this action has the same type as the previous action
+            if (out[prevIdx].type === act.type) {
                 if (act.type === 'delay') {
-                    out[out.length - 1].value = out[out.length - 1].value + act.value
+                    // We just add the value of this delay action to the current value
+                    out[prevIdx].value = out[prevIdx].value + act.value
                 } else if (act.type === 'move') {
+                    // Check the action for any enabled servos
                     act.servos.forEach((srv, idx) => {
+                        // if this servo is enabled in the action we want its data
                         if (srv.enabled) {
-                            out[out.length - 1].servos[idx].value = srv.value
-                            out[out.length - 1].servos[idx].enabled = true
+                            // Overwrite or set the servo value
+                            out[prevIdx].servos[idx].value = srv.value
+                                // Overwrite or set the servos enable | This may already be true
+                            out[prevIdx].servos[idx].enabled = true
                         }
                     })
+                } else if (act.type === 'wait') {
+                    // replace entire wait action with this latest one
+                    out[prevIdx] = act
                 } else {
-                    console.log("ERROR HERE 872341")
+                    console.log("Duplicate UNKNOWN action types in prepareActions()")
                     out.push(act)
                 }
 
+                // Else this does not require combining of actions all we have done is strip elements
             } else out.push(act)
         }
     })
     return out
 }
 
+// Take prepared actions and turn them into a buffer to be copied to MCU flash
 const generateSequenceBuffer = (actions) => {
-    console.log(actions)
     let out = []
-    let curTimePos = 0;
+
+    let timePos = 0;
     actions.forEach(action => {
         if (action.type === 'delay') {
-            curTimePos = curTimePos + action.value
-                // out.push(makeTime(curTimePos))
-            out.push(...makeDelayData(curTimePos))
+            // move timePos to after this delay
+            timePos = timePos + action.value
+
+            // write delay bytes to buffer
+            out.push(...makeDelayData(timePos))
+
         } else if (action.type === 'move') {
             action.servos.forEach((servo, idx) => {
-                // console.log(servo)
+                // If this servo is not used we have no reason to put it in memory
                 if (servo.enabled) {
-                    // out.push(makeServo(servo, idx))
+                    // write servo bytes to buffer
                     out.push(...makeServoPositionData(idx, servo.value))
                 }
             })
         } else if (action.type === 'wait') {
+            // write wait bytes to buffer
             out.push(...makeWaitData(waitTypes.remote, 1))
         }
     })
 
-    // out.push(new Buffer.from([255, 255, 255, 255]))
+    // Add 0xFFFFFFFF to mark the end of the sequence
     out.push(...[255, 255, 255, 255])
 
-    // return Buffer.concat(out)
+    // Return out as a buffer
     return new Buffer.from(out)
 }
 
