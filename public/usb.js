@@ -7,6 +7,7 @@ const usbTarget = [
     { vid: 0x03EB, pid: 0x2404 }
 ]
 
+global.connectedDeviceInfo = null
 global.port = null // The serialport for the connected device
 
 const getPorts = async() => {
@@ -20,6 +21,30 @@ const getPorts = async() => {
 
     })
 
+}
+
+const getConnectedDeviceInfo = async() => {
+    return new Promise(async(resolve, reject) => {
+
+        const exit = (err) => {
+            if (err) {
+                reject(err)
+            } else resolve()
+        }
+
+        const handleData = (data) => {
+            console.log("Connected Device Info", data.toString())
+            exit()
+        }
+
+        setTimeout(() => {
+            exit(new Error("Timed Out Waiting For Device Info"))
+        }, 1000);
+
+        port.on('data', handleData)
+
+        port.write('WBM:GETINFO')
+    })
 }
 
 const openPort = async() => {
@@ -42,6 +67,7 @@ const openPort = async() => {
                 port.on('open', () => {
                     console.log('PORT OPENED')
                     win.webContents.send('usb_status', true)
+                    getConnectedDeviceInfo()
                     resolve(true)
                 })
                 port.on('close', () => {
@@ -50,7 +76,6 @@ const openPort = async() => {
                     win.webContents.send('usb_status', false)
                 })
                 port.on('error', (err) => console.error(err))
-
             } else reject("Didn't Find target Device")
         } catch (error) {
             reject(error)

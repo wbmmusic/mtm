@@ -26,9 +26,9 @@ const checkForFirmwareUpdates = async() => {
                     if (readdirSync(pathToDeviceFolder).includes(latest.name)) {
                         console.log("Up To Date")
                     } else {
-                        const folderContents = readdirSync(pathToDeviceFolder)
-                            // delete all folder contents
-                        folderContents.forEach(file => rmSync(join(pathToDeviceFolder, file)))
+                        const folderContents = readdirSync(pathToDeviceFolder);
+                        // delete all folder contents
+                        folderContents.forEach(file => rmSync(join(pathToDeviceFolder, file)));
 
                         const download = await downloadFirmware(latest.id, join(pathToDeviceFolder, latest.name))
                         writeFileSync(join(pathToDeviceFolder, 'latest.json'), JSON.stringify(latest, null, '  '))
