@@ -152,6 +152,14 @@ const sendProgramCommand = async() => {
 const sendPage = async(page) => {
     console.log('Send Page')
     return new Promise(async(resolve, reject) => {
+        const exit = (data, err) => {
+            console.log("exit", err)
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
+        }
+
         const handleData = (data) => {
             console.log('handleData', data)
             if (JSON.stringify([...data]) === JSON.stringify([...page])) {
@@ -159,14 +167,6 @@ const sendPage = async(page) => {
             } else {
                 exit({}, new Error('Page Mismatch in sendPage'))
             }
-        }
-
-        const exit = (data, err) => {
-            console.log("exit", err)
-            clearInterval(timer)
-            port.removeListener('data', handleData)
-            if (err) reject(err)
-            else resolve(data)
         }
 
         // console.log("Send Page")
