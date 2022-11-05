@@ -182,6 +182,7 @@ const sendPage = async(page) => {
 }
 
 const sendDone = async() => {
+    console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
             clearInterval(timer)
