@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import Slider from "@mui/material/Slider";
 import React, { useState } from "react";
+const { makeServoPositionData } = window.electron.msgMkr;
 
 export const Servo = ({ label, idx, servo, onChange }) => {
   const [lastSent, setLastSent] = useState(null);
@@ -17,7 +18,7 @@ export const Servo = ({ label, idx, servo, onChange }) => {
       setLastSent(val);
       //console.log("Servo", idx, "->", val);
       window.electron.ipcRenderer
-        .invoke("sendValue", [idx, val])
+        .invoke("sendValue", makeServoPositionData(idx - 1, val))
         .then()
         .catch(err => console.log(err));
     }
