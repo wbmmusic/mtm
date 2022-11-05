@@ -191,6 +191,7 @@ const sendDone = async() => {
             else resolve(data)
         }
         const handleData = (data) => {
+            console.log("Done Data", data.toString())
             if (data.toString().includes('WBM:DONE')) {
                 // console.log("Got Done")
                 exit({})
