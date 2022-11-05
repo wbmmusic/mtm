@@ -161,7 +161,7 @@ const sendPage = async(page) => {
         }
 
         const handleData = (data) => {
-            console.log('handleData', data)
+            console.log('handleData', data.length)
             if (JSON.stringify([...data]) === JSON.stringify([...page])) {
                 exit({})
             } else {
