@@ -169,7 +169,10 @@ const sendPage = async(page) => {
         const timer = setTimeout(() => exit({}, new Error('sendPage timed out')), 1000);
         // console.log('Sending Page', page.length)
         port.on('data', handleData)
-        port.write(new Buffer.from(page))
+        port.write(new Buffer.from(page), (err) => {
+            if (err) console.log(err)
+            else console.log("Wrote Page")
+        })
     })
 
 }
