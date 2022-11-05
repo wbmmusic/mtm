@@ -154,7 +154,7 @@ const sendPage = async(page) => {
         const exit = (data, err) => {
             clearInterval(timer)
             port.removeListener('data', handleData)
-            if (err) throw err
+            if (err) reject(err)
             else resolve(data)
         }
         const handleData = (data) => {
