@@ -11,7 +11,7 @@ const compareToLatest = () => {
         const pathToLatestData = join(pathToDeviceFolder, 'latest.json')
         if (existsSync(pathToDeviceFolder)) {
             let latest = JSON.parse(readFileSync(pathToLatestData))
-            console.log(latest.version, connectedDeviceInfo.firmware)
+            console.log("Latest", latest.version, "Device", connectedDeviceInfo.firmware)
             if (latest.version > connectedDeviceInfo.firmware) {
                 console.log("Update Available for model", connectedDeviceInfo.model)
                 win.webContents.send('firmwareAvailable', latest)
