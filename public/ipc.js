@@ -39,10 +39,12 @@ ipcMain.handle('sound', (e, onOff) => {
     return settings.sound
 })
 
+const streamMsg = new Buffer.from('WBM:STREAM')
 ipcMain.handle('sendValue', async(e, data) => {
     if (port) {
         // console.log("Send Serial", data)
-        port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
+        const dataBuf = new Buffer.from(data)
+        port.write(new Buffer.concat([streamMsg, dataBuf]), (err) => { if (err) console.log(err) })
     } else console.log("NO PORT")
     return true
 })
