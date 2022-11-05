@@ -150,6 +150,7 @@ const sendProgramCommand = async() => {
 }
 
 const sendPage = async(page) => {
+    console.log('Send Page')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
             clearInterval(timer)
@@ -241,6 +242,7 @@ const sendPages = async(pages) => {
                 console.log("Sent Page", pagesSent)
                 pagesSent++
                 win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
+                console.log('After This')
             } catch (error) {
                 throw error
             }
