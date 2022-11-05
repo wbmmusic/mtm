@@ -40,6 +40,7 @@ ipcMain.handle('sound', (e, onOff) => {
 })
 
 ipcMain.handle('sendValue', async(e, data) => {
+    console.log('Send Value')
     if (port) {
         // console.log("Send Serial", data)
         port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
