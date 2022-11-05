@@ -175,7 +175,7 @@ const sendPage = async(page) => {
         port.on('data', handleData)
         port.write(new Buffer.from(page), (err) => {
             if (err) console.log(err)
-            else console.log("Wrote Page")
+            else console.log("Wrote Page", page.length)
         })
     })
 
