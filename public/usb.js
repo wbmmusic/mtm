@@ -7,6 +7,7 @@ const { pathToFirmwareFolder } = require('./utils');
 const { existsSync, readFileSync } = require('node:fs');
 const EventEmitter = require('node:events');
 
+
 const bootEmitter = new EventEmitter()
 
 const usbTarget = [
