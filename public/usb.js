@@ -185,7 +185,7 @@ const sendDone = async() => {
     console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
-            console.log("Exit done", error)
+            console.log("Exit done", err)
             clearInterval(timer)
             if (port) port.removeListener('data', handleData)
             if (err) reject(err)
