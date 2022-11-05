@@ -182,11 +182,9 @@ const sendPage = async(page) => {
 }
 
 const sendDone = async() => {
-    console.log(port._events)
     console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
-            console.log(port)
             console.log("Exit done", err)
             clearInterval(timer)
             if (port) port.removeListener('data', handleData)
