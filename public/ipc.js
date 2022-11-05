@@ -43,7 +43,7 @@ ipcMain.handle('sendValue', async(e, data) => {
     if (port) {
         // console.log("Send Serial", data)
         port.write(new Buffer.from(data), (err) => { if (err) console.log(err) })
-    }
+    } else console.log("NO PORT")
     return true
 })
 
