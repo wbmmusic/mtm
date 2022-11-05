@@ -182,7 +182,7 @@ const sendPage = async(page) => {
 }
 
 const sendDone = async() => {
-    console.log(port)
+    console.log(port._events)
     console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
