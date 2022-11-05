@@ -153,6 +153,7 @@ const sendPage = async(page) => {
     console.log('Send Page')
     return new Promise(async(resolve, reject) => {
         const handleData = (data) => {
+            console.log('handleData', data)
             if (JSON.stringify([...data]) === JSON.stringify([...page])) {
                 exit({})
             } else {
@@ -161,6 +162,7 @@ const sendPage = async(page) => {
         }
 
         const exit = (data, err) => {
+            console.log("exit", err)
             clearInterval(timer)
             port.removeListener('data', handleData)
             if (err) reject(err)
