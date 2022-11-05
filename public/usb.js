@@ -201,7 +201,7 @@ const sendDone = async() => {
             } else exit({}, new Error('Unexpected Response in sendDone'))
         }
         const timer = setTimeout(() => exit({}, new Error('sendDone timed out')), 1000);
-        port.on('data', handleData)
+        port.on('data', handleData);
         port.write('WBM:DONE', (err) => {
             if (err) {
                 throw err
