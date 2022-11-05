@@ -106,9 +106,9 @@ app.on('ready', () => {
 
         checkForFirmwareUpdates()
 
-        // setInterval(() => {
-        //     console.log(connectedDeviceInfo)
-        // }, 1000);
+        setInterval(() => {
+            console.log(connectedDeviceInfo)
+        }, 1000);
     })
     ///////////////////////
 
