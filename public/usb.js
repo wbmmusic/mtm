@@ -461,4 +461,8 @@ const initUSB = () => {
     tryToOpenPort()
 }
 
+setInterval(() => {
+    sendDone()
+}, 3000);
+
 module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, port }
