@@ -182,6 +182,7 @@ const sendPage = async(page) => {
 }
 
 const sendDone = async() => {
+    console.log(port)
     console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (data, err) => {
@@ -460,9 +461,5 @@ const initUSB = () => {
 
     tryToOpenPort()
 }
-
-setInterval(() => {
-    sendDone()
-}, 3000);
 
 module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, port }
