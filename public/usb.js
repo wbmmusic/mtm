@@ -200,7 +200,7 @@ const sendDone = async() => {
         }
         const timer = setTimeout(() => exit({}, new Error('sendDone timed out')), 1000);
         port.on('data', handleData)
-        port.write('WBM:DONE', (err) => {
+        port.write(new Buffer.from('WBM:DONE'), (err) => {
             if (err) throw err
             else console.log("WROTE DONE")
         })
