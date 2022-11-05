@@ -36,7 +36,7 @@ export const Transport = ({ actions }) => {
       } else if (act.type === "move") {
         out.push({ value: curTime, label: null, servos: act.servos });
       } else if (act.type === "wait") {
-        out.push({ value: curTime, label: "wait", key: act.key });
+        out.push({ value: curTime, label: null, key: act.key });
       }
     });
     return out;

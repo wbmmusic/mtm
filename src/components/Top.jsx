@@ -1,4 +1,11 @@
-import { Box, IconButton, Tooltip } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  LinearProgress,
+  Modal,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -16,6 +23,7 @@ import { GlobalContext } from "../contexts/GlobalContext";
 import UsbIcon from "@mui/icons-material/Usb";
 import UsbOffIcon from "@mui/icons-material/UsbOff";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { modalStyle } from "../styles";
 
 //delete me
 
@@ -23,9 +31,13 @@ export default function Top() {
   const navigate = useNavigate();
   const { admin, toggleAdmin, usbConnected } = useContext(GlobalContext);
 
+  const defaultUploadModal = { show: false, value: null };
+
   const [audioFile, setAudioFile] = useState({ file: null });
   const [sound, setSound] = useState(true);
   const [firmware, setFirmware] = useState(null);
+  const [uploadModal, setUploadModal] = useState(defaultUploadModal);
+
   const playerRef = useRef(null);
 
   useEffect(() => {
@@ -40,6 +52,11 @@ export default function Top() {
 
     window.electron.receive("play_file", file => setAudioFile({ file }));
 
+    window.electron.receive("upload_progress", data => {
+      console.log("GOT", data);
+      setUploadModal(data);
+    });
+
     window.electron.receive("firmwareAvailable", latest => {
       console.log("Latest Firmware", latest);
       setFirmware(latest);
@@ -48,6 +65,7 @@ export default function Top() {
     return () => {
       window.electron.removeListener("play_file");
       window.electron.removeListener("firmwareAvailable");
+      window.electron.removeListener("upload_progress");
     };
   }, []);
 
@@ -112,6 +130,29 @@ export default function Top() {
     }
   };
 
+  const makeUploadModal = () => {
+    return (
+      <Modal open={uploadModal.show}>
+        <Box sx={modalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Upload Progress
+          </Typography>
+          <LinearProgress
+            sx={{
+              "& .MuiLinearProgress-bar": {
+                transition: "none",
+              },
+            }}
+            variant={
+              uploadModal.value !== null ? "determinate" : "indeterminate"
+            }
+            value={uploadModal.value !== null ? uploadModal.value : null}
+          />
+        </Box>
+      </Modal>
+    );
+  };
+
   return (
     <Stack height={"100%"}>
       <Stack
@@ -146,6 +187,7 @@ export default function Top() {
         ) : null}
         {makeMute()}
         {makeAdminMode()}
+        {makeUploadModal()}
       </Stack>
       <Divider />
       <Box height={"100%"} sx={{ overflow: "auto" }}>

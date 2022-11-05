@@ -13,7 +13,9 @@ ipcMain.on('upload', async(e, actions) => {
 
         try {
             console.log("YEAH")
+            win.webContents.send('upload_progress', { show: true, value: null })
             await upload(sequenceBuffer)
+            win.webContents.send('upload_progress', { show: false, value: null })
         } catch (error) {
             throw error
         }
