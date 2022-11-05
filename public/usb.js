@@ -14,10 +14,7 @@ const usbTarget = [
     { vid: 0x03EB, pid: 0x2404 }
 ]
 
-const defaultBootloader = {
-    waiting: false,
-    serialNumber: ''
-}
+const defaultBootloader = { waiting: false, serialNumber: '' }
 
 let bootloader = {...defaultBootloader }
 
