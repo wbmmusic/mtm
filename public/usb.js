@@ -84,7 +84,7 @@ const openPort = async() => {
                 console.log('Found device', thePorts[0].friendlyName)
                 port = new SerialPort({ path: thePorts[0].path, baudRate: 115200 })
                 port.on('open', async() => {
-                    // console.log('PORT OPENED')
+                    // console.log('PORT OPENED') //
 
                     if (thePorts[0].serialNumber.includes("BOOT:")) {
                         connectedDeviceInfo = {
