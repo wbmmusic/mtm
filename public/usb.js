@@ -220,9 +220,7 @@ const sendPage = async(page) => {
         try {
             await sendHalfPage(page.slice(0, 32), 0)
             await sendHalfPage(page.slice(32, 64), 1)
-            setTimeout(() => {
-                resolve()
-            }, 10);
+            resolve()
         } catch (error) {
             reject(error)
         }
@@ -301,7 +299,7 @@ const sendPages = async(pages) => {
             try {
                 await acc
                 await sendPage(thePage)
-                    // console.log("Sent Page", pagesSent)
+                console.log("Sent Page", pagesSent)
                 pagesSent++
                 win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
             } catch (error) {
