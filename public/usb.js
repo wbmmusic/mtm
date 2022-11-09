@@ -106,7 +106,7 @@ const openPort = async() => {
                     connectedDeviceInfo = null
                     win.webContents.send('usb_status', false)
                 })
-                port.on('error', (err) => { throw err })
+                port.on('error', (err) => { console.error(err) })
             } else reject("Didn't Find target Device")
         } catch (error) {
             reject(error)
