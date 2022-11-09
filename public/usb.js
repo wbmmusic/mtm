@@ -20,7 +20,7 @@ const defaultBootloader = { waiting: false, serialNumber: '' }
 let bootloader = {...defaultBootloader }
 
 global.connectedDeviceInfo = null
-let port = null // The serialport for the connected device
+var port = null // The serialport for the connected device
 
 const getPorts = async() => {
     return new Promise(async(resolve, reject) => {
@@ -69,7 +69,7 @@ const getConnectedDeviceInfo = async(serialNumber) => {
                 const keyVal = pair.split(':')
                 out[keyVal[0]] = keyVal[1]
             })
-            connectedDeviceInfo = out
+            this.connectedDeviceInfo = out
             exit()
         }
 
@@ -104,7 +104,7 @@ const openPort = async() => {
                     // console.log('PORT OPENED') //
 
                     if (thePorts[0].serialNumber.includes("BOOT:")) {
-                        connectedDeviceInfo = {
+                        this.connectedDeviceInfo = {
                             serialNumber: thePorts[0].serialNumber,
                             model: "mtm2s"
                         }
@@ -120,13 +120,13 @@ const openPort = async() => {
                 port.on('close', () => {
                     port = null
                     console.log("Port Closed")
-                    connectedDeviceInfo = null
+                    this.connectedDeviceInfo = null
                     win.webContents.send('usb_status', false)
                 })
                 port.on('error', (err) => {
                     port = null
-                    connectedDeviceInfo = null
-                    console.error(err)
+                    this.connectedDeviceInfo = null
+                    console.error("PORT ERROR", err)
                 })
             } else reject("Didn't Find target Device")
         } catch (error) {
@@ -281,7 +281,7 @@ const sendDone = async() => {
 }
 
 const sendBootToBootloader = async() => {
-    const serial = connectedDeviceInfo.serialNumber.split(':')[1]
+    const serial = this.connectedDeviceInfo.serialNumber.split(':')[1]
     return new Promise(async(resolve, reject) => {
         const exit = (err) => {
             clearTimeout(timeout)
@@ -427,9 +427,9 @@ const upload = async(data) => {
 const handleFirmwareUpload = async(file) => {
     return new Promise(async(resolve, reject) => {
         // Connected device is not in bootloader mode TYPICAL
-        if (!connectedDeviceInfo.serialNumber.includes('BOOT:')) {
+        if (!this.connectedDeviceInfo.serialNumber.includes('BOOT:')) {
             // Just confirm that serial number does contain WBM:
-            if (connectedDeviceInfo.serialNumber.includes('WBM:')) {
+            if (this.connectedDeviceInfo.serialNumber.includes('WBM:')) {
                 try {
                     console.log("-------------- START UPLOAD FIRMWARE --------------")
                     win.webContents.send('upload_progress', { show: true, value: null })
@@ -476,7 +476,12 @@ const uploadCustomFirmware = async() => {
     const file = readFileSync(pathToFile)
 
     win.webContents.send('upload_progress', { show: true, value: null })
-    await handleFirmwareUpload(file)
+    try {
+        await handleFirmwareUpload(file)
+    } catch (error) {
+        throw error
+    }
+
     win.webContents.send('upload_progress', { show: false, value: null })
 
     return true
@@ -484,7 +489,7 @@ const uploadCustomFirmware = async() => {
 
 const uploadFirmware = async() => {
     console.log("Upload Latest Firmware")
-    const pathToDeviceFolder = join(pathToFirmwareFolder, connectedDeviceInfo.model.toLowerCase())
+    const pathToDeviceFolder = join(pathToFirmwareFolder, this.connectedDeviceInfo.model.toLowerCase())
     if (!existsSync(pathToDeviceFolder)) throw new Error("Folder Doesn't Exist")
     const devLatest = JSON.parse(readFileSync(join(pathToDeviceFolder, 'latest.json')))
     const pathToLatestFirmwareFile = join(pathToDeviceFolder, devLatest.name)

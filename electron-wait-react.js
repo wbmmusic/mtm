@@ -19,9 +19,9 @@ const startElectron = () => {
         console.log("ER", data);
     });
 
-    // elctrn.stderr.on('data', function(data) {
-    //     console.log('ERRRROOOORRRR', data);
-    // });
+    elctrn.stderr.on('data', function(data) {
+        console.log("E", data);
+    });
 }
 
 let startedElectron = false;
