@@ -205,10 +205,14 @@ const sendHalfPage = async(pageHalf, half) => {
         port.on('data', handleData)
         if (half === 0) {
             const msg = new Buffer.from("WBM:PAGE0")
-            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)], (err) => {
+                if (err) { throw err; }
+            }))
         } else {
             const msg = new Buffer.from("WBM:PAGE1")
-            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)], (err) => {
+                if (err) { throw err; }
+            }))
         }
 
     })
@@ -220,9 +224,7 @@ const sendPage = async(page) => {
         try {
             await sendHalfPage(page.slice(0, 32), 0)
             await sendHalfPage(page.slice(32, 64), 1)
-            setTimeout(() => {
-                resolve()
-            }, 1);
+            resolve()
         } catch (error) {
             reject(error)
         }
