@@ -157,7 +157,7 @@ const sendProgramCommand = async() => {
         }
         const handleData = (data) => {
             if (data.toString().includes('WBM:READY')) {
-                console.log('Device is ready for sequence')
+                // console.log('Device is ready for sequence')
                 exit({})
             } else exit({}, new Error("Didn't get expected response in sendProgramCommand"))
         }
@@ -246,17 +246,17 @@ const sendPage = async(page) => {
 }
 
 const sendDone = async() => {
-    console.log('Send Done')
+    // console.log('Send Done')
     return new Promise(async(resolve, reject) => {
         const exit = (err) => {
-            console.log("Exit done", err)
+            // console.log("Exit done", err)
             clearInterval(timer)
             if (port) port.removeListener('data', handleData)
             if (err) reject(err)
             else resolve()
         }
         const handleData = (data) => {
-            console.log("Done Data", data.toString())
+            // console.log("Done Data", data.toString())
             if (data.toString().includes('WBM:DONE')) {
                 // console.log("Got Done")
                 exit()
@@ -266,7 +266,6 @@ const sendDone = async() => {
         port.on('data', handleData);
         port.write('WBM:DONE', (err) => {
             if (err) exit(error)
-            else console.log("WROTE DONE")
         })
     })
 }
@@ -332,7 +331,6 @@ const sendPages = async(pages) => {
 const writeMcuFlash = async(data) => {
     return new Promise(async(resolve, reject) => {
         try {
-            console.log("In writeMcuFlash")
             const { pageSize, availableSpace } = await getDeviceInfo()
             console.log('Got Info | Page Size =', pageSize, "| Available Space =", availableSpace)
 
@@ -343,16 +341,14 @@ const writeMcuFlash = async(data) => {
             // send program command
             // console.log("Sending program command")
             await sendProgramCommand()
-            console.log("Sent Program Command")
 
             // send pages
             await sendPages(pages)
-            console.log('Sent Pages')
+                // console.log('Sent Pages')
 
             // send done
             await sendDone()
 
-            console.log("Upload is done")
             resolve()
 
         } catch (error) {
@@ -363,7 +359,7 @@ const writeMcuFlash = async(data) => {
 
 const makePages = (data, pageSize) => {
     console.log(data.length, "bytes to be packed into pages")
-    console.log(data)
+        // console.log(data)
     let pages = []
     let page = []
     data.forEach(byte => {
@@ -375,7 +371,7 @@ const makePages = (data, pageSize) => {
     })
     while (page.length < pageSize) page.push(0xFF)
     pages.push(page)
-    console.log("Prepared", pages.length, "pages")
+        // console.log("Prepared", pages.length, "pages")
     return pages
 }
 
@@ -390,10 +386,8 @@ const getDeviceInfo = async() => {
             } else resolve(data)
         }
         const handleData = (data) => {
-            console.log("-------------------------------------")
-            console.log(data.toString())
             if (data.toString().includes('WBM:FLASHINFO')) {
-                console.log("Got Device Info")
+                // console.log("Got Device Info")
                 const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
                 const availableSpace = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
                 exit({ pageSize, availableSpace })
@@ -402,7 +396,7 @@ const getDeviceInfo = async() => {
         }
         const timer = setTimeout(() => exit({}, new Error('getDeviceInfo timed out')), 1000);
         port.on('data', handleData)
-        port.write('WBM:GETFLASHINFO', () => console.log("Wrote WBM:GETFLASHINFO"))
+        port.write('WBM:GETFLASHINFO')
     })
 }
 
@@ -410,9 +404,9 @@ const upload = async(data) => {
     console.log("UPLOAD")
     return new Promise(async(resolve, reject) => {
         try {
-            console.log("in Upload")
+            // console.log("in Upload")
             const send = await writeMcuFlash(data)
-            console.log('Upload Complete')
+                // console.log('Upload Complete')
             resolve()
         } catch (error) {
             reject(error)
@@ -427,10 +421,12 @@ const handleFirmwareUpload = async(file) => {
             // Just confirm that serial number does contain WBM:
             if (connectedDeviceInfo.serialNumber.includes('WBM:')) {
                 try {
+                    console.log("-------------- START UPLOAD FIRMWARE --------------")
                     win.webContents.send('upload_progress', { show: true, value: null })
                     await sendBootToBootloader()
                     await upload(file)
                     win.webContents.send('upload_progress', { show: false, value: null })
+                    console.log("-------------- END UPLOAD FIRMWARE --------------")
                     resolve()
                 } catch (error) {
                     reject(error)
@@ -441,11 +437,13 @@ const handleFirmwareUpload = async(file) => {
 
             // Device is in bootloader mode... user should confirm what the connected device is for proper firmware
         } else {
+            console.log("-------------- START UPLOAD FIRMWARE FROM BOOTLOADER --------------")
             console.log('Device is in bootloader mode,  Fix this')
             try {
                 win.webContents.send('upload_progress', { show: true, value: null })
                 await upload(file)
                 win.webContents.send('upload_progress', { show: false, value: null })
+                console.log("-------------- END UPLOAD FIRMWARE FROM BOOTLOADER --------------")
                 resolve()
             } catch (error) {
                 reject(error)

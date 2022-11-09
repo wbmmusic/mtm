@@ -7,15 +7,14 @@ const { getRobots, pathToRobots, generateSequenceBuffer, prepareActions, saveSet
 ipcMain.on('uploadFirmware', () => uploadFirmware())
 
 ipcMain.on('upload', async(e, actions) => {
-    console.log("UPLOADDDD")
+    console.log("-------------- START UPLOAD SEQUENCE --------------")
     if (usbStatus()) {
-        console.log("Attempting to generate sequence buffer")
         const sequenceBuffer = generateSequenceBuffer(prepareActions(actions))
-        console.log("Made Sequence Buffer")
         try {
             win.webContents.send('upload_progress', { show: true, value: null })
             await upload(sequenceBuffer)
             win.webContents.send('upload_progress', { show: false, value: null })
+            console.log("-------------- END UPLOAD SEQUENCE --------------")
         } catch (error) {
             throw error
         }
