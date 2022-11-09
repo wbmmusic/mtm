@@ -501,10 +501,9 @@ const uploadFirmware = async() => {
 }
 
 const initUSB = () => {
-    usb.on('attach', async(e) => {
+    usb.on('attach', (e) => {
         const vid = e.deviceDescriptor.idVendor
         const pid = e.deviceDescriptor.idProduct
-
         for (let i = 0; i < usbTarget.length; i++) {
             if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
                 console.log("Device was attached")
