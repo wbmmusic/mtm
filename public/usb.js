@@ -523,8 +523,8 @@ const initUSB = () => {
             if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
                 console.log("Device was detached")
                 if (port) {
-                    connectedDeviceInfo = null
-                    if (port) port.close()
+                    this.connectedDeviceInfo = null
+                    port.close()
                     break
                 }
             }
