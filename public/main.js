@@ -1,9 +1,9 @@
 const { app, BrowserWindow, ipcMain, protocol, } = require('electron')
-const { join, } = require('node:path')
+const { join } = require('node:path')
 const url = require('node:url')
 const { autoUpdater } = require('electron-updater');
-const { initUSB, } = require('./usb');
-const { checkFolders, getRobots, pathToRobots } = require('./utils');
+const { initUSB } = require('./usb');
+const { checkFolders } = require('./utils');
 const { checkForFirmwareUpdates, compareToLatest } = require('./firmware');
 
 let firstReactInit = true

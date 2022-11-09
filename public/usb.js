@@ -6,7 +6,7 @@ const { compareToLatest } = require('./firmware');
 const { pathToFirmwareFolder } = require('./utils');
 const { existsSync, readFileSync } = require('node:fs');
 const EventEmitter = require('node:events');
-
+process.setMaxListeners(1000000000)
 
 const bootEmitter = new EventEmitter()
 
@@ -125,6 +125,7 @@ const openPort = async() => {
                 })
                 port.on('error', (err) => {
                     port = null
+                    connectedDeviceInfo = null
                     console.error(err)
                 })
             } else reject("Didn't Find target Device")
