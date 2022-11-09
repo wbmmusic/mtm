@@ -509,7 +509,6 @@ const initUSB = () => {
                 } else console.log("Device Attached but another is already connected")
             }
         }
-
     })
 
     usb.on('detach', (e) => {
