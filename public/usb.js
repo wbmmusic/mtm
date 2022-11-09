@@ -150,7 +150,7 @@ const sendProgramCommand = async() => {
     })
 }
 
-const sendPage = async(page) => {
+const olsendPage = async(page) => {
     console.log('Send Page')
     return new Promise(async(resolve, reject) => {
         const exit = (err) => {
@@ -175,6 +175,58 @@ const sendPage = async(page) => {
         // console.log('Sending Page', page.length)
         port.on('data', handleData)
         port.write(new Buffer.from(page))
+    })
+
+}
+
+const sendHalfPage = async(pageHalf, half) => {
+    console.log('Send Page Half', half)
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            console.log("Send Page exit", err)
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve()
+        }
+
+        const handleData = (data) => {
+            console.log('handleData', data.length)
+            console.log([...data])
+            console.log(pageHalf)
+            if (JSON.stringify([...data]) === JSON.stringify([...pageHalf])) {
+                exit()
+            } else {
+                exit(new Error('Page Mismatch in sendPage'))
+            }
+        }
+
+        // console.log("Send Page")
+        let timer = setTimeout(() => exit(new Error('sendPage timed out')), 1000);
+        // console.log('Sending Page', page.length)
+        port.on('data', handleData)
+        if (half === 0) {
+            const msg = new Buffer.from("WBM:PAGE0")
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]), () => console.log("WROTE PAGE0"))
+        } else {
+            const msg = new Buffer.from("WBM:PAGE1")
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]), () => console.log("WROTE PAGE1"))
+        }
+
+    })
+}
+
+const sendPage = async(page) => {
+    page.forEach((byte, idx) => console.log(idx, byte))
+    console.log('Send Page')
+    return new Promise(async(resolve, reject) => {
+        try {
+            await sendHalfPage(page.slice(0, 32), 0)
+            await sendHalfPage(page.slice(32, 64), 1)
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
     })
 
 }
@@ -296,6 +348,8 @@ const writeMcuFlash = async(data) => {
 }
 
 const makePages = (data, pageSize) => {
+    console.log(data.length, "bytes to be packed into pages")
+    console.log(data)
     let pages = []
     let page = []
     data.forEach(byte => {
