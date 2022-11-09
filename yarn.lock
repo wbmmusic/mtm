@@ -4611,10 +4611,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^21.2.2:
-  version "21.2.2"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-21.2.2.tgz#e2f3dd014981df555d2cd1655590168b404edae4"
-  integrity sha512-Q0j1tzLTM5JRjSJVAfDSONZgdtuyruHR1pc1y2IbMYQz62pVJWVWAvcJXzpty5iRh2HKzW9+B9WVlmfWNFA8ag==
+electron@20.3.4:
+  version "20.3.4"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-20.3.4.tgz#a982196c7901a17d1107618634b1d0839f49c1df"
+  integrity sha512-kZYy7lgR9k24rkz89lQSXA28PkjMz1Z6Fr5ewvfjUatKOSrc0NJKlZ+mJ9KDmTvD5+gqOmewAyVecEGsMLFVow==
   dependencies:
     "@electron/get" "^1.14.1"
     "@types/node" "^16.11.26"
@@ -9096,7 +9096,7 @@ serialize-javascript@^6.0.0:
   dependencies:
     randombytes "^2.1.0"
 
-serialport@10.4.0:
+serialport@^10.4.0:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/serialport/-/serialport-10.4.0.tgz#93c95ecccc0e314d5bbee3f06cde2c70be70e671"
   integrity sha512-PszPM5SnFMgSXom60PkKS2A9nMlNbHkuoyRBlzdSWw9rmgOn258+V0dYbWMrETJMM+TJV32vqBzjg5MmmUMwMw==
