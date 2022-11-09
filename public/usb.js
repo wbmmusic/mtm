@@ -182,24 +182,24 @@ const sendPage = async(page) => {
 const sendDone = async() => {
     console.log('Send Done')
     return new Promise(async(resolve, reject) => {
-        const exit = (data, err) => {
+        const exit = (err) => {
             console.log("Exit done", err)
             clearInterval(timer)
             if (port) port.removeListener('data', handleData)
             if (err) reject(err)
-            else resolve(data)
+            else resolve()
         }
         const handleData = (data) => {
             console.log("Done Data", data.toString())
             if (data.toString().includes('WBM:DONE')) {
                 // console.log("Got Done")
-                exit({})
+                exit()
             } else exit({}, new Error('Unexpected Response in sendDone'))
         }
         const timer = setTimeout(() => exit({}, new Error('sendDone timed out')), 1000);
         port.on('data', handleData);
         port.write('WBM:DONE', (err) => {
-            if (err) exit({}, error)
+            if (err) exit(error)
             else console.log("WROTE DONE")
         })
     })
