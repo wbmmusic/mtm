@@ -99,7 +99,7 @@ const openPort = async() => {
                     console.log("MORE THAN ONE DEVICE CONNECTED")
                 }
                 console.log('Found device', thePorts[0].friendlyName)
-                port = new SerialPort({ path: thePorts[0].path, baudRate: 115200 })
+                port = new SerialPort({ path: thePorts[0].path, baudRate: 9600 })
                 port.on('open', async() => {
                     // console.log('PORT OPENED') //
 
@@ -132,18 +132,24 @@ const openPort = async() => {
 }
 
 const tryToOpenPort = async() => {
-    try {
-        await openPort()
-    } catch (error) {
-        console.log("Error on 1st attempt to connect", error)
-        setTimeout(async() => {
-            try {
-                await openPort()
-            } catch (error) {
-                console.log("Error on 2nd attempt to connect", error)
-            }
-        }, 1000);
-    }
+    return new Promise(async(resolve, reject) => {
+        try {
+            await openPort()
+            resolve()
+        } catch (error) {
+            console.log("Error on 1st attempt to connect", error)
+            setTimeout(async() => {
+                try {
+                    await openPort()
+                    resolve()
+                } catch (error) {
+                    console.log("Error on 2nd attempt to connect", error)
+                    reject(error)
+                }
+            }, 1000);
+        }
+    })
+
 
 }
 
