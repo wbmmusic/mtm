@@ -45,7 +45,8 @@
         "linux": "yarn && yarn build && yarn deploy",
         "try": "yarn && yarn build && yarn package",
         "refresh": "yarn upgrade --latest",
-        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main"
+        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
+        "postinstall": "electron-builder install-app-deps"
     },
     "build": {
         "productName": "MTM",
