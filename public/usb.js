@@ -217,15 +217,11 @@ const sendHalfPage = async(pageHalf, half) => {
 const sendPage = async(page) => {
     // page.forEach((byte, idx) => console.log(idx, byte))
     return new Promise(async(resolve, reject) => {
-        try {
-            await sendHalfPage(page.slice(0, 32), 0)
-            await sendHalfPage(page.slice(32, 64), 1)
-            setTimeout(() => {
-                resolve()
-            }, 20);
-        } catch (error) {
-            reject(error)
-        }
+        await sendHalfPage(page.slice(0, 32), 0)
+        await sendHalfPage(page.slice(32, 64), 1)
+        setTimeout(() => {
+            resolve()
+        }, 20);
     })
 
 }
