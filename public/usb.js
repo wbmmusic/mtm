@@ -222,7 +222,7 @@ const sendPage = async(page) => {
             await sendHalfPage(page.slice(32, 64), 1)
             setTimeout(() => {
                 resolve()
-            }, 100);
+            }, 20);
         } catch (error) {
             reject(error)
         }
