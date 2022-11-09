@@ -180,10 +180,10 @@ const olsendPage = async(page) => {
 }
 
 const sendHalfPage = async(pageHalf, half) => {
-    console.log('Send Page Half', half)
+    // console.log('Send Page Half', half)
     return new Promise(async(resolve, reject) => {
         const exit = (err) => {
-            console.log("Send Page exit", err)
+            // console.log("Send Page exit", err)
             clearInterval(timer)
             port.removeListener('data', handleData)
             if (err) reject(err)
@@ -191,9 +191,7 @@ const sendHalfPage = async(pageHalf, half) => {
         }
 
         const handleData = (data) => {
-            console.log('handleData', data.length)
-            console.log([...data])
-            console.log(pageHalf)
+            // console.log('handleData', data.length)
             if (JSON.stringify([...data]) === JSON.stringify([...pageHalf])) {
                 exit()
             } else {
@@ -207,18 +205,17 @@ const sendHalfPage = async(pageHalf, half) => {
         port.on('data', handleData)
         if (half === 0) {
             const msg = new Buffer.from("WBM:PAGE0")
-            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]), () => console.log("WROTE PAGE0"))
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
         } else {
             const msg = new Buffer.from("WBM:PAGE1")
-            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]), () => console.log("WROTE PAGE1"))
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
         }
 
     })
 }
 
 const sendPage = async(page) => {
-    page.forEach((byte, idx) => console.log(idx, byte))
-    console.log('Send Page')
+    // page.forEach((byte, idx) => console.log(idx, byte))
     return new Promise(async(resolve, reject) => {
         try {
             await sendHalfPage(page.slice(0, 32), 0)
@@ -302,7 +299,7 @@ const sendPages = async(pages) => {
             try {
                 await acc
                 await sendPage(thePage)
-                console.log("Sent Page", pagesSent)
+                    // console.log("Sent Page", pagesSent)
                 pagesSent++
                 win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
             } catch (error) {
@@ -469,8 +466,6 @@ const uploadFirmware = async() => {
     const file = readFileSync(pathToLatestFirmwareFile)
 
     await handleFirmwareUpload(file)
-
-    console.log("DDFF")
 
     return true
 }
