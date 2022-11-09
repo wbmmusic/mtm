@@ -1,7 +1,7 @@
 const { ipcMain, dialog } = require('electron')
 const { existsSync, readFileSync, rmdirSync, writeFileSync, mkdirSync } = require('node:fs')
 const { join } = require('node:path')
-const { upload, uploadFirmware } = require('./usb')
+const { upload, uploadFirmware, sendStream, usbStatus } = require('./usb')
 const { getRobots, pathToRobots, generateSequenceBuffer, prepareActions, saveSettings } = require('./utils')
 
 ipcMain.on('uploadFirmware', () => uploadFirmware())
@@ -29,8 +29,7 @@ ipcMain.on('play', (e, file) => {
 })
 
 ipcMain.on('get_usb_status', () => {
-    if (port) win.webContents.send('usb_status', true)
-    else win.webContents.send('usb_status', false)
+    usbStatus()
 })
 
 ipcMain.handle('sound', (e, onOff) => {
@@ -39,13 +38,10 @@ ipcMain.handle('sound', (e, onOff) => {
     return settings.sound
 })
 
-const streamMsg = new Buffer.from('WBM:STREAM')
+
 ipcMain.handle('sendValue', async(e, data) => {
-    if (port) {
-        // console.log("Send Serial", data)
-        const dataBuf = new Buffer.from(data)
-        port.write(new Buffer.concat([streamMsg, dataBuf]), (err) => { if (err) console.log(err) })
-    } else console.log("NO PORT")
+    console.log("Send Serial", data)
+    sendStream(data)
     return true
 })
 

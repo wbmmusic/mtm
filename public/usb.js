@@ -20,7 +20,7 @@ const defaultBootloader = { waiting: false, serialNumber: '' }
 let bootloader = {...defaultBootloader }
 
 global.connectedDeviceInfo = null
-global.port = null // The serialport for the connected device
+let port = null // The serialport for the connected device
 
 const getPorts = async() => {
     return new Promise(async(resolve, reject) => {
@@ -33,6 +33,18 @@ const getPorts = async() => {
 
     })
 
+}
+
+const streamMsg = new Buffer.from('WBM:STREAM')
+const sendStream = (data) => {
+    const dataBuf = new Buffer.from(data)
+    const out = new Buffer.concat([streamMsg, dataBuf])
+    port.write(out), (err) => { if (err) console.log(err) }
+}
+
+const usbStatus = () => {
+    if (port) win.webContents.send('usb_status', true)
+    else win.webContents.send('usb_status', false)
 }
 
 const getConnectedDeviceInfo = async(serialNumber) => {
@@ -505,4 +517,4 @@ const initUSB = () => {
     tryToOpenPort()
 }
 
-module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, port }
+module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, sendStream, usbStatus }
