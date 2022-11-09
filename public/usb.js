@@ -43,8 +43,13 @@ const sendStream = (data) => {
 }
 
 const usbStatus = () => {
-    if (port) win.webContents.send('usb_status', true)
-    else win.webContents.send('usb_status', false)
+    if (port) {
+        win.webContents.send('usb_status', true)
+        return true
+    } else {
+        win.webContents.send('usb_status', false)
+        return false
+    }
 }
 
 const getConnectedDeviceInfo = async(serialNumber) => {

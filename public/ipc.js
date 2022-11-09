@@ -8,11 +8,11 @@ ipcMain.on('uploadFirmware', () => uploadFirmware())
 
 ipcMain.on('upload', async(e, actions) => {
     console.log("UPLOADDDD")
-    if (port) {
+    if (usbStatus()) {
+        console.log("Attempting to generate sequence buffer")
         const sequenceBuffer = generateSequenceBuffer(prepareActions(actions))
-
+        console.log("Made Sequence Buffer")
         try {
-            console.log("YEAH")
             win.webContents.send('upload_progress', { show: true, value: null })
             await upload(sequenceBuffer)
             win.webContents.send('upload_progress', { show: false, value: null })

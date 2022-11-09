@@ -48,6 +48,7 @@ const getRobots = () => {
 
 // Merge serial positions and serial delays & Strip unnecessary elements
 const prepareActions = (actions) => {
+    console.log("In prepare actions")
     let out = []
 
     actions.forEach((act, idx) => {
@@ -94,6 +95,7 @@ const prepareActions = (actions) => {
 
 // Take prepared actions and turn them into a buffer to be copied to MCU flash
 const generateSequenceBuffer = (actions) => {
+    console.log("In Generate Sequence Buffer")
     let out = []
 
     let timePos = 0;
