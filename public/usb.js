@@ -446,7 +446,7 @@ const initUSB = () => {
                 console.log("Device was detached")
                 if (port) {
                     connectedDeviceInfo = null
-                    port.close()
+                    if (port) port.close()
                     break
                 }
             }
