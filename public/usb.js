@@ -290,7 +290,7 @@ const writeMcuFlash = async(data) => {
             resolve()
 
         } catch (error) {
-            throw error
+            reject(error)
         }
     })
 }
@@ -318,7 +318,6 @@ const getDeviceInfo = async() => {
             clearInterval(timer)
             port.removeListener('data', handleData)
             if (err !== undefined) {
-                throw err
                 reject(err)
             } else resolve(data)
         }
