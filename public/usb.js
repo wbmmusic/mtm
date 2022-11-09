@@ -217,11 +217,13 @@ const sendHalfPage = async(pageHalf, half) => {
 const sendPage = async(page) => {
     // page.forEach((byte, idx) => console.log(idx, byte))
     return new Promise(async(resolve, reject) => {
-        await sendHalfPage(page.slice(0, 32), 0)
-        await sendHalfPage(page.slice(32, 64), 1)
-        setTimeout(() => {
+        try {
+            await sendHalfPage(page.slice(0, 32), 0)
+            await sendHalfPage(page.slice(32, 64), 1)
             resolve()
-        }, 20);
+        } catch (error) {
+            reject(error)
+        }
     })
 
 }
@@ -294,12 +296,15 @@ const sendPages = async(pages) => {
         let pagesSent = 0;
         win.webContents.send('upload_progress', { show: true, value: 0 })
         await pages.reduce(async(acc, thePage) => {
-            await acc
-            await sendPage(thePage)
-            console.log("Sent Page", pagesSent)
-            pagesSent++
-            win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
-
+            try {
+                await acc
+                await sendPage(thePage)
+                console.log("Sent Page", pagesSent)
+                pagesSent++
+                win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
+            } catch (error) {
+                throw error
+            }
         }, Promise.resolve([]))
         console.log("Sent", pagesSent, "pages")
         resolve()
