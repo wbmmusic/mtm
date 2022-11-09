@@ -294,15 +294,12 @@ const sendPages = async(pages) => {
         let pagesSent = 0;
         win.webContents.send('upload_progress', { show: true, value: 0 })
         await pages.reduce(async(acc, thePage) => {
-            try {
-                await acc
-                await sendPage(thePage)
-                console.log("Sent Page", pagesSent)
-                pagesSent++
-                win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
-            } catch (error) {
-                throw error
-            }
+            await acc
+            await sendPage(thePage)
+            console.log("Sent Page", pagesSent)
+            pagesSent++
+            win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
+
         }, Promise.resolve([]))
         console.log("Sent", pagesSent, "pages")
         resolve()
