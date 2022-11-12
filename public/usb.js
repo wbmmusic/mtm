@@ -6,7 +6,6 @@ const { compareToLatest } = require('./firmware');
 const { pathToFirmwareFolder } = require('./utils');
 const { existsSync, readFileSync } = require('node:fs');
 const EventEmitter = require('node:events');
-process.setMaxListeners(1000000000)
 
 const bootEmitter = new EventEmitter()
 
