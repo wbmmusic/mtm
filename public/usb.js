@@ -1,5 +1,5 @@
 const { dialog } = require('electron');
-const { SerialPort } = require('serialport');
+var { SerialPort } = require('serialport');
 const { usb } = require('usb');
 const { join } = require('node:path');
 const { compareToLatest } = require('./firmware');
