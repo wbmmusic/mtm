@@ -107,7 +107,7 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
-        "electron": "20.1.0",
+        "electron": "21.0.1",
         "electron-builder": "^23.6.0",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
