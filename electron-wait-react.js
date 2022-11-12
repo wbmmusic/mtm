@@ -11,17 +11,9 @@ const startElectron = () => {
     const exec = require('child_process').exec;
     var elctrn = exec('yarn run electron');
 
-    elctrn.stdout.on('data', function(data) {
-        console.log(data);
-    });
-
-    elctrn.stdout.on('error', function(data) {
-        console.log("ER", data);
-    });
-
-    elctrn.stderr.on('data', function(data) {
-        console.log("E", data);
-    });
+    elctrn.stdout.on('data', (data) => console.log(data));
+    elctrn.stdout.on('error', (data) => console.log("ER", data));
+    elctrn.stderr.on('data', (data) => console.log("E", data));
 }
 
 let startedElectron = false;
