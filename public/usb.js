@@ -1,5 +1,4 @@
 const { dialog } = require('electron');
-var { SerialPort } = require('serialport');
 const { usb } = require('usb');
 const { join } = require('node:path');
 const { compareToLatest } = require('./firmware');
@@ -100,6 +99,7 @@ const openPort = async() => {
                     console.log("MORE THAN ONE DEVICE CONNECTED")
                 }
                 console.log('Found device', thePorts[0].friendlyName)
+                const { SerialPort } = require('serialport');
                 port = new SerialPort({ path: thePorts[0].path, baudRate: 9600 })
                 port.on('open', async() => {
                     // console.log('PORT OPENED') //
@@ -257,6 +257,7 @@ const sendDone = async(port) => {
 const sendBootToBootloader = async() => {
     console.log("Boot To Bootloader", this.connectedDeviceInfo.path)
     return new Promise(async(resolve, reject) => {
+        const { SerialPort } = require('serialport');
         let port = new SerialPort({ path: this.connectedDeviceInfo.path, baudRate: 115200 })
         const serial = this.connectedDeviceInfo.serialNumber.split(':')[1]
 
@@ -339,6 +340,7 @@ const sendPages = async(port, pages) => {
 const writeMcuFlash = async(data) => {
     return new Promise(async(resolve, reject) => {
         let result = null
+        const { SerialPort } = require('serialport');
         let port = new SerialPort({ path: this.connectedDeviceInfo.path, baudRate: 115200 })
         port.on('open', async() => {
             try {
