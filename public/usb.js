@@ -22,6 +22,7 @@ global.connectedDeviceInfo = null
 const getPorts = async() => {
     return new Promise(async(resolve, reject) => {
         try {
+            const { SerialPort } = require('serialport');
             let tempPorts = await SerialPort.list()
             resolve(tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth')))
         } catch (error) {
