@@ -13,7 +13,7 @@ const startElectron = () => {
 
     elctrn.stdout.on('data', (data) => console.log(data));
     elctrn.stdout.on('error', (data) => console.log("ER", data));
-    elctrn.stderr.on('data', (data) => console.log("E", data));
+    // elctrn.stderr.on('data', (data) => console.log("E", data));
 }
 
 let startedElectron = false;
