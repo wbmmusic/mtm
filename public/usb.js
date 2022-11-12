@@ -274,7 +274,7 @@ const sendBootToBootloader = async() => {
                 } else {
                     bootloader.waiting = true
                     bootloader.serialNumber = serial
-                        // if (port) port.close()
+                    port.destroy()
                     resolve()
                 }
             }
