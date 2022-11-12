@@ -5,8 +5,8 @@ const { join } = require('node:path');
 const { compareToLatest } = require('./firmware');
 const { pathToFirmwareFolder } = require('./utils');
 const { existsSync, readFileSync } = require('node:fs');
-const { spawn } = require('node:child_process')
 const EventEmitter = require('node:events');
+process.setMaxListeners(1000000000)
 
 const bootEmitter = new EventEmitter()
 
@@ -20,6 +20,7 @@ const defaultBootloader = { waiting: false, serialNumber: '' }
 let bootloader = {...defaultBootloader }
 
 global.connectedDeviceInfo = null
+var port = null // The serialport for the connected device
 
 const getPorts = async() => {
     return new Promise(async(resolve, reject) => {
@@ -42,7 +43,7 @@ const sendStream = (data) => {
 }
 
 const usbStatus = () => {
-    if (connectedDeviceInfo) {
+    if (port) {
         win.webContents.send('usb_status', true)
         return true
     } else {
@@ -51,7 +52,7 @@ const usbStatus = () => {
     }
 }
 
-const getConnectedDeviceInfo = async(port, serialNumber, path) => {
+const getConnectedDeviceInfo = async(serialNumber) => {
     return new Promise(async(resolve, reject) => {
         const exit = (err) => {
             clearTimeout(timeout)
@@ -63,7 +64,7 @@ const getConnectedDeviceInfo = async(port, serialNumber, path) => {
 
         const handleData = (data) => {
             const pairs = data.toString().split(";")
-            out = { serialNumber, path }
+            out = { serialNumber }
             pairs.forEach(pair => {
                 const keyVal = pair.split(':')
                 out[keyVal[0]] = keyVal[1]
@@ -84,10 +85,7 @@ const getConnectedDeviceInfo = async(port, serialNumber, path) => {
 
 const openPort = async() => {
     // console.log("Try to open port")
-    let port = null
-    let result = {}
     return new Promise(async(resolve, reject) => {
-
         try {
             let tempPorts = await getPorts()
             let thePorts = tempPorts.filter(prt => {
@@ -107,30 +105,28 @@ const openPort = async() => {
 
                     if (thePorts[0].serialNumber.includes("BOOT:")) {
                         this.connectedDeviceInfo = {
-                            path: thePorts[0].path,
                             serialNumber: thePorts[0].serialNumber,
                             model: "mtm2s"
                         }
-                        result = { mode: 'bootloader' }
-                        port.close()
+                        bootEmitter.emit('bootloaderDeviceConnected', thePorts[0].serialNumber)
+                        resolve(true)
                     } else {
                         win.webContents.send('usb_status', true)
-                        await getConnectedDeviceInfo(port, thePorts[0].serialNumber, thePorts[0].path)
+                        await getConnectedDeviceInfo(thePorts[0].serialNumber)
                         compareToLatest()
-                        result = { mode: 'normal' }
-                        port.close()
+                        resolve(true)
                     }
                 })
                 port.on('close', () => {
                     port = null
                     console.log("Port Closed")
-                    resolve(result)
+                    this.connectedDeviceInfo = null
+                    win.webContents.send('usb_status', false)
                 })
                 port.on('error', (err) => {
                     port = null
                     this.connectedDeviceInfo = null
                     console.error("PORT ERROR", err)
-                    reject(err)
                 })
             } else reject("Didn't Find target Device")
         } catch (error) {
@@ -139,106 +135,296 @@ const openPort = async() => {
     })
 }
 
-const sendBootToBootloader = async() => {
-    console.log("Boot To Bootloader", this.connectedDeviceInfo.path)
+const tryToOpenPort = async() => {
     return new Promise(async(resolve, reject) => {
-        let port = new SerialPort({ path: this.connectedDeviceInfo.path, baudRate: 115200 })
-        const serial = this.connectedDeviceInfo.serialNumber.split(':')[1]
-
-        let result = null
-
-        port.on('open', () => {
-            console.log("Port Opened")
-            const exit = (err) => {
-                clearTimeout(timeout)
-                bootEmitter.removeListener('bootloaderDeviceConnected', handleEvent)
-                port.removeListener('data', handleData)
-                if (err) {
-                    result = err
-                    port.close()
-                } else {
-                    bootloader.waiting = true
-                    bootloader.serialNumber = serial
-                    port.destroy()
+        try {
+            await openPort()
+            resolve()
+        } catch (error) {
+            console.log("Error on 1st attempt to connect", error)
+            setTimeout(async() => {
+                try {
+                    await openPort()
                     resolve()
+                } catch (error) {
+                    console.log("Error on 2nd attempt to connect", error)
+                    reject(error)
                 }
+            }, 1000);
+        }
+    })
+
+
+}
+
+const sendProgramCommand = async() => {
+    return new Promise(async(resolve, reject) => {
+        const exit = (data, err) => {
+            clearTimeout(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve(data)
+        }
+        const handleData = (data) => {
+            if (data.toString().includes('WBM:READY')) {
+                // console.log('Device is ready for sequence')
+                exit({})
+            } else exit({}, new Error("Didn't get expected response in sendProgramCommand"))
+        }
+        const timer = setTimeout(() => exit({}, new Error('sendProgramCommand timed out')), 1000);
+        port.on('data', handleData)
+        port.write('WBM:LOAD')
+    })
+}
+
+const olsendPage = async(page) => {
+    console.log('Send Page')
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            console.log("Send Page exit", err)
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve()
+        }
+
+        const handleData = (data) => {
+            console.log('handleData', data.length)
+            if (JSON.stringify([...data]) === JSON.stringify([...page])) {
+                exit()
+            } else {
+                exit(new Error('Page Mismatch in sendPage'))
             }
+        }
 
-            const handleData = (data) => {
-                if (data.toString() === "WBM:BOOT") { console.log("Got This Message in boot to bootloader", data.toString()) }
-            }
-
-            const handleEvent = serialNumber => {
-                if (serialNumber.includes(serial)) exit()
-                else exit(new Error('Bootloader device serial is not what was expected'))
-            }
-
-            const timeout = setTimeout(() => {
-                exit(new Error('Timed Out sending boot to bootloader'))
-            }, 3000);
-
-            port.on('data', handleData)
-
-            bootEmitter.on('bootloaderDeviceConnected', handleEvent)
-
-            port.write('WBM:BOOTLOADER', () => console.log("Sent Boot To Bootloader"))
-        })
-
-        port.on('close', () => {
-            if (result) {
-                console.log(result)
-                reject(result)
-            }
-        })
-
-        port.on('error', (err) => {
-            console.log(err)
-            reject(err)
-        })
-
+        // console.log("Send Page")
+        let timer = setTimeout(() => exit(new Error('sendPage timed out')), 1000);
+        // console.log('Sending Page', page.length)
+        port.on('data', handleData)
+        port.write(new Buffer.from(page))
     })
 
 }
 
-const upload = async(pathToFile) => {
-    console.log("UPLOAD")
+const sendHalfPage = async(pageHalf, half) => {
+    // console.log('Send Page Half', half)
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            // console.log("Send Page exit", err)
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve()
+        }
+
+        const handleData = (data) => {
+            // console.log('handleData', data.length)
+            if (JSON.stringify([...data]) === JSON.stringify([...pageHalf])) {
+                exit()
+            } else {
+                exit(new Error('Page Mismatch in sendPage'))
+            }
+        }
+
+        // console.log("Send Page")
+        let timer = setTimeout(() => exit(new Error('sendPage timed out')), 1000);
+        // console.log('Sending Page', page.length)
+        port.on('data', handleData)
+        if (half === 0) {
+            const msg = new Buffer.from("WBM:PAGE0")
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
+        } else {
+            const msg = new Buffer.from("WBM:PAGE1")
+            port.write(Buffer.concat([msg, new Buffer.from(pageHalf)]))
+        }
+
+    })
+}
+
+const sendPage = async(page) => {
+    // page.forEach((byte, idx) => console.log(idx, byte))
     return new Promise(async(resolve, reject) => {
         try {
-            // console.log("in Upload")
+            await sendHalfPage(page.slice(0, 32), 0)
+            await sendHalfPage(page.slice(32, 64), 1)
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
+    })
 
-            const config = {
-                path: this.connectedDeviceInfo.path,
-                pathToFile: pathToFile.toString()
+}
+
+const sendDone = async() => {
+    // console.log('Send Done')
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            // console.log("Exit done", err)
+            clearInterval(timer)
+            if (port) port.removeListener('data', handleData)
+            if (err) reject(err)
+            else resolve()
+        }
+        const handleData = (data) => {
+            // console.log("Done Data", data.toString())
+            if (data.toString().includes('WBM:DONE')) {
+                // console.log("Got Done")
+                exit()
+            } else exit(new Error('Unexpected Response in sendDone'))
+        }
+        const timer = setTimeout(() => exit(new Error('sendDone timed out')), 1000);
+        port.on('data', handleData);
+        port.write('WBM:DONE', (err) => {
+            if (err) exit(error)
+        })
+    })
+}
+
+const sendBootToBootloader = async() => {
+    const serial = this.connectedDeviceInfo.serialNumber.split(':')[1]
+    return new Promise(async(resolve, reject) => {
+        const exit = (err) => {
+            clearTimeout(timeout)
+            bootEmitter.removeListener('bootloaderDeviceConnected', handleEvent)
+            port.removeListener('data', handleData)
+            if (err) reject(err)
+            else {
+                bootloader.waiting = true
+                bootloader.serialNumber = serial
+                resolve()
             }
+        }
 
-            const args = [new Buffer.from(JSON.stringify(config))]
+        const handleData = (data) => {
+            if (data.toString() === "WBM:BOOT") { console.log("Got This Message in boot to bootloader", data.toString()) }
+        }
 
-            const pathToUploader = join(__dirname, '..', '..', 'mtm-serial-port', 'release', 'mtm-serial-port-macos')
+        const handleEvent = serialNumber => {
+            if (serialNumber.includes(serial)) exit()
+            else exit(new Error('Bootloader device serial is not what was expected'))
+        }
 
-            console.log("SPAWNING")
-            const uploader = spawn(pathToUploader, [...args])
+        const timeout = setTimeout(() => {
+            exit(new Error('Timed Out sending boot to bootloader'))
+        }, 3000);
 
-            uploader.stdout.on('data', (data) => {
-                console.log(data.toString())
-            })
+        port.on('data', handleData)
 
-            uploader.stderr.on('data', (data) => console.error(data.toString()))
+        bootEmitter.on('bootloaderDeviceConnected', handleEvent)
 
-            uploader.on('close', (code) => {
-                console.log("Close code", code)
-                if (code === 0) resolve()
-                else reject()
-            })
+        port.write('WBM:BOOTLOADER', () => console.log("Sent Boot To Bootloader"))
+    })
+
+}
+
+const sendPages = async(pages) => {
+    return new Promise(async(resolve, reject) => {
+        let pagesSent = 0;
+        win.webContents.send('upload_progress', { show: true, value: 0 })
+        await pages.reduce(async(acc, thePage) => {
+            try {
+                await acc
+                await sendPage(thePage)
+                console.log("Sent Page", pagesSent)
+                pagesSent++
+                win.webContents.send('upload_progress', { show: true, value: (100 * pagesSent) / pages.length })
+            } catch (error) {
+                throw error
+            }
+        }, Promise.resolve([]))
+        console.log("Sent", pagesSent, "pages")
+        resolve()
+    })
+
+}
+
+const writeMcuFlash = async(data) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            const { pageSize, availableSpace } = await getDeviceInfo()
+            console.log('Got Info | Page Size =', pageSize, "| Available Space =", availableSpace)
+
+            if (data.length > availableSpace) reject(new Error('Sequence will not fit in EEPROM'))
+
+            let pages = makePages(data, pageSize)
+
+            // send program command
+            // console.log("Sending program command")
+            await sendProgramCommand()
+
+            // send pages
+            await sendPages(pages)
+                // console.log('Sent Pages')
+
+            // send done
+            await sendDone()
+
+            resolve()
 
         } catch (error) {
-            console.log(error)
             reject(error)
         }
     })
 }
 
-const handleFirmwareUpload = async(pathToFile) => {
-    console.log("Handle Firmware Upload")
+const makePages = (data, pageSize) => {
+    console.log(data.length, "bytes to be packed into pages")
+        // console.log(data)
+    let pages = []
+    let page = []
+    data.forEach(byte => {
+        page.push(byte)
+        if (page.length === pageSize) {
+            pages.push(page)
+            page = []
+        }
+    })
+    while (page.length < pageSize) page.push(0xFF)
+    pages.push(page)
+        // console.log("Prepared", pages.length, "pages")
+    return pages
+}
+
+const getDeviceInfo = async() => {
+    return new Promise(async(resolve, reject) => {
+
+        const exit = (data, err) => {
+            clearInterval(timer)
+            port.removeListener('data', handleData)
+            if (err !== undefined) {
+                reject(err)
+            } else resolve(data)
+        }
+        const handleData = (data) => {
+            if (data.toString().includes('WBM:FLASHINFO')) {
+                // console.log("Got Device Info")
+                const pageSize = (data[data.length - 2] << 8) | data[data.length - 1]
+                const availableSpace = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3]
+                exit({ pageSize, availableSpace })
+            } else exit({}, new Error(`Unexpected data in getDeviceInfo ${data.toString()}`))
+
+        }
+        const timer = setTimeout(() => exit({}, new Error('getDeviceInfo timed out')), 1000);
+        port.on('data', handleData)
+        port.write('WBM:GETFLASHINFO')
+    })
+}
+
+const upload = async(data) => {
+    console.log("UPLOAD")
+    return new Promise(async(resolve, reject) => {
+        try {
+            // console.log("in Upload")
+            const send = await writeMcuFlash(data)
+                // console.log('Upload Complete')
+            resolve()
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const handleFirmwareUpload = async(file) => {
     return new Promise(async(resolve, reject) => {
         // Connected device is not in bootloader mode TYPICAL
         if (!this.connectedDeviceInfo.serialNumber.includes('BOOT:')) {
@@ -248,7 +434,7 @@ const handleFirmwareUpload = async(pathToFile) => {
                     console.log("-------------- START UPLOAD FIRMWARE --------------")
                     win.webContents.send('upload_progress', { show: true, value: null })
                     await sendBootToBootloader()
-                    await upload(pathToFile)
+                    await upload(file)
                     win.webContents.send('upload_progress', { show: false, value: null })
                     console.log("-------------- END UPLOAD FIRMWARE --------------")
                     resolve()
@@ -265,7 +451,7 @@ const handleFirmwareUpload = async(pathToFile) => {
             console.log('Device is in bootloader mode,  Fix this')
             try {
                 win.webContents.send('upload_progress', { show: true, value: null })
-                await upload(pathToFile)
+                await upload(file)
                 win.webContents.send('upload_progress', { show: false, value: null })
                 console.log("-------------- END UPLOAD FIRMWARE FROM BOOTLOADER --------------")
                 resolve()
@@ -287,10 +473,11 @@ const uploadCustomFirmware = async() => {
     if (res.canceled === true) return false
     const pathToFile = normalize(res.filePaths[0])
     console.log(pathToFile)
+    const file = readFileSync(pathToFile)
 
     win.webContents.send('upload_progress', { show: true, value: null })
     try {
-        await handleFirmwareUpload(pathToFile)
+        await handleFirmwareUpload(file)
     } catch (error) {
         throw error
     }
@@ -306,47 +493,24 @@ const uploadFirmware = async() => {
     if (!existsSync(pathToDeviceFolder)) throw new Error("Folder Doesn't Exist")
     const devLatest = JSON.parse(readFileSync(join(pathToDeviceFolder, 'latest.json')))
     const pathToLatestFirmwareFile = join(pathToDeviceFolder, devLatest.name)
+    const file = readFileSync(pathToLatestFirmwareFile)
 
-    await handleFirmwareUpload(pathToLatestFirmwareFile)
+    await handleFirmwareUpload(file)
 
     return true
 }
 
-const tryToSetDeviceAsConnectedDevice = async() => {
-    return new Promise(async(resolve, reject) => {
-        try {
-            const deviceState = await openPort()
-            console.log(deviceState)
-            if (deviceState.mode === 'bootloader') {
-                win.webContents.send('usb_status', true)
-                bootEmitter.emit('bootloaderDeviceConnected', this.connectedDeviceInfo.serialNumber)
-            } else if (deviceState.mode === 'normal') {
-                win.webContents.send('usb_status', true)
-            } else {
-                reject(new Error('Unknown Device Mode'))
-            }
-            resolve()
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
-
 const initUSB = () => {
-    usb.on('attach', async(e) => {
+    usb.on('attach', (e) => {
         const vid = e.deviceDescriptor.idVendor
         const pid = e.deviceDescriptor.idProduct
         for (let i = 0; i < usbTarget.length; i++) {
-            // If this devices PID and VID match ones we are looking for
             if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
                 console.log("Device was attached")
-                    // try to get some info from it
-                try {
-                    const info = await tryToSetDeviceAsConnectedDevice()
-                    console.log(info)
-                } catch (error) {
-                    console.log(error)
-                }
+                if (!port) {
+                    tryToOpenPort()
+                    break
+                } else console.log("Device Attached but another is already connected")
             }
         }
     })
@@ -357,13 +521,16 @@ const initUSB = () => {
         for (let i = 0; i < usbTarget.length; i++) {
             if (vid === usbTarget[i].vid && pid === usbTarget[i].pid) {
                 console.log("Device was detached")
-                this.connectedDeviceInfo = null
-                break
+                if (port) {
+                    this.connectedDeviceInfo = null
+                    port.close()
+                    break
+                }
             }
         }
     })
 
-    // tryToOpenPort()
+    tryToOpenPort()
 }
 
 module.exports = { initUSB, upload, uploadCustomFirmware, uploadFirmware, sendStream, usbStatus }
