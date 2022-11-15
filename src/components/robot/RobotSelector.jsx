@@ -1,33 +1,26 @@
-import {
-  Box,
-  Button,
-  Divider,
-  Modal,
-  Paper,
-  Rating,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Modal, Paper, Stack, Typography } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import AddIcon from "@mui/icons-material/Add";
 import { EditRobotModal } from "./EditRobotModal";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
+
 import { deleteRobot, getRobots } from "../../helpers";
 import { modalStyle } from "../../styles";
+import { motion } from "framer-motion";
+import { RobotCard } from "./RobotCard";
+import { useTypewriter } from "react-simple-typewriter";
 
 const defaultDeleteModal = { show: false, robot: null };
 const defaultRobotModal = { mode: null };
 
 export const RobotSelector = () => {
-  const navigate = useNavigate();
   const { admin } = useContext(GlobalContext);
 
   const [robotModal, setRobotModal] = useState(defaultRobotModal);
   const [robots, setRobots] = useState([]);
   const [deleteModal, setDeleteModal] = useState(defaultDeleteModal);
+
+  const [text, count] = useTypewriter({ words: ["Robots"] });
 
   const setTheRobots = async () => {
     try {
@@ -90,89 +83,6 @@ export const RobotSelector = () => {
     }
   };
 
-  const Buttons = ({ robot }) => (
-    <Stack direction="row-reverse" spacing={1}>
-      <Button
-        variant="contained"
-        color="error"
-        onClick={() => setDeleteModal({ show: true, robot })}
-      >
-        Delete
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() => setRobotModal({ mode: "edit", robot })}
-      >
-        Edit
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() => {
-          window.electron.ipcRenderer
-            .invoke("exportRobot", robot.path)
-            .then(res => console.log(res))
-            .catch(err => console.error(err));
-        }}
-      >
-        Export
-      </Button>
-    </Stack>
-  );
-
-  const RobotCard = ({ robot }) => (
-    <Box p={1} component={Paper} elevation={2}>
-      <Box
-        sx={{ cursor: "pointer" }}
-        onClick={() => navigate("/robot/" + robot.path)}
-      >
-        <Stack direction="row" width={"100%"} spacing={3} alignItems="center">
-          <Typography variant="h6" sx={{ whiteSpace: "nowrap" }}>
-            {robot.name}
-          </Typography>
-          <Box width={"100%"} />
-          <Rating
-            icon={<SmartToyIcon />}
-            emptyIcon={<SmartToyOutlinedIcon />}
-            max={3}
-            value={robot.difficulty}
-            readOnly
-          />
-          <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-            Servos: {robot.servos.length}
-          </Typography>
-        </Stack>
-        <Divider />
-        <Stack direction="row">
-          <Box>
-            <Box
-              component="img"
-              sx={{ maxHeight: "100%", maxWidth: "100px" }}
-              src="img://robot.png"
-            />
-          </Box>
-          <Box
-            m={1}
-            p={1}
-            width={"100%"}
-            component={Paper}
-            color="black"
-            sx={{
-              backgroundColor: "#BBCC00",
-              fontFamily: "Arcade",
-              fontSize: "26px",
-              lineHeight: "80%",
-              border: "5px solid",
-              borderRadius: "3px",
-            }}
-          >
-            {robot.description}
-          </Box>
-        </Stack>
-      </Box>
-      {admin ? <Buttons robot={robot} /> : null}
-    </Box>
-  );
-
   const closeDeleteModal = () => setDeleteModal(defaultDeleteModal);
 
   const DeleteModal = () => {
@@ -226,6 +136,19 @@ export const RobotSelector = () => {
     }
   };
 
+  const container = {
+    show: {
+      transition: {
+        staggerChildren: 0.03,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, scale: 0, rotate: -10 },
+    show: { opacity: 1, scale: 1, rotate: 0 },
+  };
+
   return (
     <Box
       m={1}
@@ -234,12 +157,34 @@ export const RobotSelector = () => {
       elevation={4}
       sx={{ backgroundColor: "orange" }}
     >
-      <Typography variant="h5">Robots</Typography>
+      <Typography sx={{ opacity: text.length > 0 ? 1 : 0 }} variant="h5">
+        {text.length > 0 ? text : "|"}
+      </Typography>
       <Stack spacing={1}>
         {admin ? <AddRobotBlock /> : null}
-        {robots.map((robot, idx) => {
-          return <RobotCard key={"robotCard" + idx} robot={robot} />;
-        })}
+        {robots.length > 0 && (
+          <Stack
+            spacing={1}
+            component={motion.div}
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            {robots.map((robot, idx) => (
+              <motion.div
+                key={"robotCard" + robot.name + idx}
+                variants={item}
+                transition={{ duration: 0.5, type: "spring" }}
+              >
+                <RobotCard
+                  setDelete={e => setDeleteModal(e)}
+                  setRobot={e => setRobotModal(e)}
+                  robot={robot}
+                />
+              </motion.div>
+            ))}
+          </Stack>
+        )}
         {makeModal()}
       </Stack>
     </Box>

@@ -33,7 +33,7 @@ export const Robot = () => {
   return (
     <Box height={"100%"} p={1}>
       <Stack spacing={2}>
-        <Typography variant="h4">{robot.name}</Typography>
+        <Typography variant="h5">{robot.name}</Typography>
         <Divider />
         <SequencePicker robot={robot} />
         <Box m={"auto"}>

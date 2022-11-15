@@ -177,35 +177,6 @@ const sendProgramCommand = async() => {
     })
 }
 
-const olsendPage = async(page) => {
-    console.log('Send Page')
-    return new Promise(async(resolve, reject) => {
-        const exit = (err) => {
-            console.log("Send Page exit", err)
-            clearInterval(timer)
-            port.removeListener('data', handleData)
-            if (err) reject(err)
-            else resolve()
-        }
-
-        const handleData = (data) => {
-            console.log('handleData', data.length)
-            if (JSON.stringify([...data]) === JSON.stringify([...page])) {
-                exit()
-            } else {
-                exit(new Error('Page Mismatch in sendPage'))
-            }
-        }
-
-        // console.log("Send Page")
-        let timer = setTimeout(() => exit(new Error('sendPage timed out')), 1000);
-        // console.log('Sending Page', page.length)
-        port.on('data', handleData)
-        port.write(new Buffer.from(page))
-    })
-
-}
-
 const sendHalfPage = async(pageHalf, half) => {
     // console.log('Send Page Half', half)
     return new Promise(async(resolve, reject) => {
