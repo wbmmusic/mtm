@@ -30,7 +30,7 @@ const checkFolders = () => {
     if (!existsSync(pathToUserSettings)) {
         settings = defaultSettings
         saveSettings()
-    }
+    } else settings = readSettings()
 }
 
 const getRobots = () => {
@@ -124,7 +124,5 @@ const generateSequenceBuffer = (actions) => {
         // Return out as a buffer
     return new Buffer.from(out)
 }
-
-settings = readSettings()
 
 module.exports = { checkFolders, getRobots, pathToRobots, pathToFirmwareFolder, prepareActions, generateSequenceBuffer, saveSettings }
