@@ -4668,10 +4668,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^21.3.0:
-  version "21.3.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-21.3.0.tgz#e9905e240add950443dc115b4be13d36162f0a05"
-  integrity sha512-MGRpshN8fBcx4IRuBABIsGDv0tB/MclIFsyFHFFXsBCUc+vIXaE/E6vuWaniGIFSz5WyeuapfTH5IeRb+7yIfw==
+electron@^21.3.1:
+  version "21.3.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-21.3.1.tgz#02a61053ace79ecdc592afc641ff663dec805b42"
+  integrity sha512-Ik/I9oFHA1h32JRtRm6GMgYdUctFpF/tPnHyATg4r3LXBTUT6habGh3GxSdmmTa5JgtA7uJUEm8EjjZItk7T3g==
   dependencies:
     "@electron/get" "^1.14.1"
     "@types/node" "^16.11.26"
@@ -5427,10 +5427,10 @@ fraction.js@^4.2.0:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.2.0.tgz#448e5109a313a3527f5a3ab2119ec4cf0e0e2950"
   integrity sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA==
 
-framer-motion@^7.6.9:
-  version "7.6.9"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.6.9.tgz#d2c8ca8b97580aa00f7c6e2b616da241bd2ce8e6"
-  integrity sha512-byPSPOqKApmVUvbtvmFCyL09dqBNLUwkXRQMeTsawtF6YpiB54yCVzk+9YXAnoswMSgsB7CQaA6ls7e8QL+C+g==
+framer-motion@^7.6.11:
+  version "7.6.11"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.6.11.tgz#0bce2a6954b2614d45a0f5ea8d809db9dbd3db5e"
+  integrity sha512-RJTyrHl6LUVwGW+oOvLaRjPkw92vpyMigTfcCOKTJbK14LfBglb62IqzVk2kXI9v9jCvmcGhh5qDhCrrjvTYpw==
   dependencies:
     "@motionone/dom" "10.13.1"
     framesync "6.1.2"
