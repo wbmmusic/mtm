@@ -1,27 +1,34 @@
 export const delays = [
   {
-    id: "idforhalfsec",
+    id: "idFor.2sec",
+    appId: ".2_sec_delay",
+    content: ".2s",
+    type: "delay",
+    value: 2,
+  },
+  {
+    id: "idForHalfSec",
     appId: "half_sec_delay",
     content: ".5s",
     type: "delay",
     value: 5,
   },
   {
-    id: "idfor1sec",
+    id: "idFor1sec",
     appId: "one_sec_dly",
     content: "1s",
     type: "delay",
     value: 10,
   },
   {
-    id: "idfor3sec",
+    id: "idFor3sec",
     appId: "three_sec_delay",
     content: "3s",
     type: "delay",
     value: 30,
   },
   {
-    id: "idfor5sec",
+    id: "idFor5sec",
     appId: "five_sec_delay",
     content: "5s",
     type: "delay",
