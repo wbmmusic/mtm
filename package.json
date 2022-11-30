@@ -1,7 +1,8 @@
 {
     "name": "mtm",
-    "version": "0.0.35",
+    "version": "0.0.36",
     "private": true,
+    "license": "UNLICENSED",
     "author": {
         "name": "WBM Tek",
         "url": "https://www.wbmtek.com",
@@ -110,7 +111,7 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
-        "electron": "^21.3.1",
+        "electron": "^22.0.0",
         "electron-builder": "^23.6.0",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
