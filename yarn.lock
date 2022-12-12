@@ -2631,7 +2631,7 @@
   resolved "https://registry.yarnpkg.com/@types/verror/-/verror-1.10.6.tgz#3e600c62d210c5826460858f84bcbb65805460bb"
   integrity sha512-NNm+gdePAX1VGvPcGZCDKQZKYSiAWigKhKaz5KF94hG6f2s8de9Ow5+7AbXoeKxL8gavZfk4UquSAygOF2duEQ==
 
-"@types/w3c-web-usb@1.0.6":
+"@types/w3c-web-usb@^1.0.6":
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/@types/w3c-web-usb/-/w3c-web-usb-1.0.6.tgz#5d8560d0d9f585ffc80865bc773db7bc975b680c"
   integrity sha512-cSjhgrr8g4KbPnnijAr/KJDNKa/bBa+ixYkywFRvrhvi9n1WEl7yYbtRyzE6jqNQiSxxJxoAW3STaOQwJHndaw==
@@ -7416,11 +7416,6 @@ node-addon-api@^1.6.3:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-1.7.2.tgz#3df30b95720b53c24e59948b49532b662444f54d"
   integrity sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==
 
-node-addon-api@^4.2.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-4.3.0.tgz#52a1a0b475193e0928e98e0426a0d1254782b77f"
-  integrity sha512-73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==
-
 node-addon-api@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-5.0.0.tgz#7d7e6f9ef89043befdb20c1989c905ebde18c501"
@@ -7431,7 +7426,7 @@ node-forge@^1:
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
   integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
 
-node-gyp-build@^4.3.0:
+node-gyp-build@^4.3.0, node-gyp-build@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.5.0.tgz#7a64eefa0b21112f89f58379da128ac177f20e40"
   integrity sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==
@@ -10049,14 +10044,14 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-usb@^2.5.2:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/usb/-/usb-2.5.2.tgz#081b83aff83279c6d7605608880009ad698bc2c8"
-  integrity sha512-/7hWfbPL4ExGTQO2v2XfuKoBHDwNMoNPZmyKjsPpS4bnEY3BIsaanPpGsLmaI4MOq9pAWDrIz0DwRA8SqJ1pVQ==
+usb@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/usb/-/usb-2.6.0.tgz#5d1a73d43278a1b709161cd9a01917ec2b30fd2a"
+  integrity sha512-2FnACx4gy5K8R7nemeKr5UPe1veg/zq0v/ZD/3F+lVdLkpC84+cmy0xWvndh5mgvYYnOh11FkT46knRlSWFffw==
   dependencies:
-    "@types/w3c-web-usb" "1.0.6"
-    node-addon-api "^4.2.0"
-    node-gyp-build "^4.3.0"
+    "@types/w3c-web-usb" "^1.0.6"
+    node-addon-api "^5.0.0"
+    node-gyp-build "^4.5.0"
 
 use-memo-one@^1.1.1:
   version "1.1.2"
