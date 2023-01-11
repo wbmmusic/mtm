@@ -4695,10 +4695,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^22.0.0:
-  version "22.0.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-22.0.0.tgz#ef84ab9cf23aa3f8c2f42a1e8e000ad7fd941058"
-  integrity sha512-cgRc4wjyM+81A0E8UGv1HNJjL1HBI5cWNh/DUIjzYvoUuiEM0SS0hAH/zaFQ18xOz2ced6Yih8SybpOiOYJhdg==
+electron@^22.0.1:
+  version "22.0.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-22.0.1.tgz#32a8533848e41f07e53f6feb0656207da57d8707"
+  integrity sha512-05X/UmQOtUYwFmytY4/rc+4Iz+LYzHhftRZDkx1GQzyX/BxopStddG8LMcx3SESNk25F2J93oHv1Lzs6QWeCjA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^16.11.26"
@@ -5454,10 +5454,10 @@ fraction.js@^4.2.0:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.2.0.tgz#448e5109a313a3527f5a3ab2119ec4cf0e0e2950"
   integrity sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA==
 
-framer-motion@^8.3.3:
-  version "8.3.3"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-8.3.3.tgz#fc380c0bb9f5999bb6fd3be48909d5c09aae5ab7"
-  integrity sha512-K7YpdFSfcs8M12m1gd8AankcEeYh8DhQKPBbCecniSWdOwcfrACiwMptCepMCdDehKmzHo1iDxYXy4FEhw9yaw==
+framer-motion@^8.4.0:
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-8.4.0.tgz#3211ba4006a335fc9f5d04690e473dfb7ab20bc8"
+  integrity sha512-32ECxsAMrhFfpMnA/j3wXku//587kQe29emTGpIQsnh60mFSMTrnpIupAn5Bnk5qq4/OMNgWWCI6mnaFhsIu7w==
   dependencies:
     "@motionone/dom" "^10.15.3"
     hey-listen "^1.0.8"
@@ -10157,10 +10157,10 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-web-vitals@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/web-vitals/-/web-vitals-3.1.0.tgz#a6f5156cb6c7fee562da46078540265ac2cd2d16"
-  integrity sha512-zCeQ+bOjWjJbXv5ZL0r8Py3XP2doCQMZXNKlBGfUjPAVZWokApdeF/kFlK1peuKlCt8sL9TFkKzyXE9/cmNJQA==
+web-vitals@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/web-vitals/-/web-vitals-3.1.1.tgz#bb124a03df7a135617f495c5bb7dbc30ecf2cce3"
+  integrity sha512-qvllU+ZeQChqzBhZ1oyXmWsjJ8a2jHYpH8AMaVuf29yscOPZfTQTjQFRX6+eADTdsDE8IanOZ0cetweHMs8/2A==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
