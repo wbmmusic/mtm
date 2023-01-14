@@ -4695,10 +4695,10 @@ electron-updater@^5.3.0:
     semver "^7.3.5"
     typed-emitter "^2.1.0"
 
-electron@^22.0.1:
-  version "22.0.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-22.0.1.tgz#32a8533848e41f07e53f6feb0656207da57d8707"
-  integrity sha512-05X/UmQOtUYwFmytY4/rc+4Iz+LYzHhftRZDkx1GQzyX/BxopStddG8LMcx3SESNk25F2J93oHv1Lzs6QWeCjA==
+electron@^22.0.2:
+  version "22.0.2"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-22.0.2.tgz#256c3f7749bcab5d68dc0ba4ae86c1b60852f0b3"
+  integrity sha512-NdJlA2+FMgDJBhQFKMPyWJY8ng/tWpFlrRsW2JkZgSzYPXOnIu9muO3b83YHGoDn+GTyS8ghPsgcAwPMXtxirA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^16.11.26"
@@ -5454,10 +5454,10 @@ fraction.js@^4.2.0:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.2.0.tgz#448e5109a313a3527f5a3ab2119ec4cf0e0e2950"
   integrity sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA==
 
-framer-motion@^8.4.2:
-  version "8.4.2"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-8.4.2.tgz#06f4ad469d8a697cde2441c8b4009810420025db"
-  integrity sha512-AdYwbEZZ+6Z748A8JdNtwH7YR24HvXr/hJHL06ofipMyRchrf7Mzvk69zM24+rAm3SC3DCJK0WdbhpOLzroO+w==
+framer-motion@^8.4.3:
+  version "8.4.3"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-8.4.3.tgz#382bc016c1a957b4144eeed1bb186410b0d821fc"
+  integrity sha512-UMfJ8hEOlIObdJgI+U/VgaSSKY+W9/E0YtnFHPDsIE9rNPglaFZ+oycB0gj8ERuRBInGaIgNCFsil8iaJHZFgA==
   dependencies:
     "@motionone/dom" "^10.15.3"
     hey-listen "^1.0.8"
