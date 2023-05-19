@@ -9,11 +9,11 @@ const startElectron = () => {
     console.log('starting electron');
     startedElectron = true;
     const exec = require('child_process').exec;
-    var elctrn = exec('yarn run electron');
+    var electron = exec('yarn run electron');
 
-    elctrn.stdout.on('data', (data) => console.log(data));
-    elctrn.stdout.on('error', (data) => console.log("ER", data));
-    // elctrn.stderr.on('data', (data) => console.log("E", data));
+    electron.stdout.on('data', (data) => console.log(data));
+    electron.stdout.on('error', (data) => console.log("ER", data));
+    // electron.stderr.on('data', (data) => console.log("E", data));
 }
 
 let startedElectron = false;
@@ -38,7 +38,7 @@ const tryConnection = () => {
 };
 
 
-let timer = setInterval(async() => {
+let timer = setInterval(async () => {
     const running = await tryConnection()
     if (running) clearInterval(timer)
 }, 1000);
