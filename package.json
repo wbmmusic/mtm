@@ -20,9 +20,9 @@
         "@testing-library/react": "^14.0.0",
         "@testing-library/user-event": "^14.4.3",
         "axios": "^1.5.0",
-        "caniuse-lite": "^1.0.30001524",
-        "electron-updater": "^6.1.1",
-        "framer-motion": "^10.16.2",
+        "caniuse-lite": "^1.0.30001525",
+        "electron-updater": "^6.1.4",
+        "framer-motion": "^10.16.3",
         "react": "^18.2.0",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18.2.0",
@@ -113,7 +113,7 @@
     },
     "devDependencies": {
         "electron": "^26.1.0",
-        "electron-builder": "^24.6.3",
+        "electron-builder": "^24.6.4",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
     }
