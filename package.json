@@ -14,20 +14,20 @@
     "dependencies": {
         "@emotion/react": "^11.11.1",
         "@emotion/styled": "^11.11.0",
-        "@mui/icons-material": "^5.14.8",
-        "@mui/material": "^5.14.8",
+        "@mui/icons-material": "^5.14.9",
+        "@mui/material": "^5.14.9",
         "@testing-library/jest-dom": "^6.1.3",
         "@testing-library/react": "^14.0.0",
         "@testing-library/user-event": "^14.4.3",
         "axios": "^1.5.0",
-        "caniuse-lite": "^1.0.30001533",
+        "caniuse-lite": "^1.0.30001534",
         "electron-updater": "^6.1.4",
         "framer-motion": "^10.16.4",
         "react": "^18.2.0",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18.2.0",
         "react-lite-youtube-embed": "^2.3.52",
-        "react-router-dom": "^6.15.0",
+        "react-router-dom": "^6.16.0",
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^12.0.0",
@@ -112,7 +112,7 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
-        "electron": "^26.2.0",
+        "electron": "^26.2.1",
         "electron-builder": "^24.6.4",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
