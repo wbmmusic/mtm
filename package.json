@@ -20,7 +20,7 @@
         "@testing-library/react": "^14.0.0",
         "@testing-library/user-event": "^14.5.1",
         "axios": "^1.5.1",
-        "caniuse-lite": "^1.0.30001542",
+        "caniuse-lite": "^1.0.30001543",
         "electron-updater": "^6.1.4",
         "framer-motion": "^10.16.4",
         "react": "^18.2.0",
@@ -31,7 +31,7 @@
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^12.0.0",
-        "usb": "^2.10.0",
+        "usb": "^2.11.0",
         "uuid": "^9.0.1",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^3.5.0"
