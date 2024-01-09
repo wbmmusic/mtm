@@ -22,7 +22,7 @@
         "axios": "^1.6.5",
         "caniuse-lite": "^1.0.30001576",
         "electron-updater": "^6.1.7",
-        "framer-motion": "^10.17.9",
+        "framer-motion": "^10.17.12",
         "react": "^18.2.0",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18.2.0",
@@ -112,7 +112,7 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
-        "electron": "^28.1.1",
+        "electron": "^28.1.2",
         "electron-builder": "^24.9.1",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
