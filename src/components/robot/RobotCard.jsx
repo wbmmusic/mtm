@@ -35,7 +35,7 @@ export const RobotCard = ({ robot, setDelete, setRobot }) => {
       <Button
         variant="contained"
         onClick={() => {
-          window.electron.ipcRenderer
+          window.electron
             .invoke("exportRobot", robot.path)
             .then(res => console.log(res))
             .catch(err => console.error(err));

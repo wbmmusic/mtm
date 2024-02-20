@@ -98,7 +98,7 @@ export const Transport = ({ actions }) => {
           //waitOnKey(mark.key);
         }
         if (packet.length > 0) {
-          window.electron.ipcRenderer
+          window.electron
             .invoke("sendValue", packet)
             .then()
             .catch(err => console.log(err));

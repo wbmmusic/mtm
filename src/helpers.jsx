@@ -1,6 +1,6 @@
 export const getRobots = async () => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getRobots")
       .then(bots => resolve(bots))
       .catch(err => reject(err));
@@ -10,7 +10,7 @@ export const getRobots = async () => {
 export const deleteRobot = async path => {
   return new Promise(async (resolve, reject) => {
     console.log("delete", path);
-    window.electron.ipcRenderer
+    window.electron
       .invoke("deleteRobot", path)
       .then(bots => resolve(bots))
       .catch(err => reject(err));
@@ -19,7 +19,7 @@ export const deleteRobot = async path => {
 
 export const getRobot = async path => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getRobot", path)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -28,7 +28,7 @@ export const getRobot = async path => {
 
 export const saveRobot = async robot => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("saveRobot", robot)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -37,7 +37,7 @@ export const saveRobot = async robot => {
 
 export const getPositions = async robotPath => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getPositions", robotPath)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -46,7 +46,7 @@ export const getPositions = async robotPath => {
 
 export const createPosition = async (path, position) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("createPosition", path, position)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -55,7 +55,7 @@ export const createPosition = async (path, position) => {
 
 export const deletePosition = async (path, position) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("deletePosition", path, position)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -64,7 +64,7 @@ export const deletePosition = async (path, position) => {
 
 export const updatePosition = async (robotPath, position) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("updatePosition", robotPath, position)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -73,7 +73,7 @@ export const updatePosition = async (robotPath, position) => {
 
 export const saveSequence = async (robotPath, sequence) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("saveSequence", robotPath, sequence)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -82,7 +82,7 @@ export const saveSequence = async (robotPath, sequence) => {
 
 export const deleteSequence = async (robotPath, sequence) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("deleteSequence", robotPath, sequence)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -91,7 +91,7 @@ export const deleteSequence = async (robotPath, sequence) => {
 
 export const updateSequence = async (robotPath, sequence) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("updateSequence", robotPath, sequence)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -100,7 +100,7 @@ export const updateSequence = async (robotPath, sequence) => {
 
 export const getSequence = async (robotPath, sequenceID) => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getSequence", robotPath, sequenceID)
       .then(res => resolve(res))
       .catch(err => reject(err));
@@ -109,7 +109,7 @@ export const getSequence = async (robotPath, sequenceID) => {
 
 export const getServos = async robotPath => {
   return new Promise(async (resolve, reject) => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getServos", robotPath)
       .then(res => resolve(res))
       .catch(err => reject(err));

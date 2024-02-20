@@ -17,7 +17,7 @@ export const Servo = ({ label, idx, servo, onChange }) => {
     if (val !== lastSent) {
       setLastSent(val);
       //console.log("Servo", idx, "->", val);
-      window.electron.ipcRenderer
+      window.electron
         .invoke("sendValue", makeServoPositionData(idx - 1, val))
         .then()
         .catch(err => console.log(err));

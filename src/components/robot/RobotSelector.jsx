@@ -59,7 +59,7 @@ export const RobotSelector = () => {
         color="error"
         onClick={() => {
           if (window.confirm("This will wipe all user saved data...")) {
-            window.electron.ipcRenderer
+            window.electron
               .invoke("deleteUserRobots")
               .then(res => {
                 setRobots([]);

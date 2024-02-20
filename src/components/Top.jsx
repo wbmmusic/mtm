@@ -41,7 +41,7 @@ export default function Top() {
   const playerRef = useRef(null);
 
   useEffect(() => {
-    window.electron.ipcRenderer
+    window.electron
       .invoke("getSound")
       .then(res => {
         if (res !== sound) setSound(res);
@@ -77,9 +77,7 @@ export default function Top() {
   }, [audioFile]);
 
   const soundOn = mute => {
-    window.electron.ipcRenderer
-      .invoke("sound", mute)
-      .then(res => setSound(res));
+    window.electron.invoke("sound", mute).then(res => setSound(res));
   };
 
   const makeMute = () => {

@@ -66,12 +66,12 @@ export const EditRobotModal = ({ mode, data, out }) => {
   const updateRobot = () => {
     if (ogRobot.path !== robot.path) {
       console.log("Paths not equal");
-      window.electron.ipcRenderer
+      window.electron
         .invoke("updateRobot", robot, ogRobot.path)
         .then(res => out("refresh"))
         .catch(err => console.log(err));
     } else {
-      window.electron.ipcRenderer
+      window.electron
         .invoke("updateRobot", robot)
         .then(res => out("refresh"))
         .catch(err => console.log(err));
