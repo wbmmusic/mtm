@@ -14,13 +14,13 @@
     "dependencies": {
         "@emotion/react": "^11.11.4",
         "@emotion/styled": "^11.11.0",
-        "@mui/icons-material": "^5.15.11",
-        "@mui/material": "^5.15.11",
+        "@mui/icons-material": "^5.15.12",
+        "@mui/material": "^5.15.12",
         "@testing-library/jest-dom": "^6.4.2",
         "@testing-library/react": "^14.2.1",
         "@testing-library/user-event": "^14.5.2",
         "axios": "^1.6.7",
-        "caniuse-lite": "^1.0.30001591",
+        "caniuse-lite": "^1.0.30001594",
         "electron-updater": "^6.1.8",
         "framer-motion": "^11.0.8",
         "react": "^18.2.0",
@@ -31,7 +31,7 @@
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^12.0.0",
-        "usb": "^2.11.0",
+        "usb": "^2.12.0",
         "uuid": "^9.0.1",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^3.5.2"
@@ -113,7 +113,7 @@
     },
     "devDependencies": {
         "electron": "^29.1.0",
-        "electron-builder": "^24.12.0",
+        "electron-builder": "^24.13.3",
         "electron-notarize": "^1.2.2",
         "foreman": "^3.0.1"
     }
