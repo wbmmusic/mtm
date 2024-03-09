@@ -10248,10 +10248,10 @@ url-parse@^1.5.3:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
 
-usb@^2.12.0:
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/usb/-/usb-2.12.0.tgz#3c00faf6d3bf830b5a45fa510157f23df10e7d73"
-  integrity sha512-C/egt5PQWcBZq5jABOpBCbhZrB2ftyXdx+cEnK7qowo0ALkfclfrQGlCMbj0VbirfIGayvmWMYQ8Dnii5A4pXQ==
+usb@^2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/usb/-/usb-2.12.1.tgz#f7a68ddb1314d56758e3e3b1265bc467922a9503"
+  integrity sha512-hgtoSQUFuMXVJBApelpUTiX7ZB83MQCbYeHTBsHftA2JG7YZ76ycwIgKQhkhKqVY76C8K6xJscHpF7Ep0eG3pQ==
   dependencies:
     "@types/w3c-web-usb" "^1.0.6"
     node-addon-api "^7.0.0"

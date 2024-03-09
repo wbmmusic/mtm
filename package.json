@@ -31,7 +31,7 @@
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^12.0.0",
-        "usb": "^2.12.0",
+        "usb": "^2.12.1",
         "uuid": "^9.0.1",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^3.5.2"
