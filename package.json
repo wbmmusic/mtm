@@ -16,12 +16,13 @@
         "@emotion/styled": "^11.11.5",
         "@mui/icons-material": "^5.15.19",
         "@mui/material": "^5.15.19",
+        "@mui/system": "^5.15.15",
         "@testing-library/jest-dom": "^6.4.5",
-        "@testing-library/react": "^15.0.7",
+        "@testing-library/react": "^16.0.0",
         "@testing-library/user-event": "^14.5.2",
         "axios": "^1.7.2",
-        "caniuse-lite": "^1.0.30001626",
-        "electron-updater": "^6.1.8",
+        "caniuse-lite": "^1.0.30001629",
+        "electron-updater": "^6.2.1",
         "framer-motion": "^11.2.10",
         "react": "^18.3.1",
         "react-beautiful-dnd": "^13.1.1",
@@ -34,7 +35,7 @@
         "usb": "^2.13.0",
         "uuid": "^9.0.1",
         "wbm-version-manager": "^0.0.69",
-        "web-vitals": "^4.0.1"
+        "web-vitals": "^4.1.0"
     },
     "scripts": {
         "start": "react-scripts start",
@@ -44,12 +45,12 @@
         "dev": "nf start",
         "package": "electron-builder build -c.extraMetadata.main=build/main.js --publish never",
         "deploy": "electron-builder build -c.extraMetadata.main=build/main.js --publish always",
-        "upload": "yarn build && yarn backup && yarn deploy ",
+        "upload": "pnpm build && pnpm backup && pnpm deploy ",
         "electron": "electron .",
-        "mac": "yarn && yarn build && node copyPlist.js && yarn deploy",
-        "linux": "yarn && yarn build && yarn deploy",
-        "try": "yarn && yarn build && yarn package",
-        "refresh": "yarn upgrade --latest",
+        "mac": "pnpm && pnpm build && node copyPlist.js && pnpm deploy",
+        "linux": "pnpm && pnpm build && pnpm deploy",
+        "try": "pnpm && pnpm build && pnpm package",
+        "refresh": "pnpm upgrade --latest",
         "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
         "postinstall": "electron-builder install-app-deps"
     },
@@ -113,8 +114,9 @@
     },
     "devDependencies": {
         "@electron/notarize": "^2.3.2",
-        "electron": "^30.0.9",
+        "electron": "^30.1.0",
         "electron-builder": "^24.13.3",
         "foreman": "^3.0.1"
-    }
+    },
+    "packageManager": "pnpm@9.2.0+sha512.98a80fd11c2e7096747762304106432b3ddc67dcf54b5a8c01c93f68a2cd5e05e6821849522a06fb76284d41a2660d5e334f2ee3bbf29183bf2e739b1dafa771"
 }

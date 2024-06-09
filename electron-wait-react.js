@@ -9,7 +9,7 @@ const startElectron = () => {
     console.log('starting electron');
     startedElectron = true;
     const exec = require('child_process').exec;
-    var electron = exec('yarn run electron');
+    var electron = exec('pnpm electron');
 
     electron.stdout.on('data', (data) => console.log(data));
     electron.stdout.on('error', (data) => console.log("ER", data));
