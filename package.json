@@ -23,12 +23,12 @@
         "axios": "^1.7.2",
         "caniuse-lite": "^1.0.30001636",
         "electron-updater": "^6.2.1",
-        "framer-motion": "^11.2.11",
+        "framer-motion": "^11.2.12",
         "react": "^18.3.1",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^18.3.1",
         "react-lite-youtube-embed": "^2.4.0",
-        "react-router-dom": "^6.23.1",
+        "react-router-dom": "^6.24.0",
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^12.0.0",
@@ -114,7 +114,7 @@
     },
     "devDependencies": {
         "@electron/notarize": "^2.3.2",
-        "electron": "^31.0.2",
+        "electron": "^31.1.0",
         "electron-builder": "^24.13.3",
         "foreman": "^3.0.1"
     },
