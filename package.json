@@ -14,9 +14,9 @@
     "dependencies": {
         "@emotion/react": "^11.13.3",
         "@emotion/styled": "^11.13.0",
-        "@mui/icons-material": "^6.1.4",
-        "@mui/material": "^6.1.4",
-        "@mui/system": "^6.1.4",
+        "@mui/icons-material": "^6.1.5",
+        "@mui/material": "^6.1.5",
+        "@mui/system": "^6.1.5",
         "@testing-library/jest-dom": "^6.6.2",
         "@testing-library/react": "^16.0.1",
         "@testing-library/user-event": "^14.5.2",
@@ -35,7 +35,7 @@
         "usb": "^2.14.0",
         "uuid": "^10.0.0",
         "wbm-version-manager": "^0.0.69",
-        "web-vitals": "^4.2.3"
+        "web-vitals": "^4.2.4"
     },
     "scripts": {
         "start": "react-scripts start",
@@ -114,7 +114,7 @@
     },
     "devDependencies": {
         "@electron/notarize": "^2.5.0",
-        "electron": "^33.0.1",
+        "electron": "^33.0.2",
         "electron-builder": "^25.1.8",
         "foreman": "^3.0.1"
     },
