@@ -20,7 +20,7 @@
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.2.0",
         "@testing-library/user-event": "^14.6.1",
-        "axios": "^1.8.3",
+        "axios": "^1.8.4",
         "caniuse-lite": "^1.0.30001706",
         "electron-updater": "^6.3.9",
         "framer-motion": "^12.5.0",
@@ -28,7 +28,7 @@
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^19.0.0",
         "react-lite-youtube-embed": "^2.4.0",
-        "react-router-dom": "^7.3.0",
+        "react-router-dom": "^7.4.0",
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^13.0.0",
@@ -114,7 +114,7 @@
     },
     "devDependencies": {
         "@electron/notarize": "^3.0.0",
-        "electron": "^35.0.2",
+        "electron": "^35.0.3",
         "electron-builder": "^25.1.8",
         "foreman": "^3.0.1"
     },
