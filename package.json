@@ -23,7 +23,7 @@
         "axios": "^1.9.0",
         "caniuse-lite": "^1.0.30001717",
         "electron-updater": "^6.6.2",
-        "framer-motion": "^12.10.4",
+        "framer-motion": "^12.11.0",
         "react": "^19.1.0",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^19.1.0",
