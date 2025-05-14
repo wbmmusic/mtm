@@ -23,7 +23,7 @@
         "axios": "^1.9.0",
         "caniuse-lite": "^1.0.30001718",
         "electron-updater": "^6.6.2",
-        "framer-motion": "^12.11.0",
+        "framer-motion": "^12.11.3",
         "react": "^19.1.0",
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^19.1.0",
@@ -35,7 +35,7 @@
         "usb": "^2.15.0",
         "uuid": "^11.1.0",
         "wbm-version-manager": "^0.0.69",
-        "web-vitals": "^5.0.0"
+        "web-vitals": "^5.0.1"
     },
     "scripts": {
         "start": "react-scripts start",
