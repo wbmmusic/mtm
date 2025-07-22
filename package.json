@@ -28,11 +28,11 @@
         "react-beautiful-dnd": "^13.1.1",
         "react-dom": "^19.1.0",
         "react-lite-youtube-embed": "^2.5.1",
-        "react-router-dom": "^7.6.3",
+        "react-router-dom": "^7.7.0",
         "react-scripts": "5.0.1",
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^13.0.0",
-        "usb": "^2.15.0",
+        "usb": "^2.16.0",
         "uuid": "^11.1.0",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^5.0.3"
@@ -114,7 +114,7 @@
     },
     "devDependencies": {
         "@electron/notarize": "^3.0.1",
-        "electron": "^37.2.1",
+        "electron": "^37.2.3",
         "electron-builder": "^26.0.12",
         "foreman": "^3.0.1"
     },
