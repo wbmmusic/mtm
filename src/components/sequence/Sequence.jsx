@@ -14,7 +14,7 @@ import {
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Transport } from "./Transport";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import SettingsRemoteIcon from "@mui/icons-material/SettingsRemote";
@@ -47,7 +47,6 @@ const droppableStyle = {
   border: "6px solid #55533c",
   borderLeft: "20px solid #55533c",
   borderRight: "20px solid #55533c",
-  overflowX: "auto",
   minHeight: "80px",
   backgroundColor: "lightGrey",
   boxShadow: "2px 2px magenta, 6px 6px black",
@@ -232,6 +231,9 @@ export const Sequence = () => {
 
   const onDragEnd = res => {
     // console.log(res);
+    if (!res.destination) {
+      return;
+    }
     if (
       res.source.droppableId === "objects" &&
       res.destination.droppableId === "timeline"
@@ -247,14 +249,6 @@ export const Sequence = () => {
       setSequence(old => ({ ...old, actions: actionsCopy }));
 
       // console.log("Added Item To Timeline");
-    } else if (res.source.droppableId === "timeline" && !res.destination) {
-      window.electron.send("play", "trash.mp3");
-      setSequence(old => ({
-        ...old,
-        actions: old.actions.filter((x, idx) => idx !== res.source.index),
-      }));
-
-      // console.log("TRASHED");
     } else if (
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
