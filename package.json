@@ -22,7 +22,7 @@
         "@testing-library/react": "^16.3.0",
         "@testing-library/user-event": "^14.6.1",
         "axios": "^1.11.0",
-        "caniuse-lite": "^1.0.30001739",
+        "caniuse-lite": "^1.0.30001741",
         "electron-updater": "^6.6.2",
         "framer-motion": "^12.23.12",
         "react": "^19.1.1",
@@ -33,7 +33,7 @@
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^13.0.0",
         "usb": "^2.16.0",
-        "uuid": "^11.1.0",
+        "uuid": "^12.0.0",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^5.1.0"
     },
@@ -113,8 +113,8 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
-        "@electron/notarize": "^3.0.2",
-        "electron": "^37.4.0",
+        "@electron/notarize": "^3.1.0",
+        "electron": "^38.0.0",
         "electron-builder": "^26.0.12",
         "foreman": "^3.0.1"
     },
