@@ -33,7 +33,7 @@
         "react-simple-typewriter": "^5.0.1",
         "serialport": "^13.0.0",
         "usb": "^2.16.0",
-        "uuid": "^12.0.0",
+        "uuid": "^13.0.0",
         "wbm-version-manager": "^0.0.69",
         "web-vitals": "^5.1.0"
     },
