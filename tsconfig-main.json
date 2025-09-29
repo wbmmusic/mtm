@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020"],
+    "outDir": "./build",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "types": ["node"]
+  },
+  "include": ["public/main.ts", "public/usb.ts", "public/ipc.ts", "public/utils.ts", "public/msgMaker.ts", "public/firmware.ts", "public/preload.ts", "public/types.ts"],
+  "exclude": ["public/main.js", "public/usb.js", "public/ipc.js"]
+}

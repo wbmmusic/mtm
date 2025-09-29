@@ -10,7 +10,7 @@
     },
     "description": "MTM Composer",
     "homepage": "./",
-    "main": "public/main.js",
+    "main": "build/main.js",
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -39,7 +39,9 @@
     },
     "scripts": {
         "start": "react-scripts start",
-        "build": "react-scripts build",
+        "build-electron": "tsc --project tsconfig-main.json",
+        "build": "npm run build-electron && react-scripts build",
+        "type-check-main": "tsc --noEmit --project tsconfig-main.json",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "dev": "nf start",
@@ -114,9 +116,12 @@
     },
     "devDependencies": {
         "@electron/notarize": "^3.1.0",
+        "@types/node": "^22.10.2",
         "electron": "^38.1.2",
         "electron-builder": "^26.0.12",
-        "foreman": "^3.0.1"
+        "eslint": "8.57.0",
+        "foreman": "^3.0.1",
+        "typescript": "^4.9.5"
     },
     "packageManager": "pnpm@9.2.0+sha512.98a80fd11c2e7096747762304106432b3ddc67dcf54b5a8c01c93f68a2cd5e05e6821849522a06fb76284d41a2660d5e334f2ee3bbf29183bf2e739b1dafa771"
 }

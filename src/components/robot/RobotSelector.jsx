@@ -20,7 +20,7 @@ export const RobotSelector = () => {
   const [robots, setRobots] = useState([]);
   const [deleteModal, setDeleteModal] = useState(defaultDeleteModal);
 
-  const [text, count] = useTypewriter({ words: ["Robots"] });
+  const [text] = useTypewriter({ words: ["Robots"] });
 
   const setTheRobots = async () => {
     try {

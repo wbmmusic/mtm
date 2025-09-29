@@ -1,3 +1,33 @@
+/**
+ * MTM Sequence Editor Component
+ * 
+ * This is the main sequence editor for creating magic trick robot performances.
+ * Children ages 6-12 use this drag-and-drop interface to build sequences of:
+ * - Move actions (servo positions)
+ * - Delay actions (timing pauses) 
+ * - Wait actions (remote control triggers)
+ * 
+ * The component handles the complete sequence creation workflow from
+ * simple 3-step routines to complex multi-minute magic performances.
+ */
+
+/**
+ * MTM Sequence Editor - Magic Trick Robot Programming Interface
+ * 
+ * This drag-and-drop editor allows children (ages 6-12) to create magic trick performances by:
+ * 
+ * 1. MOVE Actions: Servo positions created via slider modal (children adjust servo angles)
+ * 2. DELAY Actions: Timing pauses (.2s to 5s) for dramatic effect in magic tricks
+ * 3. WAIT Actions: Pauses until keyfob remote button is pressed (3-4 button remote)
+ * 
+ * Sequences execute at exactly 10Hz (0.1s precision) and can range from simple 
+ * 3-step routines to complex 50+ action magic performances. Audio feedback 
+ * provides important user experience cues during sequence creation.
+ * 
+ * The app works offline for sequence creation but requires USB connection 
+ * for robot control and firmware updates (automatic, infrequent).
+ */
+
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import {
@@ -113,7 +143,7 @@ export const Sequence = () => {
   };
 
   useEffect(() => {
-    window.electron.send("play", "sequence.mp3");
+    window.electron?.send("play", "sequence.mp3");
     makeObjects();
 
     getPositions(robotPath)
@@ -229,8 +259,15 @@ export const Sequence = () => {
     </Box>
   );
 
+  /**
+   * Handles drag-and-drop operations for building magic trick sequences
+   * - Dragging from ACTIONS to TIMELINE: Adds new action to sequence
+   * - Dragging within TIMELINE: Reorders existing actions
+   * - Dragging to trash (no destination): Removes action from sequence
+   * Audio feedback plays for each operation to guide children
+   */
   const onDragEnd = res => {
-    // console.log(res);
+    // Early return if dropped outside valid drop zone (trash operation)
     if (!res.destination) {
       return;
     }
@@ -241,7 +278,7 @@ export const Sequence = () => {
       let objCpy = JSON.parse(
         JSON.stringify(timelineObjects[res.source.index])
       );
-      window.electron.send("play", "timeline_add.mp3");
+      window.electron?.send("play", "timeline_add.mp3");
       let actionsCopy = JSON.parse(JSON.stringify(sequence.actions));
       const insert = { type: objCpy.type, appId: objCpy.appId, id: uuid() };
       actionsCopy.splice(res.destination.index, 0, insert);
@@ -253,7 +290,7 @@ export const Sequence = () => {
       res.source.droppableId === "timeline" &&
       res.destination.droppableId === "timeline"
     ) {
-      window.electron.send("play", "timeline_move.mp3");
+      window.electron?.send("play", "timeline_move.mp3");
       let actionsCpy = JSON.parse(JSON.stringify(sequence.actions));
       let cutAction = actionsCpy.splice(res.source.index, 1)[0];
       actionsCpy.splice(res.destination.index, 0, cutAction);
@@ -470,6 +507,11 @@ export const Sequence = () => {
     }
   };
 
+  /**
+   * Converts UI sequence to robot-executable format
+   * Optimizes consecutive MOVE actions by combining them into single commands
+   * This reduces robot execution time and creates smoother magic trick performances
+   */
   const makeActionsFromRefs = () => {
     let out = [];
     let lastType = null;

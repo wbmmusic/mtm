@@ -45,7 +45,7 @@ export const EditRobotModal = ({ mode, data, out }) => {
   };
 
   const [robot, setRobot] = useState(makeRobot());
-  const [ogRobot, setOgRobot] = useState(makeOgRobot());
+  const [ogRobot] = useState(makeOgRobot());
 
   const makeTitle = () => {
     if (mode === "new") return "New Robot";

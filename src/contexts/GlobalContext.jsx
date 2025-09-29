@@ -7,14 +7,16 @@ const GlobalContextProvider = props => {
   const toggleAdmin = () => setGlobal(old => ({ ...old, admin: !old.admin }));
 
   useEffect(() => {
-    window.electron.receive("usb_status", status => {
-      console.log("GOT USB STATUS", status);
-      setGlobal(old => ({ ...old, usbConnected: status }));
-    });
-    window.electron.send("get_usb_status");
+    if (window.electron) {
+      window.electron.receive("usb_status", status => {
+        console.log("GOT USB STATUS", status);
+        setGlobal(old => ({ ...old, usbConnected: status }));
+      });
+      window.electron.send("get_usb_status");
+    }
 
     return () => {
-      window.electron.removeListener("usb_status");
+      window.electron?.removeListener("usb_status");
     };
   }, []);
 

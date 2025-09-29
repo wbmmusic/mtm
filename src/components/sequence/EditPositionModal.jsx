@@ -1,3 +1,15 @@
+/**
+ * Edit Position Modal - Servo Position Creator
+ * 
+ * This modal allows children to create robot positions for magic tricks by:
+ * 1. Adjusting servo angle sliders (0-180 degrees)
+ * 2. Enabling/disabling individual servos
+ * 3. Naming the position (e.g. "Magic Wand Up", "Box Open")
+ * 
+ * Positions become MOVE actions that can be dragged into sequences.
+ * Real-time servo feedback helps children see robot movement as they adjust sliders.
+ */
+
 import {
   Box,
   Button,

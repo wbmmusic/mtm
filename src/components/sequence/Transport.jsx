@@ -1,3 +1,17 @@
+/**
+ * Transport Controls - Magic Trick Sequence Playback
+ * 
+ * Provides VCR-style controls for testing magic trick sequences:
+ * - Play: Executes sequence at 10Hz precision timing
+ * - Stop: Halts sequence execution
+ * - Return to Start: Resets playback position
+ * - Repeat: Loops sequence for practice
+ * - Upload: Sends sequence to robot for standalone performance
+ * 
+ * The timeline slider shows sequence progress and allows scrubbing.
+ * Requires USB connection for robot communication.
+ */
+
 import {
   Box,
   Button,
@@ -19,7 +33,7 @@ import { GlobalContext } from "../../contexts/GlobalContext";
 export const Transport = ({ actions }) => {
   const { usbConnected } = useContext(GlobalContext);
   const { makeServoPositionData, makeWaitData, waitTypes } =
-    window.electron.msgMkr;
+    window.electron?.msgMkr || {};
   // console.log(actions);
   const makeMarks = () => {
     let out = [];
@@ -74,10 +88,7 @@ export const Transport = ({ actions }) => {
     setIntervalId(newIntervalId);
   };
 
-  const waitOnKey = key => {
-    setWaitingOnKey(0);
-    stop();
-  };
+
 
   useEffect(() => {
     marks.forEach(mark => {
@@ -97,7 +108,7 @@ export const Transport = ({ actions }) => {
           packet.push(...makeWaitData(waitTypes.remote, 1));
           //waitOnKey(mark.key);
         }
-        if (packet.length > 0) {
+        if (packet.length > 0 && window.electron) {
           window.electron
             .invoke("sendValue", packet)
             .then()
@@ -118,7 +129,7 @@ export const Transport = ({ actions }) => {
   }, [actions]);
 
   useEffect(() => {
-    if (waitingOnKey) {
+    if (waitingOnKey && window.electron) {
       window.electron.receive("keyPress", key => {
         // If the key that was pressed is the key we were waiting for
         if (key === waitingOnKey) {
@@ -131,13 +142,13 @@ export const Transport = ({ actions }) => {
     }
 
     return () => {
-      window.electron.removeListener("keyPress");
+      window.electron?.removeListener("keyPress");
     };
   }, [waitingOnKey]);
 
   const handleUpload = () => {
     console.log("Upload");
-    window.electron.send("upload", actions);
+    window.electron?.send("upload", actions);
   };
 
   const uploadable = () => usbConnected;
