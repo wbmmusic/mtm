@@ -1,5 +1,5 @@
 export const modalStyle = {
-  position: "absolute",
+  position: "absolute" as const,
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
@@ -8,5 +8,5 @@ export const modalStyle = {
   border: "2px solid #000",
   boxShadow: 24,
   p: 2,
-  userSelect: "none",
+  userSelect: "none" as const,
 };

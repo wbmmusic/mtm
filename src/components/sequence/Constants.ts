@@ -1,4 +1,21 @@
-export const delays = [
+interface DelayItem {
+  id: string;
+  appId: string;
+  content: string;
+  type: "delay";
+  value: number;
+}
+
+interface WaitItem {
+  id: string;
+  appId: string;
+  content: string;
+  type: "wait";
+  key: number;
+  value: number;
+}
+
+export const delays: DelayItem[] = [
   {
     id: "idFor.2sec",
     appId: ".2_sec_delay",
@@ -36,7 +53,7 @@ export const delays = [
   },
 ];
 
-export const waitStates = [
+export const waitStates: WaitItem[] = [
   {
     id: "waitForA",
     appId: "wait_for_a",

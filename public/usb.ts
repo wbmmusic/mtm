@@ -1,3 +1,20 @@
+/**
+ * public/usb.ts
+ *
+ * USB and Serial communication helpers used by the Electron main process.
+ *
+ * Responsibilities:
+ * - Detect MTM-compatible USB devices (VID/PID)
+ * - Open and manage the serial connection to the device
+ * - Query device info and perform firmware uploads using the WBM: protocol
+ *
+ * Audience: Developers — this file contains the low-level bootloader/upload
+ * protocol implementations and should be read by maintainers working on
+ * firmware, USB, or packaging.
+ */
+
+// NOTE: Keep imports grouped and stable; these are Node/Electron native imports
+// and third-party libs used by the main process.
 import { dialog } from 'electron';
 import { SerialPort } from 'serialport';
 import { usb } from 'usb';
@@ -6,21 +23,46 @@ import { compareToLatest } from './firmware';
 import { pathToFirmwareFolder } from './utils.js';
 import { existsSync, readFileSync } from 'node:fs';
 import { EventEmitter } from 'node:events';
+import type { ConnectedDeviceInfo } from './types';
+// (type imported above with other imports)
 import { getWin } from './main.js';
 
+// Increase listener limit because attach/detach and serial event listeners are
+// registered repeatedly during device reconnects. The value is intentionally
+// large to avoid EMITTER_LEAK warnings during rapid reconnects in dev.
+// TODO: consider limiting listeners by removing unused listeners more
+// aggressively or extracting a shared lifecycle manager.
 process.setMaxListeners(1000000000);
 
+/** EventEmitter used to signal when a device in bootloader mode reconnects. */
 const bootEmitter = new EventEmitter();
 
+/** USB device identity used to match supported MTM controllers. */
 interface UsbTarget {
+  /** Numeric vendor id (0x prefixed values are converted to Number). */
   vid: number;
+  /** Numeric product id. */
   pid: number;
 }
 
-import type { ConnectedDeviceInfo } from './types';
+/**
+ * A lightweight shape for the objects returned by SerialPort.list()
+ * We only include the fields used by this module.
+ */
+interface PortInfo {
+  path: string;
+  vendorId?: string;
+  productId?: string;
+  serialNumber?: string;
+  friendlyName?: string;
+  manufacturer?: string;
+}
 
+/** Tracks the state when a device is asked to reboot into its bootloader. */
 interface Bootloader {
+  /** Whether we are awaiting the bootloader device to reconnect. */
   waiting: boolean;
+  /** Expected serialNumber suffix for the bootloader device (used to verify). */
   serialNumber: string;
 }
 
@@ -33,26 +75,62 @@ const defaultBootloader: Bootloader = { waiting: false, serialNumber: '' };
 
 let bootloader: Bootloader = { ...defaultBootloader };
 
+// Shared cross-module state: `global.connectedDeviceInfo` is populated after
+// a successful GETINFO exchange. Consumers should treat this as nullable and
+// check before use. The authoritative type is `ConnectedDeviceInfo` in
+// `public/types.ts`.
 global.connectedDeviceInfo = null;
+
+/** Active SerialPort instance for the connected device or null when none. */
 let port: SerialPort | null = null; // The serialport for the connected device
 
-const getPorts = async (): Promise<any[]> => {
+/**
+ * Enumerate serial ports and filter out Bluetooth entries.
+ *
+ * Returns the raw result from `SerialPort.list()` filtered for device
+ * candidates. Callers still need to match VID/PID to confirm compatibility.
+ */
+const getPorts = async (): Promise<PortInfo[]> => {
   try {
-    let tempPorts = await SerialPort.list();
-    return tempPorts.filter(prt => !prt.path.includes('BLTH') && !prt.path.includes('Bluetooth'));
+  const rawPorts: any[] = await SerialPort.list();
+    const filtered = rawPorts.filter((prt) => prt.path && !prt.path.includes("BLTH") && !prt.path.includes("Bluetooth"));
+    const mapped: PortInfo[] = filtered.map((prt) => {
+      const pi: PortInfo = {
+        path: String(prt.path),
+        vendorId: prt.vendorId ? String(prt.vendorId) : undefined,
+        productId: prt.productId ? String(prt.productId) : undefined,
+        serialNumber: prt.serialNumber ? String(prt.serialNumber) : undefined,
+        friendlyName: prt.friendlyName ? String(prt.friendlyName) : (prt.manufacturer ? String(prt.manufacturer) : undefined),
+        manufacturer: prt.manufacturer ? String(prt.manufacturer) : undefined,
+      };
+      return pi;
+    });
+    return mapped;
   } catch (error) {
     throw error;
   }
 };
 
+// Protocol helper for streaming arbitrary bytes to the device. The stream
+// prefix `WBM:STREAM` is part of the device protocol and is expected by the
+// firmware receiver.
 const streamMsg = Buffer.from('WBM:STREAM');
+/**
+ * Send a raw stream payload to the device (no response expected).
+ * @param data - array of bytes to send
+ */
 const sendStream = (data: number[]): void => {
   if (!port) return;
   const dataBuf = Buffer.from(data);
   const out = Buffer.concat([streamMsg, dataBuf]);
-  port.write(out, (err) => { if (err) console.log(err); });
+  port.write(out, (err) => { if (err) console.error('sendStream error', err); });
 };
 
+/**
+ * Report whether a device is currently connected and notify renderer via
+ * `usb_status` IPC message.
+ * @returns boolean indicating connection status
+ */
 const usbStatus = (): boolean => {
   const win = getWin();
   if (port && win) {
@@ -64,6 +142,15 @@ const usbStatus = (): boolean => {
   }
 };
 
+/**
+ * Query the connected device for its identifying information.
+ * This sends `WBM:GETINFO` and parses the `key:val;key:val;...` response.
+ * The result is stored in `global.connectedDeviceInfo`.
+ *
+ * @param serialNumber - serial number string obtained from the OS-level
+ *                       enumeration (used as an initial identifier)
+ * @throws Error if no port is available or on timeout
+ */
 const getConnectedDeviceInfo = async (serialNumber: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!port) {
@@ -82,16 +169,22 @@ const getConnectedDeviceInfo = async (serialNumber: string): Promise<void> => {
     };
 
     const handleData = (data: Buffer) => {
+      // Response format: "key:val;key:val;..."
       const pairs = data.toString().split(";");
-      const out: ConnectedDeviceInfo = { serialNumber };
+      const out: ConnectedDeviceInfo = { serialNumber } as ConnectedDeviceInfo;
       pairs.forEach(pair => {
-        const keyVal = pair.split(':');
-        out[keyVal[0]] = keyVal[1];
+        if (!pair || !pair.includes(':')) return;
+        const [k, v] = pair.split(':');
+        // store as string values; device may send numeric strings which
+        // consumers can coerce where needed
+        out[k] = v ?? undefined;
       });
+      // Save globally for other modules to access
       global.connectedDeviceInfo = out;
       exit();
     };
 
+    // Timeout chosen to keep UX responsive; may be adjusted if devices are slow
     let timeout = setTimeout(() => {
       exit(new Error("Timed Out Waiting For Device Info"));
     }, 1000);
@@ -101,12 +194,20 @@ const getConnectedDeviceInfo = async (serialNumber: string): Promise<void> => {
   });
 };
 
+/**
+ * Open the serial port for the first matching device in `usbTarget`.
+ * On success this sets `port` and populates `global.connectedDeviceInfo`.
+ *
+ * Returns true when a compatible device is opened.
+ */
 const openPort = async (): Promise<boolean> => {
   const win = getWin();
   try {
     let tempPorts = await getPorts();
     let thePorts = tempPorts.filter(prt => {
       for (let i = 0; i < usbTarget.length; i++) {
+        // vendorId/productId can be undefined for certain ports; guard first
+        if (!prt.vendorId || !prt.productId) continue;
         if (Number("0x" + prt.vendorId) === usbTarget[i].vid && Number("0x" + prt.productId) === usbTarget[i].pid) return true;
       }
       return false;
@@ -121,16 +222,24 @@ const openPort = async (): Promise<boolean> => {
       
       return new Promise((resolve, reject) => {
         port!.on('open', async () => {
-          if (thePorts[0].serialNumber.includes("BOOT:")) {
+          const serial = thePorts[0].serialNumber;
+          if (!serial) {
+            console.error('openPort: device has no serialNumber');
+            // treat as not connected for our purposes
+            resolve(false);
+            return;
+          }
+
+          if (serial.includes("BOOT:")) {
             global.connectedDeviceInfo = {
-              serialNumber: thePorts[0].serialNumber,
+              serialNumber: serial,
               model: "mtm2s"
-            };
-            bootEmitter.emit('bootloaderDeviceConnected', thePorts[0].serialNumber);
+            } as ConnectedDeviceInfo;
+            bootEmitter.emit('bootloaderDeviceConnected', serial);
             resolve(true);
           } else {
             win?.webContents.send('usb_status', true);
-            await getConnectedDeviceInfo(thePorts[0].serialNumber);
+            await getConnectedDeviceInfo(serial);
             compareToLatest();
             resolve(true);
           }
@@ -158,6 +267,10 @@ const openPort = async (): Promise<boolean> => {
   }
 };
 
+/**
+ * Attempt to open a port; if it fails, retry once after 1s.
+ * This function swallows errors to avoid crashing the main process.
+ */
 const tryToOpenPort = async (): Promise<void> => {
   try {
     await openPort();
@@ -173,6 +286,10 @@ const tryToOpenPort = async (): Promise<void> => {
   }
 };
 
+/**
+ * Put the device into program mode by sending `WBM:LOAD` and waiting for
+ * a `WBM:READY` response. Promises rejects on timeout or unexpected data.
+ */
 const sendProgramCommand = async (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!port) {
@@ -201,6 +318,13 @@ const sendProgramCommand = async (): Promise<void> => {
   });
 };
 
+/**
+ * Send half a page to the MCU and validate the echoed bytes. Pages are split
+ * into PAGE0 and PAGE1 halves by the protocol.
+ *
+ * @param pageHalf - array of bytes (expected exactly pageHalf.length)
+ * @param half - 0 for PAGE0, 1 for PAGE1
+ */
 const sendHalfPage = async (pageHalf: number[], half: number): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!port) {
@@ -216,6 +340,8 @@ const sendHalfPage = async (pageHalf: number[], half: number): Promise<void> => 
     };
 
     const handleData = (data: Buffer) => {
+      // Firmware bootloader echoes the sent bytes; compare arrays by
+      // converting to JSON because Buffer equality is not straightforward.
       if (JSON.stringify([...data]) === JSON.stringify(pageHalf)) {
         exit();
       } else {
@@ -236,11 +362,13 @@ const sendHalfPage = async (pageHalf: number[], half: number): Promise<void> => 
   });
 };
 
+/** Send a full 64-byte page as two 32-byte halves. */
 const sendPage = async (page: number[]): Promise<void> => {
   await sendHalfPage(page.slice(0, 32), 0);
   await sendHalfPage(page.slice(32, 64), 1);
 };
 
+/** Notify the device that the upload is finished and wait for `WBM:DONE`. */
 const sendDone = async (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!port) {
@@ -271,6 +399,11 @@ const sendDone = async (): Promise<void> => {
   });
 };
 
+/**
+ * Send the device a command to reboot into the bootloader and wait for the
+ * bootloader device to reconnect. This sets `bootloader.waiting` and stores
+ * the expected serial number to verify the reconnect.
+ */
 const sendBootToBootloader = async (): Promise<void> => {
   if (!global.connectedDeviceInfo) {
     throw new Error('No connected device info');
@@ -321,6 +454,7 @@ const sendBootToBootloader = async (): Promise<void> => {
   });
 };
 
+/** Upload multiple pages (already split) and report progress to the renderer. */
 const sendPages = async (pages: number[][]): Promise<void> => {
   const win = getWin();
   let pagesSent = 0;
@@ -336,6 +470,10 @@ const sendPages = async (pages: number[][]): Promise<void> => {
   console.log("Sent", pagesSent, "pages");
 };
 
+/**
+ * Pack raw bytes into pages of pageSize bytes. The last page is padded with
+ * 0xFF bytes to reach pageSize.
+ */
 const makePages = (data: number[], pageSize: number): number[][] => {
   console.log(data.length, "bytes to be packed into pages");
   let pages: number[][] = [];
@@ -355,6 +493,12 @@ const makePages = (data: number[], pageSize: number): number[][] => {
   return pages;
 };
 
+/**
+ * Ask the device for its flash page size and available space by sending
+ * `WBM:GETFLASHINFO` and parsing the expected binary response.
+ *
+ * Returns an object with `pageSize` (bytes per page) and `availableSpace`.
+ */
 const getDeviceInfo = async (): Promise<{ pageSize: number; availableSpace: number }> => {
   return new Promise((resolve, reject) => {
     if (!port) {
@@ -373,12 +517,30 @@ const getDeviceInfo = async (): Promise<{ pageSize: number; availableSpace: numb
     };
 
     const handleData = (data: Buffer) => {
-      if (data.toString().includes('WBM:FLASHINFO')) {
-        const pageSize = (data[data.length - 2] << 8) | data[data.length - 1];
-        const availableSpace = (data[data.length - 6] << 24) | (data[data.length - 5] << 16) | (data[data.length - 4] << 8) | data[data.length - 3];
-        exit({ pageSize, availableSpace });
-      } else {
+      // Expected binary layout (tail bytes):
+      //  ... [availableSpace (4 bytes, BE)] [pageSize (2 bytes, BE)]
+      // The code looks for the `WBM:FLASHINFO` marker and then reads the
+      // trailer as unsigned big-endian integers.
+      if (!data.toString().includes('WBM:FLASHINFO')) {
         exit(undefined, new Error(`Unexpected data in getDeviceInfo ${data.toString()}`));
+        return;
+      }
+
+      // Validate length: we expect at least 6 bytes for the trailer
+      if (data.length < 6) {
+        exit(undefined, new Error('getDeviceInfo: response too short'));
+        return;
+      }
+
+      // Calculate offsets for the trailer (last 6 bytes)
+      const trailerOffset = data.length - 6;
+
+      try {
+        const availableSpace = data.readUInt32BE(trailerOffset);
+        const pageSize = data.readUInt16BE(trailerOffset + 4);
+        exit({ pageSize, availableSpace });
+      } catch (err) {
+        exit(undefined, new Error('getDeviceInfo: failed to parse trailer'));
       }
     };
 
@@ -388,6 +550,7 @@ const getDeviceInfo = async (): Promise<{ pageSize: number; availableSpace: numb
   });
 };
 
+/** Write the given data to MCU flash using the bootloader protocol. */
 const writeMcuFlash = async (data: number[]): Promise<void> => {
   const { pageSize, availableSpace } = await getDeviceInfo();
   console.log('Got Info | Page Size =', pageSize, "| Available Space =", availableSpace);
@@ -403,11 +566,17 @@ const writeMcuFlash = async (data: number[]): Promise<void> => {
   await sendDone();
 };
 
+/** Convenience wrapper used by higher-level upload flows. */
 const upload = async (data: number[]): Promise<void> => {
   console.log("UPLOAD");
   await writeMcuFlash(data);
 };
 
+/**
+ * Top-level firmware upload handler. Accepts a Buffer and performs the
+ * necessary steps depending on whether the device is already in bootloader
+ * mode or needs to be rebooted into it.
+ */
 const handleFirmwareUpload = async (file: Buffer): Promise<void> => {
   const win = getWin();
   if (!global.connectedDeviceInfo) {
@@ -439,6 +608,10 @@ const handleFirmwareUpload = async (file: Buffer): Promise<void> => {
   }
 };
 
+/**
+ * Ask the user to select a firmware binary and upload it to the connected
+ * device. Returns true on success.
+ */
 const uploadCustomFirmware = async (): Promise<boolean> => {
   const win = getWin();
   if (!win) return false;
@@ -467,6 +640,10 @@ const uploadCustomFirmware = async (): Promise<boolean> => {
   return true;
 };
 
+/**
+ * Upload the 'latest' firmware file packaged for the detected device model.
+ * This looks up `latest.json` inside the firmware folder for the model.
+ */
 const uploadFirmware = async (): Promise<boolean> => {
   if (!global.connectedDeviceInfo) {
     throw new Error('No connected device info');
@@ -487,6 +664,10 @@ const uploadFirmware = async (): Promise<boolean> => {
   return true;
 };
 
+/**
+ * Initialize USB detection and attempt to open the device port on startup.
+ * Adds attach/detach handlers and triggers an initial `tryToOpenPort()`.
+ */
 const initUSB = (): void => {
   usb.on('attach', (e) => {
     const vid = e.deviceDescriptor.idVendor;

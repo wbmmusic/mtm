@@ -39,6 +39,7 @@
     },
     "scripts": {
         "start": "react-scripts start",
+        "type-check": "tsc --noEmit --project tsconfig.json",
         "build-electron": "tsc --project tsconfig-main.json",
         "build": "npm run build-electron && react-scripts build",
         "type-check-main": "tsc --noEmit --project tsconfig-main.json",
@@ -116,7 +117,9 @@
     },
     "devDependencies": {
         "@electron/notarize": "^3.1.0",
-        "@types/node": "^22.10.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.1",
         "electron": "^38.1.2",
         "electron-builder": "^26.0.12",
         "eslint": "8.57.0",

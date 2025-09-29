@@ -10,7 +10,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: ["Bit"],
+    fontFamily: "Bit",
   },
   shape: {
     borderRadius: 0,
@@ -19,6 +19,7 @@ const theme = createTheme({
 
 function App() {
   return (
+    // @ts-ignore
     <Box
       sx={{
         height: "100vh",
@@ -26,6 +27,7 @@ function App() {
         userSelect: "none",
       }}
     >
+      {/* @ts-ignore */}
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Updates />

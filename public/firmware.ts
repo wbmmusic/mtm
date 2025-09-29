@@ -4,18 +4,18 @@ import { downloadFirmware, getDevices, getLatest, getLines, setBase } from 'wbm-
 import { pathToFirmwareFolder } from './utils';
 import { getWin } from './main';
 
-import type { ConnectedDeviceInfo, FirmwareInfo } from './types';
+import type { FirmwareInfo } from './types';
 
 interface Device {
   id: string;
   path: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Line {
   id: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 setBase('http://versions.wbmtek.com/api');
@@ -24,14 +24,23 @@ const compareToLatest = (): void => {
   const win = getWin();
   
   if (global.connectedDeviceInfo && win) {
+    // Guard: model must be present to select the firmware folder. If missing,
+    // bail early — this should not happen in normal operation but is safer
+    // when running with strict checks enabled.
+    if (!global.connectedDeviceInfo.model) {
+      console.log('Connected device missing model');
+      return;
+    }
+
     const pathToDeviceFolder = join(pathToFirmwareFolder, global.connectedDeviceInfo.model.toLowerCase());
     const pathToLatestData = join(pathToDeviceFolder, 'latest.json');
     
     if (existsSync(pathToDeviceFolder)) {
       let latest: FirmwareInfo = JSON.parse(readFileSync(pathToLatestData, 'utf8'));
-      console.log("Latest", latest.version, "Device", global.connectedDeviceInfo.firmware);
-      
-      if (latest.version > global.connectedDeviceInfo.firmware) {
+      const currentFirmware = global.connectedDeviceInfo.firmware ?? '0';
+      console.log("Latest", latest.version, "Device", currentFirmware);
+
+      if (latest.version > currentFirmware) {
         console.log("Update Available for model", global.connectedDeviceInfo.model);
         win.webContents.send('firmwareAvailable', latest);
       } else {
@@ -45,15 +54,15 @@ const compareToLatest = (): void => {
 
 const checkForFirmwareUpdates = async (): Promise<void> => {
   try {
-    const lines: Line[] = await getLines();
-    const mtmLine = lines.find(line => line.name === "MTM");
+  const lines = (await getLines()) as unknown as Line[];
+  const mtmLine = lines.find(line => line.name === "MTM");
     
     if (!mtmLine) {
       throw new Error("MTM line not found");
     }
     
     const lineID = mtmLine.id;
-    const devices: Device[] = await getDevices(lineID);
+  const devices = (await getDevices(lineID)) as unknown as Device[];
     console.log(pathToFirmwareFolder);
     
     devices.forEach(device => {
@@ -64,7 +73,7 @@ const checkForFirmwareUpdates = async (): Promise<void> => {
     for (let i = 0; i < devices.length; i++) {
       // check for latest
       const pathToDeviceFolder = join(pathToFirmwareFolder, devices[i].path);
-      const latest: FirmwareInfo | null = await getLatest(lineID, devices[i].id);
+  const latest = (await getLatest(lineID, devices[i].id)) as unknown as FirmwareInfo | null;
       
       if (latest) {
         if (!readdirSync(pathToDeviceFolder).includes(latest.name)) {

@@ -10,7 +10,7 @@ interface Settings {
 interface Robot {
   name: string;
   path: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Action {
@@ -18,7 +18,7 @@ interface Action {
   value?: number;
   key?: string;
   servos?: Array<{ enabled: boolean; value: number }>;
-  content?: any;
+  content?: unknown;
 }
 
 const pathToUserData = join(app.getPath('userData'), 'data');
