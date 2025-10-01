@@ -20,20 +20,23 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-  "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "typeRoots": ["./node_modules/@types"],
     "jsx": "react-jsx",
     "types": ["node", "react", "react-dom"]
   },
   "include": [
-    "public/**/*",
-    "src/**/*"
+    "src/**/*",
+    "index.html"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "dist-electron",
+    "build",
+    "public/**/*"
   ]
 }

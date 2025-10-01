@@ -1,27 +1,62 @@
-# IPC Contract
+# IPC Communication Documentation
 
-This document summarizes the IPC channels used between the renderer and main process, the expected payload shapes, and small examples for how to use them from the renderer.
+This document describes the Inter-Process Communication (IPC) channels between the Electron main process and React renderer process in MTM Composer, now fully migrated to TypeScript with strict typing.
 
-Notes
-- The app exposes a `window.electron` bridge via preload. Use the safe helper functions in `src/helpers.ts` (safeInvoke, safeSend, safeReceive, safeRemoveListener) instead of calling `window.electron` directly.
-- The types shown here are best-effort and derived from the renderer code. If you add or change channels in main, update this document and `src/preload.d.ts`.
+## Architecture Overview
 
-## Helper usage (renderer)
+The MTM Composer uses a fully typed IPC system with three main communication patterns:
 
-Use the exported helpers from `src/helpers.ts`:
+- **Invoke/Handle**: Request-response pattern for synchronous operations  
+- **Send/On**: One-way messages from main to renderer
+- **SendToMain**: One-way messages from renderer to main
 
-- safeInvoke<T>(channel, ...args): Promise<T>  — request/response RPC
-- safeSend(channel, payload?) — fire-and-forget messages
-- safeReceive(channel, fn) — subscribe to channel messages
-- safeRemoveListener(channel) — unsubscribe
-- getMsgMkr() — returns the msgMaker helper (used to build binary robot protocol payloads)
+All IPC channels are **strongly typed** using TypeScript interfaces defined in `src/ipc-types.ts` and accessed through helper functions in `src/helpers.ts`. This provides compile-time safety and IntelliSense support.
 
-Example (invoke):
+## Usage Notes
+- The app exposes a `window.electron` bridge via preload script (`public/preload.ts`)
+- **Always use the typed helper functions** in `src/helpers.ts` instead of calling `window.electron` directly
+- All channels are defined in `InvokeMap`, `SendMap`, and `ReceiveMap` in `src/ipc-types.ts`
+- Domain types (Servo, Position, Sequence, Robot, Action) are defined in `src/types/index.ts`
 
-```ts
+## Typed Helper Functions
+
+Use the exported **typed helpers** from `src/helpers.ts` for full TypeScript safety:
+
+### Function Signatures
+```typescript
+// Request/response with automatic type inference
+safeInvoke<TChannel extends keyof InvokeMap>(
+  channel: TChannel, 
+  ...args: InvokeArgs<TChannel>
+): Promise<InvokeRet<TChannel>>
+
+// One-way messages to main process  
+safeSend<TChannel extends keyof SendMap>(
+  channel: TChannel, 
+  data?: SendArgs<TChannel>
+): void
+
+// Subscribe to messages from main process
+safeReceive<TChannel extends keyof ReceiveMap>(
+  channel: TChannel, 
+  callback: (data: ReceiveArgs<TChannel>) => void
+): () => void // Returns cleanup function
+
+// Binary protocol helper for robot communication
+getMsgMkr(): typeof msgMaker
+```
+
+### Usage Examples
+
+**Invoke Pattern (Request/Response):**
+```typescript
 import { safeInvoke } from '../helpers';
 
-const robots = await safeInvoke<Robot[]>('getRobots');
+// TypeScript automatically infers Robot[] return type
+const robots = await safeInvoke('getRobots');
+
+// Upload sequence with type-safe payload
+const result = await safeInvoke('upload', sequenceData);
 ```
 
 Example (send/receive):

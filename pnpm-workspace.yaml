@@ -1,0 +1,9 @@
+onlyBuiltDependencies:
+  - '@serialport/bindings-cpp'
+  - core-js
+  - core-js-pure
+  - electron
+  - electron-winstaller
+  - esbuild
+  - lzma-native
+  - usb

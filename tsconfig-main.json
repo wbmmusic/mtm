@@ -10,7 +10,13 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "types": ["node"]
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/@types/*"]
+    }
   },
   "include": ["public/main.ts", "public/usb.ts", "public/ipc.ts", "public/utils.ts", "public/msgMaker.ts", "public/firmware.ts", "public/preload.ts", "public/types.ts"],
   "exclude": ["public/main.js", "public/usb.js", "public/ipc.js"]

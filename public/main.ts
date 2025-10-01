@@ -6,6 +6,7 @@ import { autoUpdater } from 'electron-updater';
 import { initUSB } from './usb';
 import { checkFolders } from './utils.js';
 import { checkForFirmwareUpdates, compareToLatest } from './firmware';
+import './ipc';
 
 let firstReactInit: boolean = true;
 let win: BrowserWindowType | null = null; // The App Window
@@ -44,7 +45,7 @@ function createWindow(): void {
   });
 
   const startUrl = process.env.ELECTRON_START_URL || url.format({
-    pathname: join(__dirname, '/../build/index.html'),
+    pathname: join(__dirname, '/../dist/index.html'),
     protocol: 'file:',
     slashes: true
   });
@@ -98,8 +99,6 @@ app.on('ready', () => {
       }
     }
   });
-
-  require('./ipc');
 
   initUSB();
 

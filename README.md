@@ -37,17 +37,19 @@ Specifically designed for children's magic trick robot performances, supporting:
 ## Technical Architecture
 
 **Desktop Application:**
-- Electron framework with React and Material-UI
-- Custom USB/serial communication protocols
-- Professional build pipeline with code signing
-- Automatic update system with version management
+- **Frontend**: React 19.1 with TypeScript 5.9, Material-UI 7.3, Vite 7.1 for fast builds
+- **Backend**: Electron 38.2 with Node.js native module support (serialport, usb)
+- **Build System**: Electron Forge 7.9 with cross-platform distribution (Windows/Mac/Linux)
+- **Development**: Hot reload with Vite dev server, strict TypeScript checking
+- **Updates**: Electron-updater with automatic background updates and GitHub releases
+- **Communication**: Typed IPC channels between renderer and main processes
 
 **Hardware Integration:**
-- SAMD21 ARM Cortex-M0+ microcontroller support
-- Custom bootloader protocol for field firmware updates
-- Multi-servo PWM control with precise timing
-- 434MHz RF communication for wireless remote control
-- Compatible with various servo-based robot kits
+- SAMD21 ARM Cortex-M0+ microcontroller support with USB/serial protocols
+- Custom bootloader protocol for field firmware updates over USB
+- Multi-servo PWM control with precise 10Hz timing and 0.1s resolution
+- 434MHz RF communication for wireless remote control (50ft range)
+- Compatible with various servo-based robot kits and educational platforms
 
 **Sequence Engine:**
 - Frame-based automation with 10Hz precision
@@ -90,13 +92,60 @@ Combines STEM learning with creative expression:
 - **Connectivity**: USB port for programming, optional 434MHz keyfob for wireless control
 - **Robot Kits**: Compatible with various servo-based educational robot kits
 
+## Development
+
+### Setup
+```bash
+# Install dependencies
+pnpm install
+
+# Development server (hot reload)
+pnpm dev
+
+# Type checking
+pnpm type-check        # Renderer process (React/TypeScript)
+pnpm type-check-main   # Main process (Electron/Node.js)
+
+# Build for production
+pnpm build
+
+# Package application
+pnpm package           # Package only
+pnpm make             # Create distributables
+
+# Platform-specific builds
+pnpm win              # Windows installer
+pnpm mac              # macOS app bundle
+pnpm linux            # Linux AppImage
+```
+
+### Architecture
+
+**TypeScript Configuration:**
+- `tsconfig.json` - Renderer process (React, DOM types, bundler resolution)
+- `tsconfig-main.json` - Main process (Node.js types, CommonJS modules)
+- Strict type checking enabled with domain types for Servo, Position, Sequence, Robot
+
+**Build Pipeline:**
+- **Vite** - Fast renderer builds with hot reload (400ms startup)
+- **Electron Forge** - Cross-platform packaging and distribution
+- **Native Modules** - Rebuilt automatically for Electron runtime (serialport, usb)
+
 ## Dependencies
 
-- React 19
-- Electron 37
-- Material-UI 7
-- @hello-pangea/dnd (drag-and-drop)
-- framer-motion (animations)
-- SerialPort (hardware communication)
-- USB (device detection)
-- electron-updater (automatic updates)
+**Core Framework:**
+- React 19.1.1 with TypeScript 5.9.3
+- Electron 38.2.0 with Node.js 22.19.0
+- Vite 7.1.7 for fast development builds
+- Electron Forge 7.9.0 for packaging and distribution
+
+**UI & UX:**
+- Material-UI 7.3.2 (components and theming)
+- @hello-pangea/dnd 18.0.1 (drag-and-drop sequences)
+- framer-motion 12.23.22 (animations and transitions)
+- @emotion/react 11.14.0 (CSS-in-JS styling)
+
+**Hardware Communication:**
+- serialport 13.0.0 (USB/serial communication with robots)
+- usb 2.16.0 (USB device detection and enumeration)
+- electron-updater 6.6.2 (automatic application updates)

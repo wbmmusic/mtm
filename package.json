@@ -10,7 +10,7 @@
     },
     "description": "MTM Composer",
     "homepage": "./",
-    "main": "build/main.js",
+    "main": "dist-electron/main.js",
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
@@ -38,60 +38,29 @@
         "web-vitals": "^5.1.0"
     },
     "scripts": {
-        "start": "react-scripts start",
+        "start": "vite",
         "type-check": "tsc --noEmit --project tsconfig.json",
-        "build-electron": "tsc --project tsconfig-main.json",
-        "build": "npm run build-electron && react-scripts build",
+        "build-electron": "vite build",
+        "build": "vite build",
         "type-check-main": "tsc --noEmit --project tsconfig-main.json",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "dev": "nf start",
-        "package": "electron-builder build -c.extraMetadata.main=build/main.js --publish never",
-        "deploy": "electron-builder build -c.extraMetadata.main=build/main.js --publish always",
-        "upload": "pnpm build && pnpm backup && pnpm deploy ",
+        "test": "vitest",
+        "preview": "vite preview",
+        "dev": "vite",
+        "package": "pnpm build && electron-forge package",
+        "make": "pnpm build && electron-forge make",
+        "publish": "pnpm build && electron-forge publish",
+        "start-electron": "electron-forge start",
+        "upload": "pnpm build && pnpm backup && pnpm publish",
         "electron": "electron .",
-        "mac": "pnpm && pnpm build && node copyPlist.js && pnpm deploy",
-        "linux": "pnpm && pnpm build && pnpm deploy",
+        "mac": "pnpm build && electron-forge make --platform=darwin",
+        "linux": "pnpm && pnpm build && electron-forge make --platform=linux",
+        "win": "pnpm && pnpm build && electron-forge make --platform=win32",
         "try": "pnpm && pnpm build && pnpm package",
         "refresh": "pnpm upgrade --latest",
-        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
-        "postinstall": "electron-builder install-app-deps"
+        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main"
     },
-    "build": {
-        "productName": "MTM",
-        "appId": "com.wbm.mtm",
-        "copyright": "WBM Tek",
-        "extends": null,
-        "npmRebuild": false,
-        "afterSign": "./notarize.js",
-        "files": [
-            "build/**/*",
-            "electron/*"
-        ],
-        "extraResources": [
-            "public/sounds/*",
-            "public/images/*"
-        ],
-        "mac": {
-            "icon": "public/icon.icns",
-            "hardenedRuntime": true,
-            "gatekeeperAssess": false,
-            "entitlements": "build/entitlements.mac.plist",
-            "entitlementsInherit": "build/entitlements.mac.plist"
-        },
-        "dmg": {
-            "sign": false,
-            "icon": "public/dmg.icns"
-        },
-        "win": {
-            "icon": "public/icon.ico",
-            "publisherName": "William Mareci"
-        },
-        "linux": {
-            "target": "AppImage",
-            "vendor": "WBM Tek",
-            "category": "Education"
-        }
+    "config": {
+        "forge": "./forge.config.ts"
     },
     "eslintConfig": {
         "extends": [
@@ -116,15 +85,27 @@
         "url": "https://github.com/wbmmusic/mtm.git"
     },
     "devDependencies": {
+        "@electron-forge/cli": "^7.9.0",
+        "@electron-forge/maker-deb": "^7.9.0",
+        "@electron-forge/maker-rpm": "^7.9.0",
+        "@electron-forge/maker-squirrel": "^7.9.0",
+        "@electron-forge/maker-zip": "^7.9.0",
+        "@electron-forge/publisher-github": "^7.9.0",
+        "@electron-forge/shared-types": "^7.9.0",
         "@electron/notarize": "^3.1.0",
+        "@electron/rebuild": "^4.0.1",
         "@types/node": "^22.10.2",
         "@types/react": "^19.1.16",
         "@types/react-dom": "^19.1.1",
+        "@vitejs/plugin-react": "^5.0.4",
         "electron": "^38.2.0",
         "electron-builder": "^26.0.12",
+        "electron-rebuild": "^3.2.9",
         "eslint": "8.57.0",
         "foreman": "^3.0.1",
-        "typescript": "^5.9.3"
-    },
-    "packageManager": "pnpm@9.2.0+sha512.98a80fd11c2e7096747762304106432b3ddc67dcf54b5a8c01c93f68a2cd5e05e6821849522a06fb76284d41a2660d5e334f2ee3bbf29183bf2e739b1dafa771"
+        "typescript": "^5.9.3",
+        "vite": "^7.1.7",
+        "vite-plugin-electron": "^0.29.0",
+        "vite-plugin-electron-renderer": "^0.14.6"
+    }
 }
