@@ -33,7 +33,18 @@ const config: ForgeConfig = {
       appleId: process.env.APPLE_ID || '',
       appleIdPassword: process.env.APPLE_PASSWORD || '',
       teamId: process.env.APPLE_TEAM_ID || ''
-    }
+    },
+    win32metadata: {
+      CompanyName: 'WBM Tek',
+      FileDescription: 'MTM Composer',
+      ProductName: 'MTM',
+      InternalName: 'MTM',
+      OriginalFilename: 'MTM.exe'
+    },
+    // Windows code signing - auto-detect certificate (like electron-builder did)
+    ...(process.platform === 'win32' && {
+      windowsSign: true  // Automatically finds and uses any valid code signing certificate
+    })
   },
   rebuildConfig: {},
   makers: [
