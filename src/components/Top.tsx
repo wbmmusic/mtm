@@ -23,7 +23,12 @@ import UsbIcon from "@mui/icons-material/Usb";
 import UsbOffIcon from "@mui/icons-material/UsbOff";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { modalStyle } from "../styles";
-import { safeReceive, safeRemoveListener, safeInvoke, safeSend } from "../helpers";
+import {
+  safeReceive,
+  safeRemoveListener,
+  safeInvoke,
+  safeSend,
+} from "../helpers";
 
 type UploadModal = { show: boolean; value: number | null };
 
@@ -33,10 +38,13 @@ export default function Top(): React.ReactElement {
 
   const defaultUploadModal: UploadModal = { show: false, value: null };
 
-  const [audioFile, setAudioFile] = useState<{ file: string | null }>({ file: null });
+  const [audioFile, setAudioFile] = useState<{ file: string | null }>({
+    file: null,
+  });
   const [sound, setSound] = useState<boolean>(true);
   const [firmware, setFirmware] = useState<any>(null);
-  const [uploadModal, setUploadModal] = useState<UploadModal>(defaultUploadModal);
+  const [uploadModal, setUploadModal] =
+    useState<UploadModal>(defaultUploadModal);
 
   const playerRef = useRef<HTMLAudioElement | null>(null);
 
@@ -50,9 +58,15 @@ export default function Top(): React.ReactElement {
 
     safeSend("play", "open.mp3");
 
-    safeReceive("play_file", (file: unknown) => setAudioFile({ file: String(file) }));
-    safeReceive("upload_progress", (data: unknown) => setUploadModal(data as UploadModal));
-    safeReceive("firmwareAvailable", (latest: unknown) => setFirmware(latest as any));
+    safeReceive("play_file", (file: unknown) =>
+      setAudioFile({ file: String(file) })
+    );
+    safeReceive("upload_progress", (data: unknown) =>
+      setUploadModal(data as UploadModal)
+    );
+    safeReceive("firmwareAvailable", (latest: unknown) =>
+      setFirmware(latest as any)
+    );
 
     return () => {
       safeRemoveListener("play_file");
@@ -69,14 +83,20 @@ export default function Top(): React.ReactElement {
   }, [audioFile, sound]);
 
   const soundOn = (mute: boolean) => {
-    safeInvoke("sound", mute).then((res: unknown) => setSound(Boolean(res))).catch(() => {});
+    safeInvoke("sound", mute)
+      .then((res: unknown) => setSound(Boolean(res)))
+      .catch(() => {});
   };
 
   const makeMute = () => {
     if (!sound) {
       return (
         <Tooltip title="Sound">
-          <IconButton color="error" size={"small"} onClick={() => soundOn(true)}>
+          <IconButton
+            color="error"
+            size={"small"}
+            onClick={() => soundOn(true)}
+          >
             <VolumeOffIcon />
           </IconButton>
         </Tooltip>
@@ -84,7 +104,11 @@ export default function Top(): React.ReactElement {
     } else {
       return (
         <Tooltip title="Sound">
-          <IconButton color="inherit" size={"small"} onClick={() => soundOn(false)}>
+          <IconButton
+            color="inherit"
+            size={"small"}
+            onClick={() => soundOn(false)}
+          >
             <VolumeUpIcon />
           </IconButton>
         </Tooltip>
@@ -125,7 +149,9 @@ export default function Top(): React.ReactElement {
                 transition: "none",
               },
             }}
-            variant={uploadModal.value !== null ? "determinate" : "indeterminate"}
+            variant={
+              uploadModal.value !== null ? "determinate" : "indeterminate"
+            }
             value={uploadModal.value !== null ? uploadModal.value : undefined}
           />
         </Box>
@@ -135,8 +161,13 @@ export default function Top(): React.ReactElement {
 
   return (
     <Stack height={"100%"}>
-      <Stack p={1} direction={"row"} spacing={1} sx={{ backgroundColor: admin ? "salmon" : "paleTurquoise" }}>
-        <IconButton size="small" color="inherit" onClick={() => navigate("/")}> 
+      <Stack
+        p={1}
+        direction={"row"}
+        spacing={1}
+        sx={{ backgroundColor: admin ? "salmon" : "paleTurquoise" }}
+      >
+        <IconButton size="small" color="inherit" onClick={() => navigate("/")}>
           <HomeIcon />
         </IconButton>
         <Box width={"100%"}>
@@ -152,7 +183,10 @@ export default function Top(): React.ReactElement {
         </Box>
         {!firmware ? (
           <IconButton size="small" color="inherit">
-            <Tooltip title="Update Firmware" onClick={() => safeSend("uploadFirmware") }>
+            <Tooltip
+              title="Update Firmware"
+              onClick={() => safeSend("uploadFirmware")}
+            >
               <FileUploadIcon />
             </Tooltip>
           </IconButton>
@@ -165,12 +199,16 @@ export default function Top(): React.ReactElement {
       <Box height={"100%"} sx={{ overflow: "auto" }}>
         <Routes>
           <Route path="robot/:robotPath" element={<Robot />} />
-          <Route path="sequence/:robotPath/:sequenceId" element={<Sequence />} />
+          <Route
+            path="sequence/:robotPath/:sequenceId"
+            element={<Sequence />}
+          />
           <Route path="*" element={<Home />} />
         </Routes>
       </Box>
-      {audioFile.file ? <audio ref={playerRef} src={"sound://" + audioFile.file} /> : null}
+      {audioFile.file ? (
+        <audio ref={playerRef} src={"sound://" + audioFile.file} />
+      ) : null}
     </Stack>
   );
 }
-

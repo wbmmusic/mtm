@@ -14,22 +14,34 @@ const defaultInstallSnack: InstallSnack = { show: false, version: "x.x.x" };
 const defaultRelaunchSnack: RelaunchSnack = { show: false };
 
 export default function Updates(): React.ReactElement {
-  const [downloadSnack, setDownloadSnack] = useState<DownloadSnack>(defaultDownloadSnack);
-  const [installSnack, setInstallSnack] = useState<InstallSnack>(defaultInstallSnack);
-  const [relaunchSnack, setRelaunchSnack] = useState<RelaunchSnack>(defaultRelaunchSnack);
+  const [downloadSnack, setDownloadSnack] =
+    useState<DownloadSnack>(defaultDownloadSnack);
+  const [installSnack, setInstallSnack] =
+    useState<InstallSnack>(defaultInstallSnack);
+  const [relaunchSnack, setRelaunchSnack] =
+    useState<RelaunchSnack>(defaultRelaunchSnack);
 
-  const handleClose = (event?: Event | React.SyntheticEvent, reason?: string) => {
+  const handleClose = (
+    event?: Event | React.SyntheticEvent,
+    reason?: string
+  ) => {
     if (reason === "clickaway") return;
     setDownloadSnack({ show: false });
   };
 
   const install = () => safeSend("installUpdate");
 
-  const closeInstallSnack = () => setInstallSnack(old => ({ ...old, show: false }));
+  const closeInstallSnack = () =>
+    setInstallSnack(old => ({ ...old, show: false }));
 
   const action = (
     <Fragment>
-      <IconButton size="small" aria-label="close" color="inherit" onClick={handleClose}>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={handleClose}
+      >
         <CloseIcon fontSize="small" />
       </IconButton>
     </Fragment>
@@ -40,28 +52,43 @@ export default function Updates(): React.ReactElement {
       <Button size="small" color="error" onClick={() => install()}>
         Relaunch App
       </Button>
-      <IconButton size="small" aria-label="close" color="inherit" onClick={closeInstallSnack}>
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        onClick={closeInstallSnack}
+      >
         <CloseIcon fontSize="small" />
       </IconButton>
     </Fragment>
   );
 
   const relaunchAction = (
-    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setRelaunchSnack(defaultRelaunchSnack)}>
+    <IconButton
+      size="small"
+      aria-label="close"
+      color="inherit"
+      onClick={() => setRelaunchSnack(defaultRelaunchSnack)}
+    >
       <CloseIcon fontSize="small" />
     </IconButton>
   );
 
   useEffect(() => {
-  safeSend("reactIsReady");
-  safeReceive("updater", (a: unknown, b: unknown) => {
+    safeSend("reactIsReady");
+    safeReceive("updater", (a: unknown, b: unknown) => {
       const ev = String(a);
       if (ev === "checking-for-update") console.log("Checking For Update");
-      else if (ev === "update-not-available") console.log("Up to date: v" + String((b as any)?.version));
-      else if (ev === "update-available") setDownloadSnack(old => ({ show: true, progress: 0 }));
+      else if (ev === "update-not-available")
+        console.log("Up to date: v" + String((b as any)?.version));
+      else if (ev === "update-available")
+        setDownloadSnack(old => ({ show: true, progress: 0 }));
       else if (ev === "download-progress") {
         console.log("Downloading", Math.round((b as any)?.percent) + "%");
-        setDownloadSnack(old => ({ ...old, progress: Math.round((b as any)?.percent) }));
+        setDownloadSnack(old => ({
+          ...old,
+          progress: Math.round((b as any)?.percent),
+        }));
       } else if (ev === "update-downloaded") {
         console.log("Downloaded", b);
         setDownloadSnack(defaultDownloadSnack);
@@ -82,9 +109,26 @@ export default function Updates(): React.ReactElement {
 
   return (
     <div>
-      <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "right" }} open={!!downloadSnack.show} onClose={handleClose} message={`Downloading Update ${downloadSnack.progress ?? 0}%`} action={action} />
-      <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "right" }} open={!!installSnack.show} onClose={handleClose} message={`Relaunch to install ${installSnack.version}`} action={installAction} />
-      <Snackbar anchorOrigin={{ vertical: "bottom", horizontal: "right" }} open={!!relaunchSnack.show} message={`Relaunching ...`} action={relaunchAction} />
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={!!downloadSnack.show}
+        onClose={handleClose}
+        message={`Downloading Update ${downloadSnack.progress ?? 0}%`}
+        action={action}
+      />
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={!!installSnack.show}
+        onClose={handleClose}
+        message={`Relaunch to install ${installSnack.version}`}
+        action={installAction}
+      />
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={!!relaunchSnack.show}
+        message={`Relaunching ...`}
+        action={relaunchAction}
+      />
     </div>
   );
 }
