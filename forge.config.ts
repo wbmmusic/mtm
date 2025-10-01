@@ -27,17 +27,12 @@ const config: ForgeConfig = {
       /\.map$/
     ],
     osxSign: {
-      identity: 'Developer ID Application: WBM Tek',
-      'hardened-runtime': true,
-      'gatekeeper-assess': false,
-      entitlements: 'entitlements.mac.plist',
-      'entitlements-inherit': 'entitlements.mac.plist'
+      identity: 'Developer ID Application: WBM Tek'
     },
     osxNotarize: {
-      tool: 'notarytool',
       appleId: process.env.APPLE_ID || '',
       appleIdPassword: process.env.APPLE_PASSWORD || '',
-      teamId: process.env.APPLE_TEAM_ID || '',
+      teamId: process.env.APPLE_TEAM_ID || ''
     }
   },
   rebuildConfig: {},
