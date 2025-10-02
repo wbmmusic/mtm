@@ -38,7 +38,9 @@ function createWindow(): void {
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
-      sandbox: false
+      sandbox: false,
+      nodeIntegration: false,
+      contextIsolation: true
     },
     icon: join(__dirname, '/favicon.ico'),
     title: "MTM --- v" + app.getVersion()
@@ -49,8 +51,14 @@ function createWindow(): void {
     protocol: 'file:',
     slashes: true
   });
-  win!.loadURL(startUrl);
-  //win!.maximize()
+  
+  win!.loadURL(startUrl).catch(err => {
+    console.error('Failed to load URL:', err);
+  });
+  
+  win!.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
+  });
 
   // Emitted when the window is closed.
   win!.on('closed', () => win = null);

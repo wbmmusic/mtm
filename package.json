@@ -40,7 +40,8 @@
         "type-check-main": "tsc --noEmit --project tsconfig-main.json",
         "test": "vitest",
         "preview": "vite preview",
-        "dev": "vite",
+        "dev": "cross-env ELECTRON_START_URL=http://localhost:5173 electron-forge start",
+        "dev:manual": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron-forge start\"",
         "package": "pnpm build && electron-forge package",
         "make": "pnpm build && electron-forge make",
         "publish": "pnpm build && electron-forge publish",
@@ -52,7 +53,11 @@
         "win": "pnpm && pnpm build && electron-forge make --platform=win32",
         "try": "pnpm && pnpm build && pnpm package",
         "refresh": "pnpm upgrade --latest",
-        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main"
+        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
+        "commit": "git add . && git commit",
+        "push": "git push origin main",
+        "commit-push": "git add . && git commit && git push origin main",
+        "save": "git add . && git commit -m \"Auto-save: $(date)\" && git push origin main"
     },
     "config": {
         "forge": "./forge.config.ts"
@@ -67,6 +72,7 @@
         "@electron-forge/maker-rpm": "^7.9.0",
         "@electron-forge/maker-squirrel": "^7.9.0",
         "@electron-forge/maker-zip": "^7.9.0",
+        "@electron-forge/plugin-vite": "^7.9.0",
         "@electron-forge/publisher-github": "^7.9.0",
         "@electron-forge/shared-types": "^7.9.0",
         "@electron/notarize": "^3.1.0",
@@ -75,10 +81,13 @@
         "@types/react": "^19.1.16",
         "@types/react-dom": "^19.1.1",
         "@vitejs/plugin-react": "^5.0.4",
+        "concurrently": "^9.2.1",
+        "cross-env": "^10.1.0",
         "electron": "^38.2.0",
         "typescript": "^5.9.3",
         "vite": "^7.1.7",
         "vite-plugin-electron": "^0.29.0",
-        "vite-plugin-electron-renderer": "^0.14.6"
+        "vite-plugin-electron-renderer": "^0.14.6",
+        "wait-on": "^9.0.1"
     }
 }

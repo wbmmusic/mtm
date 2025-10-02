@@ -4,6 +4,7 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { PublisherGithub } from '@electron-forge/publisher-github';
+import { VitePlugin } from '@electron-forge/plugin-vite';
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -41,12 +42,40 @@ const config: ForgeConfig = {
       InternalName: 'MTM',
       OriginalFilename: 'MTM.exe'
     },
-    // Windows code signing - auto-detect certificate (like electron-builder did)
+    // Windows code signing with HSM token - let signtool choose best certificate
     ...(process.platform === 'win32' && {
-      windowsSign: true  // Automatically finds and uses any valid code signing certificate
+      windowsSign: {
+        // Use /a to automatically select the best certificate
+        signWithParams: ['/a']
+      }
     })
   },
   rebuildConfig: {},
+  plugins: [
+    new VitePlugin({
+      // `build` can specify multiple entry builds, which can be Main process, Preload scripts and Worker process, etc.
+      // If you are familiar with Vite configuration, it will look really familiar.
+      build: [
+        {
+          // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
+          entry: 'public/main.ts',
+          config: 'vite.config.ts',
+          target: 'main',
+        },
+        {
+          entry: 'public/preload.ts',
+          config: 'vite.config.ts',
+          target: 'preload',
+        },
+      ],
+      renderer: [
+        {
+          name: 'main_window',
+          config: 'vite.config.ts',
+        },
+      ],
+    }),
+  ],
   makers: [
     new MakerSquirrel({
       name: 'MTM',

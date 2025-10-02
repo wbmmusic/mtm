@@ -66,7 +66,7 @@ export const RobotCard: React.FC<RobotCardProps> = ({ robot, setDelete, setRobot
         <Divider />
         <Stack direction="row">
           <Box>
-            <Box component="img" sx={{ maxHeight: "100%", maxWidth: "100px" }} src="img://robot.png" />
+            <Box component="img" sx={{ maxHeight: "100%", maxWidth: "100px" }} src="/images/robot.png" />
           </Box>
           <Box
             m={1}
