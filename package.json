@@ -53,11 +53,7 @@
         "win": "pnpm && pnpm build && electron-forge make --platform=win32",
         "try": "pnpm && pnpm build && pnpm package",
         "refresh": "pnpm upgrade --latest",
-        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main",
-        "commit": "git add . && git commit",
-        "push": "git push origin main",
-        "commit-push": "git add . && git commit && git push origin main",
-        "save": "git add . && git commit -m \"Auto-save: $(date)\" && git push origin main"
+        "backup": "git add . && git commit -m %NPM_PACKAGE_VERSION% && git push origin main"
     },
     "config": {
         "forge": "./forge.config.ts"
