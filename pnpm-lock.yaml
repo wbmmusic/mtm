@@ -123,9 +123,6 @@ importers:
       vite:
         specifier: ^7.1.7
         version: 7.1.7(@types/node@22.18.8)(jiti@2.6.1)(terser@5.44.0)(yaml@2.8.1)
-      vite-plugin-electron:
-        specifier: ^0.29.0
-        version: 0.29.0(vite-plugin-electron-renderer@0.14.6)
       vite-plugin-electron-renderer:
         specifier: ^0.14.6
         version: 0.14.6
@@ -2982,14 +2979,6 @@ packages:
 
   vite-plugin-electron-renderer@0.14.6:
     resolution: {integrity: sha512-oqkWFa7kQIkvHXG7+Mnl1RTroA4sP0yesKatmAy0gjZC4VwUqlvF9IvOpHd1fpLWsqYX/eZlVxlhULNtaQ78Jw==}
-
-  vite-plugin-electron@0.29.0:
-    resolution: {integrity: sha512-HP0DI9Shg41hzt55IKYVnbrChWXHX95QtsEQfM+szQBpWjVhVGMlqRjVco6ebfQjWNr+Ga+PeoBjMIl8zMaufw==}
-    peerDependencies:
-      vite-plugin-electron-renderer: '*'
-    peerDependenciesMeta:
-      vite-plugin-electron-renderer:
-        optional: true
 
   vite@7.1.7:
     resolution: {integrity: sha512-VbA8ScMvAISJNJVbRDTJdCwqQoAareR/wutevKanhR2/1EkoXVZVkkORaYm/tNVCjP/UDTKtcw3bAkwOUdedmA==}
@@ -6354,10 +6343,6 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   vite-plugin-electron-renderer@0.14.6: {}
-
-  vite-plugin-electron@0.29.0(vite-plugin-electron-renderer@0.14.6):
-    optionalDependencies:
-      vite-plugin-electron-renderer: 0.14.6
 
   vite@7.1.7(@types/node@22.18.8)(jiti@2.6.1)(terser@5.44.0)(yaml@2.8.1):
     dependencies:

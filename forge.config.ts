@@ -17,16 +17,6 @@ const config: ForgeConfig = {
       './public/sounds',
       './public/images'
     ],
-    ignore: [
-      /^\/src/,
-      /^\/public/,
-      /^\/\.git/,
-      /^\/node_modules\/(?!.*\.(node|dll|dylib|so)$)/,
-      /^\/vite\.config/,
-      /^\/tsconfig/,
-      /\.md$/,
-      /\.map$/
-    ],
     osxSign: {
       identity: 'Developer ID Application: WBM Tek'
     },
@@ -59,19 +49,17 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'public/main.ts',
-          config: 'vite.config.ts',
-          target: 'main',
+          config: 'vite.main.config.ts',
         },
         {
           entry: 'public/preload.ts',
-          config: 'vite.config.ts',
-          target: 'preload',
+          config: 'vite.preload.config.ts',
         },
       ],
       renderer: [
         {
           name: 'main_window',
-          config: 'vite.config.ts',
+          config: 'vite.renderer.config.ts',
         },
       ],
     }),

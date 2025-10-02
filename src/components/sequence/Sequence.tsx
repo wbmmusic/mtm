@@ -55,9 +55,10 @@ const droppableStyle = {
   border: "6px solid #55533c",
   borderLeft: "20px solid #55533c",
   borderRight: "20px solid #55533c",
-  minHeight: "80px",
+  height: "80px", // Fixed height to prevent layout shift during drag operations
   backgroundColor: "lightGrey",
   boxShadow: "2px 2px magenta, 6px 6px black",
+  overflow: "hidden", // Prevent content from expanding beyond fixed height
 };
 
 export const Sequence: React.FC = () => {
@@ -130,10 +131,11 @@ export const Sequence: React.FC = () => {
   useEffect(() => makeObjects(), [makeObjects]);
 
   const haveEverything = () => {
-    if (!sequence) return false;
+    if (!sequence || !timelineObjects) return false;
     const acts = (sequence.actions || []) as Action[];
     for (const act of acts) {
-      if (act.type === "move") {
+      // Check if this action references a timeline object by appId
+      if (act.appId) {
         const idx = timelineObjects?.findIndex((obj) => obj.appId === act.appId) ?? -1;
         if (idx < 0) return false;
       }
@@ -379,16 +381,19 @@ export const Sequence: React.FC = () => {
   };
 
   const makeActionsFromRefs = (): Action[] => {
+    // Early return if timelineObjects isn't ready yet
+    if (!timelineObjects || !sequence) return [];
+    
     const out: Action[] = [];
     let lastType: string | null = null;
 
     for (const act of (sequence?.actions || []) as Action[]) {
       const theObjRaw = timelineObjects?.find((obj) => obj.appId === act.appId);
       if (!theObjRaw) {
-        // don't throw here - timelineObjects can change between checks and render
-        // log a helpful warning and skip the missing reference so the UI stays
-        // usable rather than crashing.
-        console.warn("Sequence.makeActionsFromRefs: missing referenced object with appId", act.appId);
+        // This indicates the sequence references a position that no longer exists.
+        // Log as debug instead of warning to reduce console noise, but keep the
+        // defensive behavior to prevent crashes.
+        console.debug("Sequence.makeActionsFromRefs: missing referenced position with appId", act.appId, "- this position may have been deleted");
         // reset lastType because we don't have a meaningful type to compare
         lastType = null;
         continue;

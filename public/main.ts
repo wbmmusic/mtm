@@ -8,6 +8,10 @@ import { checkFolders } from './utils.js';
 import { checkForFirmwareUpdates, compareToLatest } from './firmware';
 import './ipc';
 
+// Vite defines these constants for Electron Forge
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
+declare const MAIN_WINDOW_VITE_NAME: string;
+
 let firstReactInit: boolean = true;
 let win: BrowserWindowType | null = null; // The App Window
 
@@ -46,15 +50,12 @@ function createWindow(): void {
     title: "MTM --- v" + app.getVersion()
   });
 
-  const startUrl = process.env.ELECTRON_START_URL || url.format({
-    pathname: join(__dirname, '/../dist/index.html'),
-    protocol: 'file:',
-    slashes: true
-  });
-  
-  win!.loadURL(startUrl).catch(err => {
-    console.error('Failed to load URL:', err);
-  });
+    // Load the app using Vite constants
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    win!.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  } else {
+    win!.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+  }
   
   win!.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
     console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
