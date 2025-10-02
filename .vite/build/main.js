@@ -9779,7 +9779,7 @@ electron.app.on("second-instance", (event, commandLine, workingDirectory) => {
 function createWindow() {
   win = new electron.BrowserWindow({
     width: 800,
-    height: 600,
+    height: 625,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -9792,13 +9792,21 @@ function createWindow() {
     title: "MTM --- v" + electron.app.getVersion()
   });
   {
-    win.loadURL("http://localhost:5174");
+    win.loadURL("http://localhost:5173");
   }
   win.webContents.on("did-fail-load", (event, errorCode, errorDescription, validatedURL) => {
     console.error("Failed to load page:", errorCode, errorDescription, validatedURL);
   });
   win.on("closed", () => win = null);
-  win.on("ready-to-show", () => win?.show());
+  win.on("ready-to-show", () => {
+    win?.show();
+    const display = electron.screen.getDisplayMatching(win.getBounds());
+    win?.webContents.send("display-changed", { scaleFactor: display.scaleFactor });
+  });
+  win.on("moved", () => {
+    const display = electron.screen.getDisplayMatching(win.getBounds());
+    win?.webContents.send("display-changed", { scaleFactor: display.scaleFactor });
+  });
 }
 electron.app.on("ready", () => {
   electron.protocol.registerFileProtocol("sound", (request, callback) => {

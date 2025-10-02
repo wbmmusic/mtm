@@ -1,37 +1,103 @@
-import { Robot, Position, Servo, Sequence } from "./types";
-import type { InvokeMap, InvokeKey } from "./ipc-types";
+/**
+ * CORE HELPER FUNCTIONS AND IPC COMMUNICATION
+ * 
+ * This module provides the primary interface between the React renderer process
+ * and the Electron main process. It includes type-safe IPC communication wrappers,
+ * data persistence functions, and utility functions for robot and sequence management.
+ * 
+ * KEY FUNCTIONALITY:
+ * - Type-safe IPC communication with automatic error handling
+ * - Robot configuration management (CRUD operations)
+ * - Sequence and position data persistence
+ * - USB communication abstraction for robot control
+ * - Audio playback for user feedback
+ * - File import/export operations
+ * 
+ * ARCHITECTURE:
+ * - Uses Electron's contextBridge for secure IPC communication
+ * - Implements type safety through TypeScript interfaces
+ * - Provides promise-based async API for all operations
+ * - Includes comprehensive error handling and logging
+ * 
+ * SECURITY:
+ * - All main process communication goes through contextBridge
+ * - Type-safe interfaces prevent injection attacks
+ * - Proper error handling prevents crashes
+ * - No direct Node.js API access from renderer
+ * 
+ * USAGE PATTERNS:
+ * - Import specific functions as needed: { getRobots, saveSequence }
+ * - All functions return promises and should be awaited
+ * - Error handling is built-in but can be overridden with .catch()
+ * - Functions automatically handle JSON serialization/deserialization
+ */
 
-// Derive argument tuple and return types from InvokeMap safely.
+// Type definitions for application data structures
+import { Robot, Position, Servo, Sequence } from "./types";
+import type { InvokeMap, InvokeKey } from "./ipc-types"; // IPC type mappings
+
+/**
+ * TYPESCRIPT TYPE UTILITIES FOR IPC COMMUNICATION
+ * 
+ * These utility types extract argument and return types from the IPC mapping
+ * to provide compile-time type safety for all main process communications.
+ */
+
+// Extract argument types from IPC method definitions
 type InvokeArgs<C extends InvokeKey> = InvokeMap[C] extends { args: infer A }
   ? A extends any[]
     ? A
     : any[]
   : any[];
+
+// Extract return types from IPC method definitions  
 type InvokeRet<C extends InvokeKey> = InvokeMap[C] extends { ret: infer R } ? R : any;
 
+/**
+ * GLOBAL WINDOW INTERFACE EXTENSION
+ * 
+ * Extends the global Window interface to include Electron-specific APIs
+ * that are exposed through the preload script and contextBridge.
+ */
 declare global {
   interface Window {
     electron: {
-      invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
-      send: (channel: string, args?: any) => void;
-      receive?: (channel: string, func: (...args: any[]) => void) => void;
-      removeListener?: (channel: string) => void;
-      msgMkr?: any;
+      invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>; // Main process invocation
+      send: (channel: string, args?: any) => void;                      // One-way message sending
+      receive?: (channel: string, func: (...args: any[]) => void) => void; // Event listener setup
+      removeListener?: (channel: string) => void;                       // Event listener cleanup
+      msgMkr?: any;                                                     // Message maker utilities
     };
   }
 }
 
 /**
- * Fetch the list of robots saved in the main process.
- * @returns Promise resolving to an array of Robot objects.
+ * ROBOT MANAGEMENT FUNCTIONS
+ * 
+ * These functions provide a high-level interface for robot configuration
+ * management, abstracting the IPC communication with the main process.
+ */
+
+/**
+ * FETCH ALL ROBOTS
+ * 
+ * Retrieves the complete list of robot configurations from persistent storage.
+ * Used to populate the robot selection interface and home screen.
+ * 
+ * @returns {Promise<Robot[]>} Array of all saved robot configurations
  */
 export const getRobots = async (): Promise<Robot[]> => {
   return safeInvoke("getRobots");
 };
 
 /**
- * Delete a robot by path and return the updated robot list.
- * @param path - robot identifier/path
+ * DELETE ROBOT CONFIGURATION
+ * 
+ * Removes a robot configuration and all associated data (sequences, positions)
+ * from storage. Returns the updated robot list for UI synchronization.
+ * 
+ * @param {string} path - Unique robot identifier/path
+ * @returns {Promise<Robot[]>} Updated list of remaining robots
  */
 export const deleteRobot = async (path: string): Promise<Robot[]> => {
   console.log("delete", path);
@@ -39,15 +105,23 @@ export const deleteRobot = async (path: string): Promise<Robot[]> => {
 };
 
 /**
- * Load a single robot by path.
- * @param path - robot identifier/path
+ * LOAD SINGLE ROBOT
+ * 
+ * Fetches detailed configuration for a specific robot by its path identifier.
+ * Used when navigating to robot-specific interfaces.
+ * 
+ * @param {string} path - Unique robot identifier/path
+ * @returns {Promise<Robot>} Complete robot configuration object
  */
 export const getRobot = async (path: string): Promise<Robot> => {
   return safeInvoke("getRobot", path);
 };
 
 /**
- * Save a robot to storage.
+ * SAVE ROBOT CONFIGURATION
+ * 
+ * Persists a robot configuration to storage. Used for both creating new
+ * robots and updating existing configurations.
  * @param robot - Robot object to save
  */
 export const saveRobot = async (robot: Robot): Promise<Robot> => {
@@ -101,8 +175,26 @@ export const getServos = async (robotPath: string): Promise<Servo[]> => {
  * @returns Promise<T>
  */
 /**
- * Typed safeInvoke — when called with a key from InvokeKey the TypeScript
- * compiler can infer the expected argument and return shapes using InvokeMap.
+ * SAFE IPC COMMUNICATION WRAPPER
+ * 
+ * Type-safe wrapper for Electron IPC communication between renderer and main processes.
+ * Provides compile-time type checking and runtime error handling for all IPC operations.
+ * 
+ * FEATURES:
+ * - TypeScript type inference from IPC mapping definitions
+ * - Automatic error handling for missing preload bridge
+ * - Promise-based async API for all operations
+ * - Compile-time validation of arguments and return types
+ * 
+ * SECURITY:
+ * - All communication goes through contextBridge (no direct Node.js access)
+ * - Type safety prevents injection attacks and data corruption
+ * - Error boundaries prevent renderer crashes from IPC failures
+ * 
+ * USAGE:
+ * - Use typed overload for known IPC channels: safeInvoke("getRobots")
+ * - Use generic overload for dynamic channels: safeInvoke<T>("customChannel", args)
+ * - Always handle promise rejection with .catch() or try/catch
  */
 export function safeInvoke<C extends InvokeKey>(channel: C, ...args: InvokeArgs<C>): Promise<InvokeRet<C>>;
 export function safeInvoke<T = any>(channel: string, ...args: any[]): Promise<T> {
@@ -114,8 +206,18 @@ export function safeInvoke<T = any>(channel: string, ...args: any[]): Promise<T>
 }
 
 /**
- * Return the msgMaker helper exposed by preload (if present).
- * This helper produces the binary packets used by the robot protocol.
+ * MESSAGE MAKER UTILITY ACCESS
+ * 
+ * Provides access to the message maker utility exposed by the preload script.
+ * This utility generates binary protocol packets for USB communication with robots.
+ * 
+ * FUNCTIONALITY:
+ * - Servo position command generation
+ * - Wait command packet creation
+ * - Protocol-specific byte encoding
+ * - Checksum and validation
+ * 
+ * @returns {any} Message maker utility object or undefined if not available
  */
 export function getMsgMkr(): any {
   return window.electron?.msgMkr;

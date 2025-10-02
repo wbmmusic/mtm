@@ -1,23 +1,13 @@
-import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import Top from "./components/Top";
 import Updates from "./components/Updates";
 import GlobalContextProvider from "./contexts/GlobalContext";
+import { ScaleProvider, useDisplayScale } from "./contexts/ScaleContext";
+import { mtmTheme } from "./theme";
 
-const theme = createTheme({
-  palette: {
-    background: {
-      default: "#ffe400",
-    },
-  },
-  typography: {
-    fontFamily: "Bit",
-  },
-  shape: {
-    borderRadius: 0,
-  },
-});
-
-function App() {
+const AppContent = () => {
+  const { scaledTheme } = useDisplayScale();
+  
   return (
     // @ts-ignore
     <Box
@@ -27,8 +17,7 @@ function App() {
         userSelect: "none",
       }}
     >
-      {/* @ts-ignore */}
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={scaledTheme}>
         <CssBaseline />
         <Updates />
         <GlobalContextProvider>
@@ -36,6 +25,14 @@ function App() {
         </GlobalContextProvider>
       </ThemeProvider>
     </Box>
+  );
+};
+
+function App() {
+  return (
+    <ScaleProvider>
+      <AppContent />
+    </ScaleProvider>
   );
 }
 

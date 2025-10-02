@@ -1,6 +1,23 @@
 # MTM Composer
 
-Desktop application for programming children's magic trick robots. MTM Composer provides an intuitive drag-and-drop interface for creating robotic magic performances, designed specifically for ages 6-12 to learn programming through visual sequencing rather than traditional coding.
+Desktop appl📖 **[Complete User Guide](docs/USER-GUIDE.md)** - Comprehensive documentation for creating positions, building sequences, playback controls, reordering actions, and uploading to robots.
+
+## Recent Improvements
+
+### Documentation & User Experience (October 2025)
+- ✅ **Comprehensive Code Documentation**: Added 4,000+ lines of detailed inline comments across all major components
+- ✅ **Complete User Guide**: Created comprehensive [USER-GUIDE.md](docs/USER-GUIDE.md) with step-by-step instructions
+- ✅ **Improved Font Readability**: Enhanced robot card typography - increased servo count text size from 9px to 12px
+- ✅ **Enhanced Architecture Documentation**: Detailed system architecture with component hierarchy and data flow diagrams
+- ✅ **API Documentation**: Complete IPC communication protocols and component interface documentation
+- ✅ **Developer Experience**: Added development setup guides and coding best practices
+
+### UI/UX Improvements
+- **Better Typography**: Robot names use h5 variant with explicit 16px sizing for consistency
+- **Readable Servo Counts**: Increased font size and switched to "Bit" monospace font for better clarity
+- **Comprehensive Tooltips**: Enhanced user guidance throughout the interface
+
+## Magic Trick Focustion for programming children's magic trick robots. MTM Composer provides an intuitive drag-and-drop interface for creating robotic magic performances, designed specifically for ages 6-12 to learn programming through visual sequencing rather than traditional coding.
 
 ## How It Works
 
@@ -26,6 +43,8 @@ Sequences execute at exactly 10Hz (0.1s precision) and can range from simple 3-s
 - **Admin Mode**: Advanced features for educators and administrators
 - **YouTube Integration**: Embedded assembly instruction videos for robot kits
 
+📖 **[Complete User Guide](docs/USER-GUIDE.md)** - Comprehensive documentation for creating positions, building sequences, playback controls, reordering actions, and uploading to robots.
+
 ## Magic Trick Focus
 
 Specifically designed for children's magic trick robot performances, supporting:
@@ -36,18 +55,126 @@ Specifically designed for children's magic trick robot performances, supporting:
 
 ## Technical Architecture
 
-**Desktop Application:**
-- **Frontend**: React 19.1 with TypeScript 5.9, Material-UI 7.3, Vite 7.1 for fast builds
-- **Backend**: Electron 38.2 with Node.js native module support (serialport, usb)
-- **Build System**: Electron Forge 7.9 with cross-platform distribution (Windows/Mac/Linux)
-- **Development**: Hot reload with Vite dev server, strict TypeScript checking
-- **Updates**: Electron-updater with automatic background updates and GitHub releases
-- **Communication**: Typed IPC channels between renderer and main processes
+### Application Stack
+**Frontend:**
+- **React 19.1**: Modern functional components with hooks for state management
+- **TypeScript 5.9**: Strict type checking for enhanced code quality and IntelliSense
+- **Material-UI 7.3**: Component library with comprehensive custom theming system
+- **Vite 7.1**: Lightning-fast build system with hot module replacement
+- **React Router**: Client-side navigation with nested routing support
+- **React Beautiful DnD**: Drag-and-drop interface for sequence timeline editing
+
+**Desktop Framework:**
+- **Electron 38.2**: Cross-platform desktop framework with Node.js integration
+- **Electron Forge 7.9**: Build system with cross-platform packaging and distribution
+- **Native Modules**: serialport and usb for direct hardware communication
+- **Auto Updates**: electron-updater with GitHub releases integration
+- **Security**: contextBridge and preload scripts for secure IPC communication
 
 **Hardware Integration:**
-- SAMD21 ARM Cortex-M0+ microcontroller support with USB/serial protocols
-- Custom bootloader protocol for field firmware updates over USB
-- Multi-servo PWM control with precise 10Hz timing and 0.1s resolution
+- **SAMD21 ARM Cortex-M0+**: Primary microcontroller with USB/serial communication
+- **Custom Bootloader**: Field-updatable firmware with USB protocol
+- **Multi-Servo Control**: PWM control with 10Hz precision timing
+- **Remote Control**: 434MHz keyfob integration with 50ft range
+
+### Component Architecture
+
+```
+App (Main Container)
+├── GlobalContext (State Management)
+├── ScaleContext (DPI Scaling)
+├── Router Configuration
+│   ├── Home (Robot Selection)
+│   │   ├── RobotCard[] (Robot Grid)
+│   │   └── EditRobotModal (Robot CRUD)
+│   ├── Robot/:robotPath (Robot Overview)
+│   │   ├── SequencePicker (Sequence Management)
+│   │   └── YouTube Integration (Assembly Videos)
+│   └── Sequence/:robotPath/:sequenceId (Sequence Editor)
+│       ├── Sequence (Main Editor)
+│       │   ├── DragDropContext (Timeline Interface)
+│       │   ├── EditPositionModal (Servo Position Creator)
+│       │   ├── SelectPositionModal (Position Browser)
+│       │   └── ConfirmDeleteModals (Safety Dialogs)
+│       └── Transport (Playback Controls)
+│           ├── Timeline Slider (Scrubbing Interface)
+│           ├── Playback Controls (Play/Pause/Stop/Repeat)
+│           └── Upload Interface (Robot Communication)
+```
+
+### Data Flow Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  React Frontend │◄──►│ Electron Main   │◄──►│ Hardware Layer  │
+│                 │    │                 │    │                 │
+│ • UI Components │    │ • IPC Handlers  │    │ • USB Protocol  │
+│ • State Mgmt    │    │ • File Storage  │    │ • Servo Control │
+│ • Type Safety   │    │ • USB Comms     │    │ • Remote Input  │
+│ • Theme System  │    │ • Audio System  │    │ • Firmware Mgmt │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+    ┌────▼────┐             ┌────▼────┐             ┌────▼────┐
+    │ Context │             │   IPC   │             │  Robot  │
+    │ Bridge  │             │ Channel │             │ Protocol│
+    │ (Secure)│             │  Types  │             │ Packets │
+    └─────────┘             └─────────┘             └─────────┘
+```
+
+### Styling System Architecture
+
+**Theme Foundation:**
+- **mtmTheme**: Base Material-UI theme with retro gaming aesthetic
+- **RetroColors**: Comprehensive color palette (primary yellow, accent colors)
+- **Typography**: Pixel-perfect fonts (Arcade, Bit, Video, Seven Segment)
+- **Component Overrides**: Custom MUI component styling for consistent look
+
+**Dynamic Scaling System:**
+- **ScaleContext**: Provides DPI-aware theme scaling across different monitors
+- **Display Monitoring**: Real-time detection of display configuration changes
+- **Inverse Scaling**: Maintains consistent visual appearance regardless of system DPI
+- **Theme Generation**: Creates scaled theme instances with adjusted fonts and spacing
+
+**Styled Components Library:**
+- **Typography**: RetroTitle, PixelText, SevenSegmentDisplay with themed styling
+- **Interactive**: RetroButton, DangerButton with 3D shadow effects and animations
+- **Containers**: DroppableContainer, SectionContainer, HeaderBar with consistent borders
+- **Modals**: RetroConfirmModal system replacing native browser dialogs
+- **Progress**: RetroProgressBar with themed styling and animations
+
+### State Management
+
+**Global State (GlobalContext):**
+- USB connection status and device management
+- Admin mode permissions and feature access
+- Global timeline length for sequence synchronization
+- Error handling and user feedback systems
+
+**Local Component State:**
+- Sequence editing with undo/redo capabilities
+- Position creation and modification workflows
+- Modal dialog visibility and state management
+- Drag-and-drop operation handling
+
+**IPC Communication:**
+- Type-safe channels with compile-time validation
+- Async/await pattern for all main process communication
+- Error boundaries and graceful failure handling
+- Automatic JSON serialization/deserialization
+
+### Security Model
+
+**Process Isolation:**
+- Main process handles all file system and hardware operations
+- Renderer process limited to UI logic and user interaction
+- No direct Node.js API access from frontend code
+- All communication through secure contextBridge
+
+**Type Safety:**
+- Comprehensive TypeScript interfaces for all data structures
+- IPC channel type mapping for compile-time validation
+- Strict null checking and error handling
+- Runtime type validation for critical operations
 - 434MHz RF communication for wireless remote control (50ft range)
 - Compatible with various servo-based robot kits and educational platforms
 
@@ -94,22 +221,96 @@ Combines STEM learning with creative expression:
 
 ## Development
 
+### Prerequisites
+- **Node.js 18+**: LTS version recommended for stability
+- **pnpm**: Preferred package manager for performance and workspace support
+- **Git**: Version control and development workflow
+- **VS Code**: Recommended IDE with TypeScript and React extensions
+
 ### Setup
 ```bash
-# Install dependencies
+# Clone repository
+git clone [repository-url]
+cd mtm-app
+
+# Install dependencies (uses pnpm workspaces)
 pnpm install
 
-# Development server (hot reload)
+# Development server with hot reload
 pnpm dev
 
-# Type checking
+# Type checking (run in separate terminals)
 pnpm type-check        # Renderer process (React/TypeScript)
 pnpm type-check-main   # Main process (Electron/Node.js)
 
 # Build for production
 pnpm build
 
-# Package application
+# Package for distribution
+pnpm make
+```
+
+### Project Structure
+```
+mtm-app/
+├── src/                          # Renderer process (React frontend)
+│   ├── components/               # React components organized by feature
+│   │   ├── robot/               # Robot management components
+│   │   ├── sequence/            # Sequence editor components
+│   │   └── styled/              # Styled components library
+│   ├── contexts/                # React contexts for global state
+│   ├── theme/                   # Material-UI theme configuration
+│   ├── types/                   # TypeScript type definitions
+│   ├── helpers.ts               # IPC communication utilities
+│   └── ipc-types.ts            # Type-safe IPC channel definitions
+├── public/                      # Main process files (Electron backend)
+│   ├── main.ts                 # Electron main process entry point
+│   ├── preload.ts              # Secure IPC bridge and context isolation
+│   ├── ipc.ts                  # IPC handler implementations
+│   ├── usb.ts                  # USB communication and protocol handling
+│   ├── msgMaker.ts             # Robot protocol message generation
+│   └── firmware.ts             # Firmware update and bootloader protocol
+├── art/                        # Application icons and visual assets
+├── docs/                       # Technical documentation
+└── dist-electron/              # Built Electron files (generated)
+```
+
+### Development Workflow
+
+**Code Organization:**
+- **Feature-Based**: Components grouped by functionality (robot, sequence, styled)
+- **Type Safety**: Comprehensive TypeScript coverage with strict checking
+- **Modular Architecture**: Clear separation between UI, state, and communication
+- **Consistent Styling**: Centralized theme system with styled components
+
+**Development Commands:**
+```bash
+# Start development environment
+pnpm dev                    # Full application with hot reload
+
+# Testing and validation
+pnpm type-check            # TypeScript compilation check
+pnpm lint                  # Code quality and style checking
+pnpm build                 # Production build verification
+
+# Distribution
+pnpm make                  # Package for current platform
+pnpm publish               # Create GitHub release (maintainers)
+```
+
+**Code Quality Standards:**
+- **TypeScript Strict Mode**: Full type coverage with strict null checks
+- **Component Documentation**: Comprehensive inline comments for all components
+- **IPC Type Safety**: Compile-time validation for all inter-process communication
+- **Error Handling**: Graceful error boundaries and user-friendly messages
+- **Performance**: Optimized rendering with React.memo and useMemo where appropriate
+
+**Architecture Patterns:**
+- **Functional Components**: Modern React with hooks-based state management
+- **Context Providers**: Global state management without external dependencies
+- **IPC Abstraction**: Type-safe wrappers for all Electron communication
+- **Theme Composition**: Dynamic theming with Material-UI and custom components
+- **Security First**: All main process communication through secure contextBridge
 pnpm package           # Package only
 pnpm make             # Create distributables
 

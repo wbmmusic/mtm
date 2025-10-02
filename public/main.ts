@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, protocol, screen } from 'electron';
 import { BrowserWindow as BrowserWindowType } from 'electron';
 import { join } from 'node:path';
 import * as url from 'node:url';
@@ -37,7 +37,7 @@ function createWindow(): void {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 625,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -50,13 +50,13 @@ function createWindow(): void {
     title: "MTM --- v" + app.getVersion()
   });
 
-    // Load the app using Vite constants
+  // Load the app using Vite constants
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     win!.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
     win!.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
-  
+
   win!.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
     console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
   });
@@ -64,7 +64,18 @@ function createWindow(): void {
   // Emitted when the window is closed.
   win!.on('closed', () => win = null);
 
-  win!.on('ready-to-show', () => win?.show());
+  win!.on('ready-to-show', () => {
+    win?.show();
+    // Send initial scale factor
+    const display = screen.getDisplayMatching(win!.getBounds());
+    win?.webContents.send('display-changed', { scaleFactor: display.scaleFactor });
+  });
+
+  // Monitor display changes
+  win!.on('moved', () => {
+    const display = screen.getDisplayMatching(win!.getBounds());
+    win?.webContents.send('display-changed', { scaleFactor: display.scaleFactor });
+  });
 }
 
 // Create myWindow, load the rest of the app, etc...

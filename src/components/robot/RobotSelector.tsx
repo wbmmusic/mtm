@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import AddIcon from "@mui/icons-material/Add";
 import { EditRobotModal } from "./EditRobotModal";
+import { RetroConfirmModal } from "../styled";
 
 import { deleteRobot, getRobots, safeInvoke } from "../../helpers";
 import { modalStyle } from "../../styles";
@@ -23,6 +24,7 @@ export const RobotSelector: React.FC = () => {
   const [robotModal, setRobotModal] = useState<RobotModalState>(defaultRobotModal);
   const [robots, setRobots] = useState<Robot[]>([]);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>(defaultDeleteModal);
+  const [showFactoryResetConfirm, setShowFactoryResetConfirm] = useState(false);
 
   const [text] = useTypewriter({ words: ["Robots"] });
 
@@ -57,16 +59,7 @@ export const RobotSelector: React.FC = () => {
       <Button
         variant="contained"
         color="error"
-        onClick={() => {
-          if (window.confirm("This will wipe all user saved data...")) {
-            safeInvoke("deleteUserRobots")
-              .then(() => {
-                setRobots([]);
-                setTheRobots();
-              })
-              .catch((err) => console.error(err));
-          }
-        }}
+        onClick={() => setShowFactoryResetConfirm(true)}
       >
         Delete User Robots
       </Button>
@@ -82,6 +75,20 @@ export const RobotSelector: React.FC = () => {
   };
 
   const closeDeleteModal = () => setDeleteModal(defaultDeleteModal);
+
+  const handleFactoryResetConfirm = () => {
+    safeInvoke("deleteUserRobots")
+      .then(() => {
+        setRobots([]);
+        setTheRobots();
+        setShowFactoryResetConfirm(false);
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const handleFactoryResetCancel = () => {
+    setShowFactoryResetConfirm(false);
+  };
 
   const DeleteModal: React.FC = () => {
     return (
@@ -109,12 +116,24 @@ export const RobotSelector: React.FC = () => {
   };
 
   const makeModal = () => {
-    if (robotModal.mode === "new" || robotModal.mode === "edit") {
-      return <EditRobotModal mode={robotModal.mode} data={robotModal.robot ?? null} out={handleModelOut} />;
-    } else if (deleteModal.show) {
-      return <DeleteModal />;
-    }
-    return null;
+    return (
+      <>
+        {robotModal.mode === "new" || robotModal.mode === "edit" ? (
+          <EditRobotModal mode={robotModal.mode} data={robotModal.robot ?? null} out={handleModelOut} />
+        ) : null}
+        {deleteModal.show ? <DeleteModal /> : null}
+        <RetroConfirmModal
+          open={showFactoryResetConfirm}
+          title="Factory Reset"
+          message="This will permanently delete all user saved data including robots, positions, and sequences. This action cannot be undone!"
+          confirmText="Delete All"
+          cancelText="Cancel"
+          onConfirm={handleFactoryResetConfirm}
+          onCancel={handleFactoryResetCancel}
+          danger={true}
+        />
+      </>
+    );
   };
 
   const container = { show: { transition: { staggerChildren: 0.03 } } };

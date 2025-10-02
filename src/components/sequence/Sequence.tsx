@@ -1,102 +1,305 @@
+/**
+ * SEQUENCE EDITOR COMPONENT
+ * 
+ * This is the main sequence editing interface for the MTM robot application.
+ * It provides a comprehensive drag-and-drop timeline editor for creating and
+ * modifying robot movement sequences.
+ * 
+ * CORE FUNCTIONALITY:
+ * - Visual timeline with draggable actions (moves and waits)
+ * - Real-time sequence playback with Transport controls
+ * - Position management (create, edit, duplicate, delete)
+ * - Sequence metadata editing (name, description, duration)
+ * - Drag-and-drop reordering of sequence actions
+ * - Integration with robot communication for live testing
+ * 
+ * KEY FEATURES:
+ * - React Beautiful DnD for smooth drag-and-drop interactions
+ * - Modal dialogs for editing positions and managing actions
+ * - Real-time validation and error handling
+ * - Responsive design with retro gaming aesthetic
+ * - Automatic sequence saving and state persistence
+ * 
+ * ARCHITECTURE:
+ * - Uses React hooks for state management
+ * - Integrates with global context for robot connection
+ * - Communicates with main process via IPC for data persistence
+ * - Modular design with separate modals for different editing tasks
+ */
+
+// React core and utilities
 import React, { useEffect, useState, useCallback } from "react";
-import { safeSend } from "../../helpers";
+import { safeSend } from "../../helpers"; // IPC communication wrapper
+import { useNavigate, useParams } from "react-router-dom"; // React Router navigation
+import { v4 as uuid } from "uuid"; // Unique ID generation for new actions
+
+// Material-UI components
 import Box from "@mui/material/Box";
 import {
-  Stack,
-  Paper,
-  Typography,
-  TextField,
-  Divider,
-  LinearProgress,
-  IconButton,
-  Tooltip,
-  Button,
+  Stack,        // Flex container with spacing
+  Paper,        // Card-like container
+  Typography,   // Text components
+  TextField,    // Input fields
+  Divider,      // Visual separators
+  LinearProgress, // Loading indicators
+  IconButton,   // Icon-based buttons
+  Tooltip,      // Hover information
+  Button,       // Standard buttons
 } from "@mui/material";
+
+// Custom styled components with retro theme
+import { 
+  RetroTitle,         // Large pixel-style headers
+  PixelText,          // Small pixel-style text
+  RetroButton,        // Themed buttons
+  DangerButton,       // Warning/delete buttons
+  RetroTextField,     // Themed input fields
+  DroppableContainer, // Drag-and-drop containers
+  SectionContainer,   // Content section wrappers
+  HeaderBar,          // Top section bars
+  RetroProgressBar,   // Themed progress indicators
+  RetroConfirmModal   // Custom confirmation dialogs
+} from "../styled";
+
+// Application theme and styling
+import { mtmStyles } from "../../theme";
+
+// Material-UI icons
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { Transport } from "./Transport";
-import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
-import { useNavigate, useParams } from "react-router-dom";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import SettingsRemoteIcon from "@mui/icons-material/SettingsRemote";
-import { EditPositionModal } from "./EditPositionModal";
-import { v4 as uuid } from "uuid";
-import {
-  createPosition,
-  deletePosition,
-  deleteSequence,
-  getPositions,
-  getSequence,
-  saveSequence,
-  updatePosition,
-  updateSequence,
-} from "../../helpers";
 import EditIcon from "@mui/icons-material/Edit";
 import ControlPointDuplicateIcon from "@mui/icons-material/ControlPointDuplicate";
-import { SelectPositionModal } from "./SelectPositionModal";
-import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal";
-import { delays, waitStates } from "./Constants";
+
+// Child components
+import { Transport } from "./Transport"; // Playback controls
+import { EditPositionModal } from "./EditPositionModal"; // Position editing dialog
+import { SelectPositionModal } from "./SelectPositionModal"; // Position selection dialog  
+import { ConfirmDeletePositionModal } from "./ConfirmDeletePositionModal"; // Delete confirmation
+
+// Drag and drop functionality
+import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
+
+// Data persistence helpers
+import {
+  createPosition,   // Create new servo position
+  deletePosition,   // Remove position from storage
+  deleteSequence,   // Remove entire sequence
+  getPositions,     // Load all saved positions
+  getSequence,      // Load sequence by ID
+  saveSequence,     // Persist sequence to storage
+  updatePosition,   // Modify existing position
+  updateSequence,   // Update sequence metadata
+} from "../../helpers";
+// Sequence configuration constants
+import { delays, waitStates } from "./Constants"; // Predefined timing and wait options
+
+// Type definitions
 import { Position as PositionType, Sequence as SequenceType, Servo as ServoType, Action } from "../../types";
+
+// Additional modal components
 import { ConfirmDeleteSequenceModal } from "./ConfirmDeleteSequenceModal";
 
-type PositionModalState = { show: boolean; mode: "new" | "edit" | null; position: PositionType | null };
-type SelectPositionModalState = { show: boolean };
-type DeletePositionModalState = { show: boolean; position: PositionType | null };
-type ConfirmDeleteSequenceModalState = { show: boolean; name: string | null };
-type TimelineItem = { id: string; appId?: string; content?: string; type?: string; servos?: ServoType[]; value?: number; name?: string };
+/**
+ * TYPE DEFINITIONS FOR MODAL STATE MANAGEMENT
+ * 
+ * These types define the shape of state objects for various modal dialogs
+ * used throughout the sequence editor interface.
+ */
 
-const defaultPositionModal: PositionModalState = { show: false, mode: null, position: null };
-const defaultSelectPositionModal: SelectPositionModalState = { show: false };
-const defaultDeletePositionModal: DeletePositionModalState = { show: false, position: null };
-const defaultSequence: SequenceType = { appId: uuid(), name: "", actions: [] } as SequenceType;
-const defaultConfirmDeleteSequenceModal: ConfirmDeleteSequenceModalState = { show: false, name: null };
-
-const droppableStyle = {
-  border: "6px solid #55533c",
-  borderLeft: "20px solid #55533c",
-  borderRight: "20px solid #55533c",
-  height: "80px", // Fixed height to prevent layout shift during drag operations
-  backgroundColor: "lightGrey",
-  boxShadow: "2px 2px magenta, 6px 6px black",
-  overflow: "hidden", // Prevent content from expanding beyond fixed height
+// Position editing modal (create new or edit existing positions)
+type PositionModalState = { 
+  show: boolean;                        // Modal visibility
+  mode: "new" | "edit" | null;         // Creation or editing mode
+  position: PositionType | null;       // Position being edited (null for new)
 };
 
-export const Sequence: React.FC = () => {
-  const navigate = useNavigate();
-  const { robotPath, sequenceId } = useParams();
+// Position selection modal (choose from existing positions)
+type SelectPositionModalState = { 
+  show: boolean;                        // Modal visibility
+};
 
+// Position deletion confirmation modal
+type DeletePositionModalState = { 
+  show: boolean;                        // Modal visibility
+  position: PositionType | null;       // Position to be deleted
+};
+
+// Sequence deletion confirmation modal
+type ConfirmDeleteSequenceModalState = { 
+  show: boolean;                        // Modal visibility
+  name: string | null;                 // Sequence name for confirmation display
+};
+
+// Timeline item representation for drag-and-drop
+type TimelineItem = { 
+  id: string;                          // Unique identifier for React keys
+  appId?: string;                      // Application-specific ID
+  content?: string;                    // Display text for the item
+  type?: string;                       // Action type (move, wait, etc.)
+  servos?: ServoType[];               // Servo positions for move actions
+  value?: number;                      // Duration for wait actions
+  name?: string;                       // Human-readable name
+};
+
+/**
+ * DEFAULT STATE VALUES
+ * 
+ * These constants provide clean initial states for all modal dialogs
+ * and core data structures, ensuring consistent initialization.
+ */
+const defaultPositionModal: PositionModalState = { 
+  show: false, 
+  mode: null, 
+  position: null 
+};
+
+const defaultSelectPositionModal: SelectPositionModalState = { 
+  show: false 
+};
+
+const defaultDeletePositionModal: DeletePositionModalState = { 
+  show: false, 
+  position: null 
+};
+
+const defaultSequence: SequenceType = { 
+  appId: uuid(),    // Generate unique ID
+  name: "",         // Empty name for new sequences
+  actions: []       // Empty action list
+} as SequenceType;
+
+const defaultConfirmDeleteSequenceModal: ConfirmDeleteSequenceModalState = { 
+  show: false, 
+  name: null 
+};
+
+/**
+ * STYLING CONFIGURATION
+ * 
+ * Uses centralized theme styling for drag-and-drop containers
+ * to maintain consistent visual appearance across the application.
+ */
+const droppableStyle = mtmStyles.droppable;
+
+/**
+ * SEQUENCE COMPONENT DEFINITION
+ * 
+ * Main functional component for the sequence editor interface.
+ * Manages all state for sequence editing, modal dialogs, and drag-and-drop operations.
+ */
+export const Sequence: React.FC = () => {
+  // React Router hooks for navigation and URL parameters
+  const navigate = useNavigate();                    // Navigation function
+  const { robotPath, sequenceId } = useParams();    // URL parameters
+
+  /**
+   * MODAL STATE MANAGEMENT
+   * 
+   * Each modal dialog has its own state to control visibility and context.
+   * This provides fine-grained control over the user interface flow.
+   */
+  
+  // Sequence deletion confirmation modal
   const [confirmDeleteSequenceModal, setConfirmDeleteSequenceModal] = useState<ConfirmDeleteSequenceModalState>(
     defaultConfirmDeleteSequenceModal
   );
-  const [timelineObjects, setTimelineObjects] = useState<TimelineItem[] | null>(null);
-  const [positions, setPositions] = useState<PositionType[] | null>(null);
+  
+  // Timeline clearing confirmation modal
+  const [showClearTimelineConfirm, setShowClearTimelineConfirm] = useState(false);
+  
+  // Position editing modal (create/edit positions)
   const [positionModal, setPositionModal] = useState<PositionModalState>(defaultPositionModal);
-  const [ogSequense, setOgSequense] = useState<SequenceType | null>(null);
+  
+  // Position deletion confirmation modal
   const [deletePositionModal, setDeletePositionModal] = useState<DeletePositionModalState>(
     defaultDeletePositionModal
   );
+  
+  // Position selection modal (choose existing position)
   const [selectPositionModal, setSelectPositionModal] = useState<SelectPositionModalState>(
     defaultSelectPositionModal
   );
+
+  /**
+   * CORE DATA STATE MANAGEMENT
+   * 
+   * These state variables hold the primary data structures for the sequence editor.
+   */
+  
+  // Timeline items for drag-and-drop interface (null = loading)
+  const [timelineObjects, setTimelineObjects] = useState<TimelineItem[] | null>(null);
+  
+  // Available servo positions (null = loading)
+  const [positions, setPositions] = useState<PositionType[] | null>(null);
+  
+  // Original sequence state for change tracking (null = loading/new)
+  const [ogSequense, setOgSequense] = useState<SequenceType | null>(null);
+  
+  // Positions available in modal contexts (for selection)
   const [modalPositions, setModalPositions] = useState<PositionType[] | null>(null);
 
+  /**
+   * SEQUENCE INITIALIZATION HELPER
+   * 
+   * Determines initial sequence state based on URL parameters:
+   * - "newsequenceplaceholder" → Create new empty sequence
+   * - Actual sequence ID → Will be loaded from storage later
+   * 
+   * @returns {SequenceType | null} Initial sequence or null for loading from storage
+   */
   const initSequence = () => {
     if (sequenceId === "newsequenceplaceholder") return defaultSequence;
-    else return null;
+    else return null; // Will be loaded in useEffect
   };
 
+  // Current sequence being edited (null = loading)
   const [sequence, setSequence] = useState<SequenceType | null>(initSequence());
 
+  /**
+   * SEQUENCE STATE SYNCHRONIZATION
+   * 
+   * Updates both current sequence and original sequence states simultaneously.
+   * The original sequence is used for change detection and saving logic.
+   * Uses deep cloning to prevent reference sharing between states.
+   * 
+   * @param {SequenceType} seq - The sequence to set as current state
+   */
   const setTheSequences = (seq: SequenceType) => {
-    setSequence(JSON.parse(JSON.stringify(seq)) as SequenceType);
-    setOgSequense(JSON.parse(JSON.stringify(seq)) as SequenceType);
+    setSequence(JSON.parse(JSON.stringify(seq)) as SequenceType);     // Current editable state
+    setOgSequense(JSON.parse(JSON.stringify(seq)) as SequenceType);   // Original for comparison
   };
 
+  /**
+   * TIMELINE OBJECTS GENERATION
+   * 
+   * Creates the complete list of draggable items for the timeline interface.
+   * Combines predefined items (delays, wait states) with user-created positions.
+   * 
+   * INCLUDES:
+   * - Delay actions: Fixed duration waits (from Constants.ts)
+   * - Wait states: Interactive waits for remote control input
+   * - Move actions: User-defined servo positions
+   * 
+   * Each item gets a unique ID for React drag-and-drop operations.
+   * 
+   * @returns {TimelineItem[]} Complete array of timeline items
+   */
   const makeObjects = useCallback(() => {
+    // Start with predefined delay and wait actions
     const out: TimelineItem[] = [...delays, ...waitStates] as TimelineItem[];
+    
+    // Add user-created positions as move actions
     if (positions) {
       positions.forEach((position) => {
-        out.push({ id: uuid(), appId: position.appId, content: position.name, type: "move", servos: position.servos });
+        out.push({ 
+          id: uuid(),                    // Unique ID for drag-and-drop
+          appId: position.appId,         // Reference to position data
+          content: position.name,        // Display name
+          type: "move",                  // Action type
+          servos: position.servos        // Servo position data
+        });
       });
     }
 
@@ -176,24 +379,32 @@ export const Sequence: React.FC = () => {
   };
 
   const DelayItem: React.FC<{ itm: TimelineItem }> = ({ itm }) => (
-    <Stack height={"100%"}>
-      <Box>
-        <Typography variant="body2" sx={{ textAlign: "center", whiteSpace: "nowrap", fontSize: "9px" }}>
+    <Stack height={"100%"} spacing={0.5}>
+      <Box textAlign="center">
+        <PixelText>
           {itm.content}
-        </Typography>
+        </PixelText>
       </Box>
-      <Box height={"100%"}>
-  <Box m={"auto"} height={"100%"} width={`${(itm.value ?? 0) / 2}px`} sx={{ backgroundColor: "lightGrey" }} />
+      <Box height={"100%"} display="flex" alignItems="center" justifyContent="center" px={0.5}>
+        <Box 
+          height={"16px"} 
+          width={`${Math.max((itm.value ?? 0) * 1.5, (itm.value ?? 0) >= 5 ? 4 : 2)}px`} 
+          sx={{ 
+            backgroundColor: "#ffa500", // orange to match time bar
+            border: "1px solid #55533c",
+            borderRadius: 0,
+          }} 
+        />
       </Box>
     </Stack>
   );
 
   const WaitItem: React.FC<{ itm: TimelineItem }> = ({ itm }) => (
     <Stack height={"100%"}>
-      <Box>
-        <Typography variant="body2" sx={{ textAlign: "center", whiteSpace: "nowrap", fontSize: "9px" }}>
+      <Box textAlign="center">
+        <PixelText>
           {itm.content}
-        </Typography>
+        </PixelText>
       </Box>
       <Box height={"100%"}>
         <Stack height="100%" justifyContent="center">
@@ -205,43 +416,100 @@ export const Sequence: React.FC = () => {
 
   const PositionItem: React.FC<{ itm: TimelineItem }> = ({ itm }) => (
     <Box height={"100%"}>
-      <Typography sx={{ fontSize: "9px" }} variant="body2">
-        {itm.content}
-      </Typography>
+      <Box textAlign="center">
+        <PixelText>
+          {itm.content}
+        </PixelText>
+      </Box>
       <Stack spacing={0.5}>
         {itm.servos?.map((servo: ServoType, idx: number) => (
-          <LinearProgress key={"servo" + idx + itm.name} color={servo.enabled ? "primary" : "inherit"} variant="determinate" value={((servo.value ?? 0) * 100) / 180} />
+          <RetroProgressBar 
+            key={"servo" + idx + itm.name} 
+            color={servo.enabled ? "primary" : "inherit"} 
+            variant="determinate" 
+            value={((servo.value ?? 0) * 100) / 180} 
+          />
         ))}
       </Stack>
     </Box>
   );
 
+  /**
+   * DRAG AND DROP EVENT HANDLER
+   * 
+   * Handles all drag-and-drop operations in the sequence editor:
+   * 
+   * 1. ADDING NEW ACTIONS (objects → timeline):
+   *    - Copies timeline object to create new action
+   *    - Inserts at the dropped position in sequence
+   *    - Plays audio feedback for user confirmation
+   *    - Assigns unique ID for React keys
+   * 
+   * 2. REORDERING ACTIONS (timeline → timeline):
+   *    - Moves existing action to new position
+   *    - Maintains all action properties and references
+   *    - Plays different audio for move vs add operations
+   * 
+   * @param {DropResult} res - Drag result from react-beautiful-dnd
+   */
   const onDragEnd = (res: DropResult) => {
+    // Exit early if dropped outside valid drop zone
     if (!res.destination) {
       return;
     }
+    
     if (res.source.droppableId === "objects" && res.destination.droppableId === "timeline") {
+      /**
+       * ADDING NEW ACTION FROM PALETTE
+       * 
+       * User dragged an item from the objects palette to the timeline.
+       * Create a new action and insert it at the dropped position.
+       */
       const objCpy = JSON.parse(JSON.stringify(timelineObjects![res.source.index]));
-      safeSend("play", "timeline_add.mp3");
+      safeSend("play", "timeline_add.mp3"); // Audio feedback for addition
+      
       const actionsCopy = JSON.parse(JSON.stringify(sequence?.actions || [])) as Action[];
-      const insert: Action = { type: objCpy.type as Action["type"], appId: objCpy.appId, id: uuid() } as Action;
+      const insert: Action = { 
+        type: objCpy.type as Action["type"], 
+        appId: objCpy.appId, 
+        id: uuid() // Unique ID for React rendering
+      } as Action;
+      
+      // Insert at the specified index
       actionsCopy.splice(res.destination.index, 0, insert);
-
       setSequence((old: SequenceType | null) => (old ? { ...old, actions: actionsCopy } : old));
+      
     } else if (res.source.droppableId === "timeline" && res.destination.droppableId === "timeline") {
-      safeSend("play", "timeline_move.mp3");
+      /**
+       * REORDERING EXISTING ACTIONS
+       * 
+       * User dragged an action from one timeline position to another.
+       * Move the action while preserving all its properties.
+       */
+      safeSend("play", "timeline_move.mp3"); // Audio feedback for reordering
+      
       const actionsCpy = JSON.parse(JSON.stringify(sequence?.actions || [])) as Action[];
-      const cutAction = actionsCpy.splice(res.source.index, 1)[0];
-      actionsCpy.splice(res.destination.index, 0, cutAction);
+      const cutAction = actionsCpy.splice(res.source.index, 1)[0]; // Remove from original position
+      actionsCpy.splice(res.destination.index, 0, cutAction);       // Insert at new position
+      
       setSequence((old: SequenceType | null) => (old ? { ...old, actions: actionsCpy } : old));
     }
   };
 
+  /**
+   * TIMELINE ITEM RENDERER
+   * 
+   * Factory function that creates the appropriate React component for each timeline item type.
+   * Supports different visual representations for different action types.
+   * 
+   * @param {TimelineItem} itm - The timeline item to render
+   * @returns {JSX.Element | null} Appropriate component or null for unknown types
+   */
   const makeItem = (itm: TimelineItem) => {
-    if (itm.type === "delay") return <DelayItem itm={itm} />;
-    else if (itm.type === "move") return <PositionItem itm={itm} />;
-    else if (itm.type === "wait") return <WaitItem itm={itm} />;
-    return null;
+    if (itm.type === "delay") return <DelayItem itm={itm} />;      // Fixed duration waits
+    else if (itm.type === "move") return <PositionItem itm={itm} />; // Servo movements
+    else if (itm.type === "wait") return <WaitItem itm={itm} />;     // Interactive waits
+    return null; // Unknown type
   };
 
   const makeDefaultPosition = () => {
@@ -267,14 +535,13 @@ export const Sequence: React.FC = () => {
 
   const TimelineObjects: React.FC = () => {
     return (
-      <Box p={1} sx={{ border: "3px dashed limegreen" }}>
-        <Box>
-          <Box sx={{ paddingLeft: "4px" }}>
-            <Typography variant="h6">ACTIONS</Typography>
-          </Box>
+      <SectionContainer>
+        <Box sx={{ paddingLeft: "4px" }}>
+          <RetroTitle variant="h6">ACTIONS</RetroTitle>
+        </Box>
           <Droppable droppableId="objects" direction="horizontal" isDropDisabled={true}>
             {(provided) => (
-              <Stack component={Paper} ref={provided.innerRef} {...provided.droppableProps} direction={"row"} p={0.5} width={"100%"} spacing={0.5} sx={droppableStyle}>
+              <Stack component={Paper} ref={provided.innerRef} {...provided.droppableProps} direction={"row"} p={1} width={"100%"} spacing={0.5} sx={droppableStyle}>
                 {timelineObjects?.map((itm: TimelineItem, idx: number) => (
                   <Draggable key={"timelineitm" + itm.id} draggableId={itm.id} index={idx}>
                     {(provided, snapshot) => (
@@ -295,26 +562,21 @@ export const Sequence: React.FC = () => {
               </Stack>
             )}
           </Droppable>
-        </Box>
-      </Box>
+      </SectionContainer>
     );
   };
 
   const Timeline: React.FC = () => {
     return (
-      <Box p={1} sx={{ border: "3px dashed limegreen" }}>
-        <Box width={"100%"}>
+      <SectionContainer>
+        <Stack spacing={1}>
           <Box sx={{ paddingLeft: "4px" }}>
-            <Stack direction="row" spacing={4}>
-              <Typography variant="h6">MY SEQUENCE</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <RetroTitle variant="h6">MY SEQUENCE</RetroTitle>
               {(sequence?.actions?.length || 0) > 0 ? (
-                <Button color="error" size="small" onClick={() => {
-                  if (window.confirm("Are you sure you want to clear the timeline?")) {
-                    setSequence((old) => (old ? { ...old, actions: [] } : old));
-                  }
-                }}>
+                <DangerButton size="small" onClick={() => setShowClearTimelineConfirm(true)}>
                   Clear Timeline
-                </Button>
+                </DangerButton>
               ) : null}
             </Stack>
           </Box>
@@ -342,8 +604,8 @@ export const Sequence: React.FC = () => {
               </Stack>
             )}
           </Droppable>
-        </Box>
-      </Box>
+        </Stack>
+      </SectionContainer>
     );
   };
 
@@ -427,35 +689,61 @@ export const Sequence: React.FC = () => {
     } else if (data === "delete") sequenceDelete();
   };
 
+  const handleClearTimelineConfirm = () => {
+    setSequence((old) => (old ? { ...old, actions: [] } : old));
+    setShowClearTimelineConfirm(false);
+  };
+
+  const handleClearTimelineCancel = () => {
+    setShowClearTimelineConfirm(false);
+  };
+
   const Modals = () => (
     <>
       {positionModal.mode !== null ? <EditPositionModal mode={positionModal.mode} position={positionModal.position} out={handlePositionModal} /> : null}
-  {selectPositionModal.show ? <SelectPositionModal positions={modalPositions || []} out={handleSelectPosition} /> : null}
+      {selectPositionModal.show ? <SelectPositionModal positions={modalPositions || []} out={handleSelectPosition} /> : null}
       {deletePositionModal.show ? <ConfirmDeletePositionModal position={deletePositionModal.position} out={handleConfirmDelete} /> : null}
       {confirmDeleteSequenceModal.show ? <ConfirmDeleteSequenceModal name={confirmDeleteSequenceModal.name} out={handleConfirmDeleteSequence} /> : null}
+      <RetroConfirmModal
+        open={showClearTimelineConfirm}
+        title="Clear Timeline"
+        message="Are you sure you want to clear the timeline? This will remove all actions from your sequence."
+        confirmText="Clear"
+        cancelText="Cancel"
+        onConfirm={handleClearTimelineConfirm}
+        onCancel={handleClearTimelineCancel}
+        danger={true}
+      />
     </>
   );
 
   const TypeSelector = () => (
-    <Box p={1} sx={{ border: "3px dashed  limegreen" }}>
+    <SectionContainer>
       <Stack direction="row-reverse">
         <Box width="40px" />
         <Box component={Paper}>
           <Stack direction="row" p={1} spacing={1}>
-            <Button variant="contained">Wait</Button>
-            <Button variant="contained">Move</Button>
+            <RetroButton variant="contained">Wait</RetroButton>
+            <RetroButton variant="contained">Move</RetroButton>
           </Stack>
         </Box>
       </Stack>
-    </Box>
+    </SectionContainer>
   );
 
   return (
     <Stack height={"100%"} width={"100%"} maxWidth={"100vw"} sx={{ overflow: "hidden" }}>
-      <Stack direction="row" width={"100vw"} spacing={1} p={1} bgcolor="orange">
-        <Box width={"100%"}>
-          <TextField sx={{ width: "100%" }} label="Sequence Name" error={sequence.name === ""} size="small" variant="standard" value={sequence.name} onChange={(e) => setSequence((old: any) => ({ ...old, name: e.target.value }))} />
-        </Box>
+      <HeaderBar>
+        <Stack direction="row" width={"100%"} spacing={1} alignItems="center">
+          <RetroTextField 
+            fullWidth
+            label="Sequence Name" 
+            error={sequence.name === ""} 
+            size="small" 
+            variant="outlined"
+            value={sequence.name} 
+            onChange={(e) => setSequence((old: any) => ({ ...old, name: e.target.value }))} 
+          />
         <Box>
           <Tooltip title="New Position">
             <IconButton color="inherit" size="small" onClick={() => setPositionModal({ show: true, mode: "new", position: makeDefaultPosition() })}>
@@ -487,14 +775,13 @@ export const Sequence: React.FC = () => {
           </Box>
         ) : null}
 
-        <Box>
           <Tooltip title="Return to robot">
             <IconButton color="inherit" sx={{ whiteSpace: "nowrap" }} size="small" onClick={() => navigate("/robot/" + robotPath)}>
               <KeyboardReturnIcon />
             </IconButton>
           </Tooltip>
-        </Box>
-      </Stack>
+        </Stack>
+      </HeaderBar>
       <Divider />
       <Box height={"100%"} p={1}>
         <DragDropContext onDragEnd={onDragEnd}>
