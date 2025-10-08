@@ -19,7 +19,7 @@
         "@mui/material": "^7.3.4",
         "@mui/system": "^7.3.3",
         "axios": "^1.12.2",
-        "caniuse-lite": "^1.0.30001748",
+        "caniuse-lite": "^1.0.30001749",
         "electron-updater": "^6.6.2",
         "framer-motion": "^12.23.22",
         "react": "^19.2.0",
