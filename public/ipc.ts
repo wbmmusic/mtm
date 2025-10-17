@@ -237,3 +237,30 @@ ipcMain.handle('getServos', async (e, path: string) => {
 });
 
 ipcMain.handle('getSound', () => global.settings?.sound || false);
+
+ipcMain.handle('startKeyfobProgramming', async () => {
+  if (!usbStatus()) {
+    throw new Error('No USB device connected');
+  }
+  // TODO: Send WBM:PROGRAM_KEYFOB command to device
+  console.log('Starting keyfob programming mode');
+  return true;
+});
+
+ipcMain.handle('programKeyfobButton', async (e, buttonId: number) => {
+  if (!usbStatus()) {
+    throw new Error('No USB device connected');
+  }
+  // TODO: Send WBM:PROGRAM_BUTTON + buttonId to device
+  console.log('Programming keyfob button', buttonId);
+  return true;
+});
+
+ipcMain.handle('testKeyfobButton', async (e, buttonId: number) => {
+  if (!usbStatus()) {
+    throw new Error('No USB device connected');
+  }
+  // TODO: Test if keyfob button works
+  console.log('Testing keyfob button', buttonId);
+  return true;
+});

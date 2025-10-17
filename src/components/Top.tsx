@@ -29,6 +29,7 @@ import {
   safeInvoke,
   safeSend,
 } from "../helpers";
+import KeyfobProgramming from "./KeyfobProgramming";
 
 type UploadModal = { show: boolean; value: number | null };
 
@@ -191,6 +192,7 @@ export default function Top(): React.ReactElement {
             </Tooltip>
           </IconButton>
         ) : null}
+        {admin && <KeyfobProgramming />}
         {makeMute()}
         {makeAdminMode()}
         {makeUploadModal()}
