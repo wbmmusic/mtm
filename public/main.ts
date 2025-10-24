@@ -54,7 +54,9 @@ function createWindow(): void {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     win!.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    win!.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    // In production, Vite outputs to .vite/dist/index.html
+    // main.js is in .vite/build, so we go up one level then into dist
+    win!.loadFile(join(__dirname, '../dist/index.html'));
   }
 
   win!.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
@@ -82,16 +84,27 @@ function createWindow(): void {
 app.on('ready', () => {
   //log("-APP IS READY");
 
+  // Register custom protocols for sounds and images
+  // In dev: __dirname is .vite/build, need to go up to project root then into public
+  // In prod: __dirname is .vite/build, resources are in .vite/dist
   protocol.registerFileProtocol('sound', (request, callback) => {
     const urlPath = request.url.substr(7);
     console.log("SOUND URL ->", urlPath);
-    callback({ path: join(__dirname, 'sounds', urlPath) });
+    const soundPath = app.isPackaged
+      ? join(__dirname, '../dist/sounds', urlPath)
+      : join(__dirname, '../../public/sounds', urlPath);
+    console.log("SOUND PATH ->", soundPath);
+    callback({ path: soundPath });
   });
 
   protocol.registerFileProtocol('img', (request, callback) => {
     const urlPath = request.url.substr(5);
     console.log("IMAGE URL ->", urlPath);
-    callback({ path: join(__dirname, 'images', urlPath) });
+    const imgPath = app.isPackaged
+      ? join(__dirname, '../dist/images', urlPath)
+      : join(__dirname, '../../public/images', urlPath);
+    console.log("IMAGE PATH ->", imgPath);
+    callback({ path: imgPath });
   });
 
   ipcMain.on('reactIsReady', () => {

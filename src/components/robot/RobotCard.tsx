@@ -149,7 +149,7 @@ export const RobotCard: React.FC<RobotCardProps> = ({
             <Box
               component="img"
               sx={{ maxHeight: "100%", maxWidth: "100px" }}
-              src="/images/robot.png"
+              src="img://robot.png"
             />
           </Box>
           <Box
