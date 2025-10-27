@@ -7,7 +7,8 @@ import type { Robot, Sequence } from "../../types";
 
 export const SequencePicker: React.FC<{ robot: Robot }> = ({ robot }) => {
   const navigate = useNavigate();
-  const newSequence = () => navigate(`/sequence/${robot.path}/newsequenceplaceholder`);
+  const newSequence = () =>
+    navigate(`/sequence/${robot.path}/newsequenceplaceholder`);
 
   const editSequence = (sequence: Sequence) => {
     navigate(`/sequence/${robot.path}/${sequence.appId}`);
@@ -42,7 +43,10 @@ export const SequencePicker: React.FC<{ robot: Robot }> = ({ robot }) => {
       <Box width={"100%"}>
         <Stack direction="row" spacing={1}>
           {(robot.sequences ?? []).map((seq: Sequence, idx: number) => (
-            <SequenceCard key={(seq.appId ?? `sequence${idx}`).toString()} sequence={seq} />
+            <SequenceCard
+              key={(seq.appId ?? `sequence${idx}`).toString()}
+              sequence={seq}
+            />
           ))}
           <NewSequence />
         </Stack>

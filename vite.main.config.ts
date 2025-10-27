@@ -1,28 +1,40 @@
 import { defineConfig } from 'vite';
+import { builtinModules } from 'module';
 
 // https://vitejs.dev/config
 export default defineConfig({
-  resolve: {
-    // Some libs that can run in both Web and Node.js, such as `axios`, we need to tell Vite to build them in Node.js.
-    conditions: ['node'],
-    mainFields: ['module', 'jsnext:main', 'jsnext']
-  },
+  // NOTE: We do NOT define 'build.lib' here.
+  // The @electron-forge/plugin-vite will configure it automatically
+  // based on the 'entry' in forge.config.ts.
+  // Manually defining it breaks the plugin's logic that creates
+  // node_modules in the build output.
+
   build: {
-    lib: {
-      entry: 'public/main.ts',
-      formats: ['cjs'],
-      fileName: () => '[name].js'
-    },
+    // Ensure source maps for debugging
+    sourcemap: true,
     rollupOptions: {
+      // The 'input' is set automatically by the Vite plugin
+      // based on the 'entry' in forge.config.ts.
+
+      // Mark all Node.js built-ins and native modules as external
       external: [
         'electron',
+        // Native modules must be external - they'll be loaded from node_modules at runtime
         'serialport',
         'usb',
         '@serialport/bindings-cpp',
+        '@serialport/parser-readline',
+        '@serialport/stream',
+        'bindings',
         'electron-updater',
-        // All other Node.js built-ins
-        ...require('module').builtinModules,
+        // All Node.js built-ins
+        ...builtinModules,
+        ...builtinModules.map((m: string) => `node:${m}`),
       ],
+      output: {
+        // Ensure we are outputting a CJS module
+        format: 'cjs',
+      }
     },
   },
 });

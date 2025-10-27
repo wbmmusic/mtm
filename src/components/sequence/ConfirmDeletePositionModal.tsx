@@ -2,9 +2,17 @@ import { Box, Button, Modal, Stack, Typography } from "@mui/material";
 import React from "react";
 import { modalStyle } from "../../styles";
 
-export const ConfirmDeletePositionModal: React.FC<{ out: (t: string) => void; position: any }> = ({ out, position }) => {
+export const ConfirmDeletePositionModal: React.FC<{
+  out: (t: string) => void;
+  position: any;
+}> = ({ out, position }) => {
   return (
-    <Modal open={true} onClose={() => out("cancel")} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+    <Modal
+      open={true}
+      onClose={() => out("cancel")}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
       <Box sx={modalStyle}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           Confirm Delete Position
@@ -16,7 +24,11 @@ export const ConfirmDeletePositionModal: React.FC<{ out: (t: string) => void; po
           <Button variant="contained" onClick={() => out("cancel")}>
             cancel
           </Button>
-          <Button variant="contained" color="error" onClick={() => out("delete")}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => out("delete")}
+          >
             Delete
           </Button>
         </Stack>

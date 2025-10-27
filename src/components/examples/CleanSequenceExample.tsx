@@ -1,18 +1,18 @@
 // EXAMPLE: How the Sequence component could be refactored
 
-import React, { useState } from 'react';
-import { Stack, Box } from '@mui/material';
-import { 
-  RetroTitle, 
-  PixelText, 
-  RetroButton, 
+import React, { useState } from "react";
+import { Stack, Box } from "@mui/material";
+import {
+  RetroTitle,
+  PixelText,
+  RetroButton,
   DangerButton,
   RetroTextField,
   DroppableContainer,
   SectionContainer,
   HeaderBar,
-  RetroConfirmModal 
-} from '../styled';
+  RetroConfirmModal,
+} from "../styled";
 
 // Instead of this scattered approach with native dialogs:
 /*
@@ -39,7 +39,7 @@ export const SequenceHeaderExample = () => {
 
   const handleClearConfirm = () => {
     // Clear timeline logic here
-    console.log('Timeline cleared!');
+    console.log("Timeline cleared!");
     setShowClearConfirm(false);
   };
 
@@ -47,23 +47,20 @@ export const SequenceHeaderExample = () => {
     <>
       <HeaderBar>
         <Stack direction="row" spacing={1} alignItems="center">
-          <RetroTextField 
-            label="Sequence Name" 
-            size="small" 
+          <RetroTextField
+            label="Sequence Name"
+            size="small"
             fullWidth
             // error={sequence.name === ""}
-            // value={sequence.name} 
+            // value={sequence.name}
             // onChange={(e) => setSequence((old: any) => ({ ...old, name: e.target.value }))}
           />
-          <DangerButton 
-            size="small" 
-            onClick={() => setShowClearConfirm(true)}
-          >
+          <DangerButton size="small" onClick={() => setShowClearConfirm(true)}>
             Clear Timeline
           </DangerButton>
         </Stack>
       </HeaderBar>
-      
+
       <RetroConfirmModal
         open={showClearConfirm}
         title="Clear Timeline"

@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "commonjs",
-    "lib": ["es2020"],
+    "lib": [
+      "es2020"
+    ],
     "outDir": "./build",
     "strict": false,
     "esModuleInterop": true,
@@ -11,13 +13,32 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types"],
-    "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "types": [
+      "node"
+    ],
     "baseUrl": ".",
     "paths": {
-      "*": ["node_modules/@types/*"]
+      "*": [
+        "node_modules/@types/*"
+      ]
     }
   },
-  "include": ["public/main.ts", "public/usb.ts", "public/ipc.ts", "public/utils.ts", "public/msgMaker.ts", "public/firmware.ts", "public/preload.ts", "public/types.ts"],
-  "exclude": ["public/main.js", "public/usb.js", "public/ipc.js"]
+  "include": [
+    "public/main.ts",
+    "public/usb.ts",
+    "public/ipc.ts",
+    "public/utils.ts",
+    "public/msgMaker.ts",
+    "public/firmware.ts",
+    "public/preload.ts",
+    "public/types.ts"
+  ],
+  "exclude": [
+    "public/main.js",
+    "public/usb.js",
+    "public/ipc.js"
+  ]
 }

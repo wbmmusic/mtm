@@ -21,9 +21,11 @@ const defaultRobotModal: RobotModalState = { mode: null };
 export const RobotSelector: React.FC = () => {
   const { admin } = useContext(GlobalContext) as { admin?: boolean };
 
-  const [robotModal, setRobotModal] = useState<RobotModalState>(defaultRobotModal);
+  const [robotModal, setRobotModal] =
+    useState<RobotModalState>(defaultRobotModal);
   const [robots, setRobots] = useState<Robot[]>([]);
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>(defaultDeleteModal);
+  const [deleteModal, setDeleteModal] =
+    useState<DeleteModalState>(defaultDeleteModal);
   const [showFactoryResetConfirm, setShowFactoryResetConfirm] = useState(false);
 
   const [text] = useTypewriter({ words: ["Robots"] });
@@ -53,7 +55,11 @@ export const RobotSelector: React.FC = () => {
 
   const AddRobotBlock: React.FC = () => (
     <Stack direction="row" spacing={1}>
-      <Button variant="contained" startIcon={<AddIcon />} onClick={() => setRobotModal({ mode: "new" })}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setRobotModal({ mode: "new" })}
+      >
         Create New Robot
       </Button>
       <Button
@@ -83,7 +89,7 @@ export const RobotSelector: React.FC = () => {
         setTheRobots();
         setShowFactoryResetConfirm(false);
       })
-      .catch((err) => console.error(err));
+      .catch(err => console.error(err));
   };
 
   const handleFactoryResetCancel = () => {
@@ -92,21 +98,34 @@ export const RobotSelector: React.FC = () => {
 
   const DeleteModal: React.FC = () => {
     return (
-      <Modal open={deleteModal.show} onClose={closeDeleteModal} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+      <Modal
+        open={deleteModal.show}
+        onClose={closeDeleteModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
         <Box sx={modalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Confirm Delete Robot
           </Typography>
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Are you sure you want to delete robot named <b>{deleteModal.robot?.name}</b>
+            Are you sure you want to delete robot named{" "}
+            <b>{deleteModal.robot?.name}</b>
           </Typography>
           <Stack direction="row-reverse" spacing={1}>
-            <Button size="small" color="error" onClick={() => deleteBot(deleteModal.robot?.path ?? "")}
+            <Button
+              size="small"
+              color="error"
+              onClick={() => deleteBot(deleteModal.robot?.path ?? "")}
               disabled={!deleteModal.robot?.path}
             >
               Delete
             </Button>
-            <Button size="small" color="success" onClick={() => setDeleteModal(defaultDeleteModal)}>
+            <Button
+              size="small"
+              color="success"
+              onClick={() => setDeleteModal(defaultDeleteModal)}
+            >
               Cancel
             </Button>
           </Stack>
@@ -119,7 +138,11 @@ export const RobotSelector: React.FC = () => {
     return (
       <>
         {robotModal.mode === "new" || robotModal.mode === "edit" ? (
-          <EditRobotModal mode={robotModal.mode} data={robotModal.robot ?? null} out={handleModelOut} />
+          <EditRobotModal
+            mode={robotModal.mode}
+            data={robotModal.robot ?? null}
+            out={handleModelOut}
+          />
         ) : null}
         {deleteModal.show ? <DeleteModal /> : null}
         <RetroConfirmModal
@@ -137,19 +160,38 @@ export const RobotSelector: React.FC = () => {
   };
 
   const container = { show: { transition: { staggerChildren: 0.03 } } };
-  const item = { hidden: { opacity: 0, scale: 0, rotate: -10 }, show: { opacity: 1, scale: 1, rotate: 0 } };
+  const item = {
+    hidden: { opacity: 0, scale: 0, rotate: -10 },
+    show: { opacity: 1, scale: 1, rotate: 0 },
+  };
 
   return (
-    <Box m={1} p={1} component={Paper} elevation={4} sx={{ backgroundColor: "orange" }}>
+    <Box
+      m={1}
+      p={1}
+      component={Paper}
+      elevation={4}
+      sx={{ backgroundColor: "orange" }}
+    >
       <Typography sx={{ opacity: text.length > 0 ? 1 : 0 }} variant="h5">
         {text.length > 0 ? text : "|"}
       </Typography>
       <Stack spacing={1}>
         {admin ? <AddRobotBlock /> : null}
         {robots.length > 0 && (
-          <Stack spacing={1} component={motion.div} variants={container} initial="hidden" animate="show">
+          <Stack
+            spacing={1}
+            component={motion.div}
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
             {robots.map((robot, idx) => (
-              <motion.div key={"robotCard" + (robot.name ?? "") + idx} variants={item} transition={{ duration: 0.5, type: "spring" }}>
+              <motion.div
+                key={"robotCard" + (robot.name ?? "") + idx}
+                variants={item}
+                transition={{ duration: 0.5, type: "spring" }}
+              >
                 <RobotCard
                   setDelete={(e: DeleteModalState) => setDeleteModal(e)}
                   setRobot={(e: RobotModalState) => setRobotModal(e)}

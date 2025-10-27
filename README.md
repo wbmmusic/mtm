@@ -5,6 +5,7 @@ Desktop appl📖 **[Complete User Guide](docs/USER-GUIDE.md)** - Comprehensive d
 ## Recent Improvements
 
 ### Documentation & User Experience (October 2025)
+
 - ✅ **Comprehensive Code Documentation**: Added 4,000+ lines of detailed inline comments across all major components
 - ✅ **Complete User Guide**: Created comprehensive [USER-GUIDE.md](docs/USER-GUIDE.md) with step-by-step instructions
 - ✅ **Improved Font Readability**: Enhanced robot card typography - increased servo count text size from 9px to 12px
@@ -13,6 +14,7 @@ Desktop appl📖 **[Complete User Guide](docs/USER-GUIDE.md)** - Comprehensive d
 - ✅ **Developer Experience**: Added development setup guides and coding best practices
 
 ### UI/UX Improvements
+
 - **Better Typography**: Robot names use h5 variant with explicit 16px sizing for consistency
 - **Readable Servo Counts**: Increased font size and switched to "Bit" monospace font for better clarity
 - **Comprehensive Tooltips**: Enhanced user guidance throughout the interface
@@ -48,6 +50,7 @@ Sequences execute at exactly 10Hz (0.1s precision) and can range from simple 3-s
 ## Magic Trick Focus
 
 Specifically designed for children's magic trick robot performances, supporting:
+
 - **Individual Learning**: Home practice and creativity development
 - **Classroom Instruction**: STEM education through magic and robotics
 - **Performance Ready**: Reliable operation for actual magic shows and presentations
@@ -56,7 +59,9 @@ Specifically designed for children's magic trick robot performances, supporting:
 ## Technical Architecture
 
 ### Application Stack
+
 **Frontend:**
+
 - **React 19.1**: Modern functional components with hooks for state management
 - **TypeScript 5.9**: Strict type checking for enhanced code quality and IntelliSense
 - **Material-UI 7.3**: Component library with comprehensive custom theming system
@@ -65,6 +70,7 @@ Specifically designed for children's magic trick robot performances, supporting:
 - **React Beautiful DnD**: Drag-and-drop interface for sequence timeline editing
 
 **Desktop Framework:**
+
 - **Electron 38.2**: Cross-platform desktop framework with Node.js integration
 - **Electron Forge 7.9**: Build system with cross-platform packaging and distribution
 - **Native Modules**: serialport and usb for direct hardware communication
@@ -72,6 +78,7 @@ Specifically designed for children's magic trick robot performances, supporting:
 - **Security**: contextBridge and preload scripts for secure IPC communication
 
 **Hardware Integration:**
+
 - **SAMD21 ARM Cortex-M0+**: Primary microcontroller with USB/serial communication
 - **Custom Bootloader**: Field-updatable firmware with USB protocol
 - **Multi-Servo Control**: PWM control with 10Hz precision timing
@@ -124,18 +131,21 @@ App (Main Container)
 ### Styling System Architecture
 
 **Theme Foundation:**
+
 - **mtmTheme**: Base Material-UI theme with retro gaming aesthetic
 - **RetroColors**: Comprehensive color palette (primary yellow, accent colors)
 - **Typography**: Pixel-perfect fonts (Arcade, Bit, Video, Seven Segment)
 - **Component Overrides**: Custom MUI component styling for consistent look
 
 **Dynamic Scaling System:**
+
 - **ScaleContext**: Provides DPI-aware theme scaling across different monitors
 - **Display Monitoring**: Real-time detection of display configuration changes
 - **Inverse Scaling**: Maintains consistent visual appearance regardless of system DPI
 - **Theme Generation**: Creates scaled theme instances with adjusted fonts and spacing
 
 **Styled Components Library:**
+
 - **Typography**: RetroTitle, PixelText, SevenSegmentDisplay with themed styling
 - **Interactive**: RetroButton, DangerButton with 3D shadow effects and animations
 - **Containers**: DroppableContainer, SectionContainer, HeaderBar with consistent borders
@@ -145,18 +155,21 @@ App (Main Container)
 ### State Management
 
 **Global State (GlobalContext):**
+
 - USB connection status and device management
 - Admin mode permissions and feature access
 - Global timeline length for sequence synchronization
 - Error handling and user feedback systems
 
 **Local Component State:**
+
 - Sequence editing with undo/redo capabilities
 - Position creation and modification workflows
 - Modal dialog visibility and state management
 - Drag-and-drop operation handling
 
 **IPC Communication:**
+
 - Type-safe channels with compile-time validation
 - Async/await pattern for all main process communication
 - Error boundaries and graceful failure handling
@@ -165,12 +178,14 @@ App (Main Container)
 ### Security Model
 
 **Process Isolation:**
+
 - Main process handles all file system and hardware operations
 - Renderer process limited to UI logic and user interaction
 - No direct Node.js API access from frontend code
 - All communication through secure contextBridge
 
 **Type Safety:**
+
 - Comprehensive TypeScript interfaces for all data structures
 - IPC channel type mapping for compile-time validation
 - Strict null checking and error handling
@@ -179,6 +194,7 @@ App (Main Container)
 - Compatible with various servo-based robot kits and educational platforms
 
 **Sequence Engine:**
+
 - Frame-based automation with 10Hz precision
 - Three action types: Move (servo positioning), Delay (timing), Wait (remote trigger)
 - Drag-and-drop timeline interface
@@ -195,6 +211,7 @@ App (Main Container)
 ## Educational Value
 
 Combines STEM learning with creative expression:
+
 - **Programming Concepts**: Sequence logic, timing, and cause-and-effect relationships
 - **Problem Solving**: Debugging performances and optimizing robot movements
 - **Creativity**: Designing unique magic tricks and dramatic performances
@@ -204,6 +221,7 @@ Combines STEM learning with creative expression:
 ## Error Handling & Reliability
 
 **Current Status**: Code review identified areas needing improvement for child-friendly error handling:
+
 - USB connection status monitoring with clear visual indicators
 - Graceful handling of robot disconnection during sequence creation
 - User-friendly error messages instead of console logging
@@ -222,12 +240,14 @@ Combines STEM learning with creative expression:
 ## Development
 
 ### Prerequisites
+
 - **Node.js 18+**: LTS version recommended for stability
 - **pnpm**: Preferred package manager for performance and workspace support
 - **Git**: Version control and development workflow
 - **VS Code**: Recommended IDE with TypeScript and React extensions
 
 ### Setup
+
 ```bash
 # Clone repository
 git clone [repository-url]
@@ -251,6 +271,7 @@ pnpm make
 ```
 
 ### Project Structure
+
 ```
 mtm-app/
 ├── src/                          # Renderer process (React frontend)
@@ -278,12 +299,14 @@ mtm-app/
 ### Development Workflow
 
 **Code Organization:**
+
 - **Feature-Based**: Components grouped by functionality (robot, sequence, styled)
 - **Type Safety**: Comprehensive TypeScript coverage with strict checking
 - **Modular Architecture**: Clear separation between UI, state, and communication
 - **Consistent Styling**: Centralized theme system with styled components
 
 **Development Commands:**
+
 ```bash
 # Start development environment
 pnpm dev                    # Full application with hot reload
@@ -299,6 +322,7 @@ pnpm publish               # Create GitHub release (maintainers)
 ```
 
 **Code Quality Standards:**
+
 - **TypeScript Strict Mode**: Full type coverage with strict null checks
 - **Component Documentation**: Comprehensive inline comments for all components
 - **IPC Type Safety**: Compile-time validation for all inter-process communication
@@ -306,18 +330,21 @@ pnpm publish               # Create GitHub release (maintainers)
 - **Performance**: Optimized rendering with React.memo and useMemo where appropriate
 
 **Architecture Patterns:**
+
 - **Functional Components**: Modern React with hooks-based state management
 - **Context Providers**: Global state management without external dependencies
 - **IPC Abstraction**: Type-safe wrappers for all Electron communication
 - **Theme Composition**: Dynamic theming with Material-UI and custom components
 - **Security First**: All main process communication through secure contextBridge
-pnpm package           # Package only
-pnpm make             # Create distributables
+  pnpm package # Package only
+  pnpm make # Create distributables
 
 # Platform-specific builds
-pnpm win              # Windows installer
-pnpm mac              # macOS app bundle
-pnpm linux            # Linux AppImage
+
+pnpm win # Windows installer
+pnpm mac # macOS app bundle
+pnpm linux # Linux AppImage
+
 ```
 
 ### Architecture
@@ -350,3 +377,4 @@ pnpm linux            # Linux AppImage
 - serialport 13.0.0 (USB/serial communication with robots)
 - usb 2.16.0 (USB device detection and enumeration)
 - electron-updater 6.6.2 (automatic application updates)
+```

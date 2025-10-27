@@ -31,7 +31,13 @@ const defaultRobot: Robot = {
   boardRequirements: {},
 };
 
-const makeDefaultServo = (index = 0): Servo => ({ id: uuid(), index, name: "", value: 90, enabled: false });
+const makeDefaultServo = (index = 0): Servo => ({
+  id: uuid(),
+  index,
+  name: "",
+  value: 90,
+  enabled: false,
+});
 
 interface EditRobotModalProps {
   mode: "new" | "edit" | null;
@@ -39,14 +45,20 @@ interface EditRobotModalProps {
   out: (arg: "close" | "refresh") => void;
 }
 
-export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out }) => {
+export const EditRobotModal: React.FC<EditRobotModalProps> = ({
+  mode,
+  data,
+  out,
+}) => {
   const makeRobot = (): Robot => {
-    if (mode === "edit" && data) return JSON.parse(JSON.stringify(data)) as Robot;
+    if (mode === "edit" && data)
+      return JSON.parse(JSON.stringify(data)) as Robot;
     else return defaultRobot;
   };
 
   const makeOgRobot = (): Robot | null => {
-    if (mode === "edit" && data) return JSON.parse(JSON.stringify(data)) as Robot;
+    if (mode === "edit" && data)
+      return JSON.parse(JSON.stringify(data)) as Robot;
     else return null;
   };
 
@@ -74,11 +86,11 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
       console.log("Paths not equal");
       safeInvoke("updateRobot", robot, ogRobot?.path)
         .then(() => out("refresh"))
-        .catch((err) => console.log(err));
+        .catch(err => console.log(err));
     } else {
       safeInvoke("updateRobot", robot)
         .then(() => out("refresh"))
-        .catch((err) => console.log(err));
+        .catch(err => console.log(err));
     }
   };
 
@@ -102,7 +114,11 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
       );
     } else if (mode === "edit") {
       return (
-        <Button variant="contained" disabled={saveChangesDisabled()} onClick={updateRobot}>
+        <Button
+          variant="contained"
+          disabled={saveChangesDisabled()}
+          onClick={updateRobot}
+        >
           Save Changes
         </Button>
       );
@@ -111,13 +127,16 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
   };
 
   const deleteServo = (idx: number) => {
-    setRobot((old) => ({ ...old, servos: (old.servos || []).filter((_, index) => index !== idx) }));
+    setRobot(old => ({
+      ...old,
+      servos: (old.servos || []).filter((_, index) => index !== idx),
+    }));
   };
 
   const editServoName = (idx: number, newName: string) => {
     const oldServos = JSON.parse(JSON.stringify(robot.servos || [])) as Servo[];
     if (oldServos[idx]) oldServos[idx].name = newName;
-    setRobot((old) => ({ ...old, servos: oldServos }));
+    setRobot(old => ({ ...old, servos: oldServos }));
   };
 
   useEffect(() => {
@@ -128,7 +147,12 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
   }, []);
 
   return (
-    <Modal open={true} onClose={() => out("close")} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+    <Modal
+      open={true}
+      onClose={() => out("close")}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
       <Box sx={{ ...modalStyle, overflowX: "auto" }} maxHeight={"98%"}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {makeTitle()}
@@ -141,7 +165,7 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
             variant="standard"
             value={robot.name}
             error={robot.name === ""}
-            onChange={(e) =>
+            onChange={e =>
               setRobot((old: any) => ({
                 ...old,
                 name: e.target.value,
@@ -156,27 +180,54 @@ export const EditRobotModal: React.FC<EditRobotModalProps> = ({ mode, data, out 
             value={robot.description}
             multiline
             inputProps={{ style: { fontSize: "11px", lineHeight: "170%" } }}
-            onChange={(e) => setRobot((old: any) => ({ ...old, description: e.target.value }))}
+            onChange={e =>
+              setRobot((old: any) => ({ ...old, description: e.target.value }))
+            }
           />
-          <TextField label="Assembly video YouTube ID" size="small" variant="standard" value={robot.youtubeId} onChange={(e) => setRobot((old: any) => ({ ...old, youtubeId: e.target.value }))} />
+          <TextField
+            label="Assembly video YouTube ID"
+            size="small"
+            variant="standard"
+            value={robot.youtubeId}
+            onChange={e =>
+              setRobot((old: any) => ({ ...old, youtubeId: e.target.value }))
+            }
+          />
           <Stack direction="row" spacing={1}>
             <Typography variant="body1">Dificulty</Typography>
-            <Rating icon={<SmartToyIcon />} emptyIcon={<SmartToyOutlinedIcon />} max={3} value={robot.difficulty} onChange={(e, newVal) => setRobot((old: any) => ({ ...old, difficulty: newVal }))} />
+            <Rating
+              icon={<SmartToyIcon />}
+              emptyIcon={<SmartToyOutlinedIcon />}
+              max={3}
+              value={robot.difficulty}
+              onChange={(e, newVal) =>
+                setRobot((old: any) => ({ ...old, difficulty: newVal }))
+              }
+            />
           </Stack>
           <Box component={Paper} p={1}>
             <Typography>Servos</Typography>
             <Stack p={1} spacing={1}>
               {(robot.servos || []).map((servo, idx) => (
-                <ServoInput key={"servo" + idx} servo={servo} index={idx} update={(newName: string) => editServoName(idx, newName)} trash={() => deleteServo(idx)} />
+                <ServoInput
+                  key={"servo" + idx}
+                  servo={servo}
+                  index={idx}
+                  update={(newName: string) => editServoName(idx, newName)}
+                  trash={() => deleteServo(idx)}
+                />
               ))}
               <Box>
                 <Button
                   variant="contained"
                   startIcon={<AddIcon />}
                   onClick={() =>
-                    setRobot((old) => ({
+                    setRobot(old => ({
                       ...old,
-                      servos: [...(old.servos || []), makeDefaultServo((old.servos || []).length)],
+                      servos: [
+                        ...(old.servos || []),
+                        makeDefaultServo((old.servos || []).length),
+                      ],
                     }))
                   }
                 >

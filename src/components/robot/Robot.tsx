@@ -1,28 +1,28 @@
 /**
  * ROBOT OVERVIEW COMPONENT
- * 
+ *
  * This component displays the main interface for a specific robot configuration,
  * including robot details, sequence management, and assembly instructions.
  * It serves as the primary landing page when a robot is selected.
- * 
+ *
  * KEY FUNCTIONALITY:
  * - Robot metadata display (name, description, specifications)
  * - Sequence management interface (create, edit, delete sequences)
  * - Assembly instruction video embedding via YouTube
  * - Navigation hub for robot-specific operations
- * 
+ *
  * DATA FLOW:
  * 1. Extracts robot path from URL parameters
  * 2. Loads robot configuration from storage via IPC
  * 3. Displays robot information and available sequences
  * 4. Provides interface for sequence creation and management
- * 
+ *
  * ARCHITECTURE:
  * - Uses React Router params to identify which robot to display
  * - Integrates with SequencePicker for sequence management
  * - Embeds YouTube videos for assembly instructions
  * - Handles loading states and error conditions gracefully
- * 
+ *
  * INTEGRATION POINTS:
  * - Routes: Accessed via /robot/:robotPath URL pattern
  * - Storage: Loads robot data through getRobot helper function
@@ -35,9 +35,9 @@ import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 // Type definitions and utilities
-import type { Robot as RobotType } from "../../types";  // Robot data structure
-import { useParams } from "react-router-dom";           // URL parameter extraction
-import { getRobot } from "../../helpers";               // Robot data loading
+import type { Robot as RobotType } from "../../types"; // Robot data structure
+import { useParams } from "react-router-dom"; // URL parameter extraction
+import { getRobot } from "../../helpers"; // Robot data loading
 
 // Child components
 import { SequencePicker } from "../sequence/SequencePicker"; // Sequence management interface
@@ -48,7 +48,7 @@ import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
 /**
  * ROBOT COMPONENT DEFINITION
- * 
+ *
  * Main functional component that orchestrates the robot overview interface.
  * Manages robot data loading and provides the primary navigation hub.
  */

@@ -46,8 +46,8 @@ import type { InvokeMap, InvokeKey } from "./ipc-types"; // IPC type mappings
 // Extract argument types from IPC method definitions
 type InvokeArgs<C extends InvokeKey> = InvokeMap[C] extends { args: infer A }
   ? A extends any[]
-    ? A
-    : any[]
+  ? A
+  : any[]
   : any[];
 
 // Extract return types from IPC method definitions  

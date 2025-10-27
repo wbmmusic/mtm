@@ -47,7 +47,7 @@ const retroColors = {
     dark: '#ccb300',    // Darker yellow for hover states and depth
     light: '#fff666',   // Lighter yellow for highlights and active states
   },
-  
+
   /**
    * SECONDARY COLOR SYSTEM
    * 
@@ -59,7 +59,7 @@ const retroColors = {
     dark: '#3d3b2a',    // Darker brown for shadows and depth
     light: '#6f6d58',   // Lighter brown for subtle backgrounds
   },
-  
+
   /**
    * ACCENT COLOR PALETTE
    * 
@@ -74,7 +74,7 @@ const retroColors = {
     salmon: '#fa8072',      // Salmon - secondary highlights and accents  
     turquoise: '#afeeee',   // Turquoise - info states and calm elements
   },
-  
+
   /**
    * SEMANTIC COLORS
    * 
@@ -113,7 +113,7 @@ export const mtmTheme = createTheme({
     success: retroColors.success,         // Success messages and indicators
     error: retroColors.error,             // Error messages and warnings
   },
-  
+
   /**
    * TYPOGRAPHY SYSTEM
    * 
@@ -137,7 +137,7 @@ export const mtmTheme = createTheme({
       fontFamily: 'Video, monospace',       // Compact font for details
     },
   },
-  
+
   /**
    * SHAPE CONFIGURATION
    * 

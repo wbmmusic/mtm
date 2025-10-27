@@ -7,7 +7,7 @@ import { mtmTheme } from "./theme";
 
 const AppContent = () => {
   const { scaledTheme } = useDisplayScale();
-  
+
   return (
     // @ts-ignore
     <Box

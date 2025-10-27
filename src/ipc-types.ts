@@ -24,9 +24,6 @@ export interface InvokeMap {
   getSound: { args: []; ret: boolean };
   sound: { args: [boolean]; ret: boolean };
   sendValue: { args: [number[]]; ret: void };
-  startKeyfobProgramming: { args: []; ret: boolean };
-  programKeyfobButton: { args: [number]; ret: boolean };
-  testKeyfobButton: { args: [number]; ret: boolean };
   // allow other channels
   [key: string]: { args: any[]; ret: any } | undefined;
 }

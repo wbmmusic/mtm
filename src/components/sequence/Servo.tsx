@@ -11,12 +11,19 @@ import React, { useState, useMemo } from "react";
 import { getMsgMkr, safeInvoke } from "../../helpers";
 import type { Servo as ServoType } from "../../types";
 
-export const Servo: React.FC<{ label: string; idx: number; servo: ServoType; onChange: (t: string, v: number | boolean) => void }> = ({ label, idx, servo, onChange }) => {
+export const Servo: React.FC<{
+  label: string;
+  idx: number;
+  servo: ServoType;
+  onChange: (t: string, v: number | boolean) => void;
+}> = ({ label, idx, servo, onChange }) => {
   const [lastSent, setLastSent] = useState<number | null>(null);
 
   const makeServoPositionData = useMemo(() => {
     const mk = getMsgMkr();
-    return typeof mk?.makeServoPositionData === "function" ? (mk.makeServoPositionData as (i:number, v:number)=>number[]) : (() => [] as number[]);
+    return typeof mk?.makeServoPositionData === "function"
+      ? (mk.makeServoPositionData as (i: number, v: number) => number[])
+      : () => [] as number[];
   }, []);
 
   const handleChange = (val: number | number[]) => {
@@ -25,7 +32,9 @@ export const Servo: React.FC<{ label: string; idx: number; servo: ServoType; onC
       setLastSent(value as number);
       try {
         const packet = makeServoPositionData(idx - 1, value as number);
-        safeInvoke("sendValue", packet).catch((err: unknown) => console.log(err));
+        safeInvoke("sendValue", packet).catch((err: unknown) =>
+          console.log(err)
+        );
       } catch (e) {
         console.log(e);
       }
@@ -41,7 +50,7 @@ export const Servo: React.FC<{ label: string; idx: number; servo: ServoType; onC
           control={
             <Checkbox
               checked={Boolean(servo?.enabled)}
-              onChange={(e) => onChange("enabled", e.target.checked)}
+              onChange={e => onChange("enabled", e.target.checked)}
               size="small"
             />
           }
