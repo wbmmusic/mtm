@@ -7,6 +7,37 @@ import { initUSB } from './usb';
 import { checkFolders } from './utils.js';
 import { checkForFirmwareUpdates, compareToLatest } from './firmware';
 import './ipc';
+import { spawn } from 'node:child_process';
+
+// Handle Squirrel.Windows install/update events BEFORE anything else
+if (process.platform === 'win32') {
+  const squirrelEvent = process.argv.find(a => a.startsWith('--squirrel'));
+
+  if (squirrelEvent) {
+    const appFolder = join(process.execPath, '..');
+    const updateExe = join(appFolder, '..', 'Update.exe');
+    const exeName = join(appFolder, 'MTM.exe');
+
+    const runUpdate = (args: string[], done: () => void) => {
+      spawn(updateExe, args, { detached: true }).on('close', done);
+    };
+
+    switch (squirrelEvent) {
+      case '--squirrel-install':
+      case '--squirrel-updated':
+        // Create Start Menu and Desktop shortcuts
+        runUpdate(['--createShortcut', exeName, '--shortcut-locations', 'StartMenu,Desktop'], () => app.quit());
+        break;
+      case '--squirrel-uninstall':
+        // Remove shortcuts
+        runUpdate(['--removeShortcut', exeName], () => app.quit());
+        break;
+      case '--squirrel-obsolete':
+        app.quit();
+        break;
+    }
+  }
+}
 
 // Vite defines these constants for Electron Forge
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;

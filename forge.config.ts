@@ -8,6 +8,7 @@ import { VitePlugin } from '@electron-forge/plugin-vite';
 import fs from 'fs-extra';
 import path from 'path';
 import { execSync } from 'child_process';
+import 'dotenv/config';
 
 const config: ForgeConfig = {
   hooks: {
@@ -42,6 +43,20 @@ const config: ForgeConfig = {
       }
     }
   },
+  /**
+   * CODE SIGNING CONFIGURATION
+   * 
+   * Signing is handled by MakerSquirrel during the build process.
+   * SafeNet HSM token password is cached, so you only enter it once per build.
+   * 
+   * What gets signed:
+   * - All binaries in the package (MTM.exe, Update.exe, DLLs, .node files)
+   * - Update packages (.nupkg files)
+   * - Installer (MTM-Setup.exe)
+   * 
+   * Certificate: WBM Tek EV Code Signing (SHA1: b281b2c2413406e54ac73f3f3b204121b4a66e64)
+   * Algorithm: SHA256 with RFC3161 timestamping
+   */
   packagerConfig: {
     name: 'MTM',
     executableName: 'MTM',
@@ -57,6 +72,48 @@ const config: ForgeConfig = {
     asar: {
       unpack: '**/node_modules/**/*.{node,dll,dylib,so}'
     },
+    // Remove non-Windows prebuilt binaries to prevent signing errors
+    // Squirrel can't sign Android/Linux .node files (non-PE format)
+    afterCopy: [(buildPath: string, electronVersion: string, platform: string, arch: string, callback: (err?: Error) => void) => {
+      if (platform !== 'win32') {
+        callback();
+        return;
+      }
+
+      try {
+        console.log('🗑️  [afterCopy] Removing non-Windows prebuilt binaries...');
+
+        // List of packages with prebuilds that need cleaning
+        const packagesToClean = [
+          ['@serialport', 'bindings-cpp'],
+          ['usb']
+        ];
+
+        for (const packagePath of packagesToClean) {
+          const prebuildsPath = path.join(buildPath, 'node_modules', ...packagePath, 'prebuilds');
+
+          if (fs.existsSync(prebuildsPath)) {
+            console.log(`   Cleaning: ${packagePath.join('/')}`);
+            const entries = fs.readdirSync(prebuildsPath);
+
+            for (const entry of entries) {
+              // Keep only win32-* folders
+              if (!entry.startsWith('win32-')) {
+                const fullPath = path.join(prebuildsPath, entry);
+                console.log(`      Removing: ${entry}`);
+                fs.removeSync(fullPath);
+              }
+            }
+          }
+        }
+
+        console.log('✓ [afterCopy] Non-Windows binaries removed successfully');
+        callback();
+      } catch (error) {
+        console.error('❌ [afterCopy] Error removing binaries:', error);
+        callback(error as Error);
+      }
+    }],
     osxSign: {
       identity: 'Developer ID Application: WBM Tek'
     },
@@ -71,14 +128,8 @@ const config: ForgeConfig = {
       ProductName: 'MTM',
       InternalName: 'MTM',
       OriginalFilename: 'MTM.exe'
-    },
-    // Windows code signing with EV certificate on SafeNet HSM token
-    // Using SHA1 thumbprint from .env to select the specific certificate
-    ...(process.env.WINDOWS_SIGN_THUMBPRINT && {
-      windowsSign: {
-        signWithParams: `/sha1 ${process.env.WINDOWS_SIGN_THUMBPRINT}`
-      }
-    })
+    }
+    // Note: windowsSign is disabled - all signing handled by MakerSquirrel below
   },
   rebuildConfig: {
     // Ensure native modules are rebuilt for the target platform
@@ -111,7 +162,11 @@ const config: ForgeConfig = {
     new MakerSquirrel({
       name: 'MTM',
       setupExe: 'MTM-Setup.exe',
-      setupIcon: './public/icon.ico'
+      setupIcon: './public/icon.ico',
+      // Code signing: ENABLED - Signs all package files and installer
+      // With HSM password caching enabled, you'll only enter password once
+      // This signs: Update.exe, .nupkg files, Setup.exe, and all binaries
+      signWithParams: '/sha1 b281b2c2413406e54ac73f3f3b204121b4a66e64 /fd sha256 /tr http://timestamp.sectigo.com /td sha256'
     }),
     new MakerZIP({}, ['darwin']),
     new MakerDeb({

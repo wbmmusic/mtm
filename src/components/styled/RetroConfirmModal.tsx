@@ -81,7 +81,7 @@ export const RetroConfirmModal: React.FC<RetroConfirmModalProps> = ({
         <Stack spacing={2}>
           <Typography
             id="retro-confirm-title"
-            variant="h6"
+            variant="h5"
             component="h2"
             sx={{
               fontFamily: "Arcade, monospace",
