@@ -77,18 +77,19 @@
     "@octokit/rest": "^22.0.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.3",
-    "electron": "^39.2.1",
+    "electron": "^39.2.2",
     "fs-extra": "^11.3.2",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.2",
     "vite-plugin-electron-renderer": "^0.14.6",
     "wait-on": "^9.0.3"
-  }
+  },
+  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8"
 }
