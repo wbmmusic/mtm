@@ -76,7 +76,7 @@
     "@electron/rebuild": "^4.0.1",
     "@octokit/rest": "^22.0.1",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.10.2",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
